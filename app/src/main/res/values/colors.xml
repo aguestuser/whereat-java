@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="go_button_on">#30ff40</color>
+    <color name="go_button_off">#dd3b47</color>
+</resources>
