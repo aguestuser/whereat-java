@@ -1,8 +1,8 @@
 package org.tlc.whereat;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -11,26 +11,35 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-    }
-
 //    @Override
 //    protected void onCreate(Bundle savedInstanceState) {
 //        super.onCreate(savedInstanceState);
 //        setContentView(R.layout.activity_main);
-//
-//        final Button btn = (Button) findViewById(R.id.go_button);
-//        btn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                toastLocationShared();
-//            }
-//        });
-//
 //    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        final Button shareLocationButton = (Button) findViewById(R.id.go_button);
+        shareLocationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toastLocationShared();
+            }
+        });
+
+        final Button mapButton = (Button) findViewById(R.id.map_button);
+        mapButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(v.getContext(), MapActivity.class);
+                startActivity(i);
+            }
+        });
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -55,11 +64,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void toastLocationShared(){
-        Toast t = Toast.makeText(
-                getApplicationContext(),
-                "Location shared.",
-                Toast.LENGTH_SHORT);
-        t.show();
+        Toast.makeText(getApplicationContext(), "Location shared.", Toast.LENGTH_SHORT).show();
 
     }
 }
