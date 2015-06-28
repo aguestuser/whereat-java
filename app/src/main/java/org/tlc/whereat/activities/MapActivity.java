@@ -1,21 +1,21 @@
-package org.tlc.whereat;
+package org.tlc.whereat.activities;
 
 import android.content.Intent;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.tlc.whereat.R;
 
 public class MapActivity extends AppCompatActivity {
 
@@ -24,25 +24,27 @@ public class MapActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
         setUpMap();
-
-        final Button mapButton = (Button) findViewById(R.id.home_button);
-        mapButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(v.getContext(), MainActivity.class);
-                startActivity(i);
-            }
-        });
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) { // The action bar will automatically handle clicks on the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
+        switch(item.getItemId()){
+            case R.id.action_main:
+                startActivity(new Intent(this, MainActivity.class));
+                break;
+            case R.id.action_map:
+                startActivity(new Intent(this, MapActivity.class));
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void setUpMap(){

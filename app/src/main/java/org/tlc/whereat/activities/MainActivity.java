@@ -1,4 +1,4 @@
-package org.tlc.whereat;
+package org.tlc.whereat.activities;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -8,6 +8,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+
+import org.tlc.whereat.R;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,15 +26,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        final Button mapButton = (Button) findViewById(R.id.map_button);
-        mapButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(v.getContext(), MapActivity.class);
-                startActivity(i);
-            }
-        });
-
     }
 
     @Override
@@ -42,15 +35,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) { return true; }
-
+    public boolean onOptionsItemSelected(MenuItem item) { // The action bar will automatically handle clicks on the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
+        switch(item.getItemId()){
+            case R.id.action_main:
+                startActivity(new Intent(this, MainActivity.class));
+                break;
+            case R.id.action_map:
+                startActivity(new Intent(this, MapActivity.class));
+        }
         return super.onOptionsItemSelected(item);
     }
 
