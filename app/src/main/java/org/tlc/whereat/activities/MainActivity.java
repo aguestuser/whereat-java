@@ -57,8 +57,20 @@ public class MainActivity
     }
 
     @Override
+    protected void onResume(){
+        super.onResume();
+        mLocationProvider.connect();
+    }
+
+    @Override
     protected void onStop(){
         super.onStop();
+        mLocationProvider.disconnect();
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
         mLocationProvider.disconnect();
     }
 

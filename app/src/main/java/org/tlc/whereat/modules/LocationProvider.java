@@ -64,7 +64,6 @@ public class LocationProvider implements
     }
 
     public void getLocation(){
-        //TODO: is there a more functional way to handle unhappy paths (client not connected loc is null)?
         if (mGoogleApiClient.isConnected()){
             Location loc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             if (loc != null) mLocationCallback.handleNewLocation(loc);
@@ -97,8 +96,10 @@ public class LocationProvider implements
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.i(TAG, "Location services connection failed.");
         if (connectionResult.hasResolution() && mContext instanceof Activity) {
             try {
+                Log.i(TAG, "Trying to resolve location services connection.");
                 Activity activity = (Activity)mContext;
                 connectionResult.startResolutionForResult(activity, CONNECTION_FAILURE_RESOLUTION_REQUEST);
             } catch (IntentSender.SendIntentException e) {
