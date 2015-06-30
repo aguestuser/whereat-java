@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<shape
+
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@id/go_button_on"
+    android:shape="oval" >
+
+    <size android:height="200dp" android:width="201dp"/>
+        <solid android:color="@color/go_button_on" />
+
+</shape>

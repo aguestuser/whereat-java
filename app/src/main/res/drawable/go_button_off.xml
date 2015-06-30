@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
+<selector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@id/go_button_selector">
+
     <item android:state_pressed="false">
         <shape android:shape="oval" >
-            <size android:height="200dp" android:width="201dp"/>
+            <size
+                android:height="@dimen/go_button_radius"
+                android:width="@dimen/go_button_radius" />
             <solid android:color="@color/go_button_off" />
         </shape>
     </item>
     <item android:state_pressed="true">
         <shape android:shape="oval" >
-            <size android:height="200dp" android:width="201dp"/>
+            <size
+                android:height="@dimen/go_button_radius"
+                android:width="@dimen/go_button_radius" />
             <solid android:color="@color/go_button_on" />
         </shape>
     </item>
