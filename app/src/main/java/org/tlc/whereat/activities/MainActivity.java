@@ -1,7 +1,10 @@
 package org.tlc.whereat.activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
+import android.provider.Settings;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,17 +21,24 @@ public class MainActivity
         extends AppCompatActivity
         implements LocationProvider.LocationCallback {
 
+    // FIELDS
+
     public static final String TAG = MainActivity.class.getSimpleName();
     private LocationProvider mLocationProvider;
     private Boolean mPollingOwnLocation;
+
+
+    // LIFE CYCLE METHODS
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mLocationProvider = new LocationProvider(this, this);
-        mLocationProvider.connect();
+
         mPollingOwnLocation = false;
+        //if (mLocationProvider.hasPlayServices()) {
+            mLocationProvider = new LocationProvider(this, this);
+        //}
 
         final Button shareLocationButton = (Button) findViewById(R.id.go_button);
         shareLocationButton.setOnClickListener(new View.OnClickListener() {
@@ -40,20 +50,29 @@ public class MainActivity
         shareLocationButton.setOnLongClickListener(new View.OnLongClickListener(){
             @Override
             public boolean onLongClick(View v){
-                if (!mPollingOwnLocation){
-                    v.setBackground(getResources().getDrawable(R.drawable.go_button_on));
-                    mLocationProvider.pollLocation();
-                    mPollingOwnLocation = true;
-
-                }
-                else {
-                    v.setBackground(getResources().getDrawable(R.drawable.go_button_off));
-                    mLocationProvider.stopPollingLocation();
-                    mPollingOwnLocation = false;
-                }
-                return true;
+                return mPollingOwnLocation ? turnOff(v) : turnOn(v);
             }
         });
+    }
+
+        private boolean turnOn(View v){
+            v.setBackground(getResources().getDrawable(R.drawable.go_button_on));
+            mLocationProvider.pollLocation();
+            mPollingOwnLocation = true;
+            return true;
+        }
+
+        private boolean turnOff(View v){
+            v.setBackground(getResources().getDrawable(R.drawable.go_button_off));
+            mLocationProvider.stopPollingLocation();
+            mPollingOwnLocation = false;
+            return true;
+        }
+
+    @Override
+    protected void onStart(){
+        super.onStart();
+        mLocationProvider.connect();
     }
 
     @Override
@@ -63,16 +82,18 @@ public class MainActivity
     }
 
     @Override
+    protected void onPause(){
+        super.onPause();
+        mLocationProvider.disconnect();
+    }
+
+    @Override
     protected void onStop(){
         super.onStop();
         mLocationProvider.disconnect();
     }
 
-    @Override
-    protected void onPause(){
-        super.onPause();
-        mLocationProvider.disconnect();
-    }
+    // EVENT HANDLERS
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -90,6 +111,7 @@ public class MainActivity
         return super.onOptionsItemSelected(item);
     }
 
+    // LOCATION SERVICE CALLBACKS
 
     public void handleNewLocation(Location loc){
         Log.i(TAG, "Received own location: " + loc.toString());
@@ -97,19 +119,22 @@ public class MainActivity
     }
 
     public void handleFailedLocationRequest(String msg) {
-        Toast.makeText(
-                getApplicationContext(), msg, Toast.LENGTH_SHORT)
-                .show();
+        shortToast(msg);
     }
 
-    private void toastLocation(Location loc){
-        Toast.makeText(
-                getApplicationContext(), "Location shared: " + loc.toString(), Toast.LENGTH_SHORT)
-                .show();
+    public void handleNoPlayServices(){
+        shortToast("This device does not support Google Play Services, which is required for location sharing.");
+        finish();
     }
 
-    private void toastLocationShared(){
-        Toast.makeText(getApplicationContext(), "Location shared.", Toast.LENGTH_SHORT).show();
+    // TOAST HELPERS
+
+    private void toastLocation(Location loc) {
+        shortToast("Location shared: " + loc.toString());
+    }
+
+    private void shortToast(String msg){
+        Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
     }
 
 }
