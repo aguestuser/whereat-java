@@ -19,6 +19,9 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationListener;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class LocationProvider implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
@@ -39,6 +42,9 @@ public class LocationProvider implements
     private Context mContext;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
+    private Boolean mIsPolling;
+    private Timer mTimer;
+
 
     // Constructor
     public LocationProvider(Context ctx, LocationCallback cb) {
@@ -55,8 +61,8 @@ public class LocationProvider implements
                 .setFastestInterval(INTERVAL);
 
         mLocationCallback = cb;
-
         mContext = ctx;
+        mIsPolling = false;
     }
 
     // Public Methods
@@ -68,22 +74,29 @@ public class LocationProvider implements
     public void disconnect(){
         if (shouldDisconnect()) {
             turnOffLocationRequests();
+            stopPolling();
             mGoogleApiClient.disconnect();
         }
     }
 
-    public void getLocation(){
+    public void get(){
         Location loc = lastApiLocation();
         if (loc == null) enableLocations();
         else mLocationCallback.handleNewLocation(loc);
     }
 
-    public void pollLocation(){
-        Log.i(TAG, "Passive location sharing FAKE turned on.");
+    public void poll(){
+        Log.i(TAG, "Location polling turned on.");
+        mIsPolling = true;
     }
 
-    public void stopPollingLocation(){
-        Log.i(TAG, "Passive location sharing FAKE turned off.");
+    public void stopPolling(){
+        Log.i(TAG, "Location polling turned off.");
+        mIsPolling = false;
+    }
+
+    public boolean isPolling(){
+        return mIsPolling;
     }
 
     // Location API Callbacks
@@ -91,9 +104,7 @@ public class LocationProvider implements
     @Override
     public void onConnected(Bundle bundle) {
         Log.i(TAG, "Location services connected.");
-        if (lastApiLocation() == null) {
-            turnOnLocationRequests();
-        }
+        turnOnLocationRequests();
     }
 
     @Override
@@ -117,13 +128,18 @@ public class LocationProvider implements
 
     @Override
     public void onLocationChanged(Location location) {
-        mLocationCallback.handleNewLocation(location);
+        if (mIsPolling) mLocationCallback.handleNewLocation(location);
+    }
+
+    private Location lastApiLocation(){
+        return LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
     }
 
     // LOCATION API HELPERS
 
     private boolean shouldConnect(){
         return hasPlayServices() && !mGoogleApiClient.isConnected();
+        // return !mGoogleApiClient.isConnected();
     }
 
     private boolean shouldDisconnect(){
@@ -199,10 +215,6 @@ public class LocationProvider implements
     private void turnOffLocationRequests(){
         Log.i(TAG, "Turning on location updates.");
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-    }
-
-    private Location lastApiLocation(){
-        return LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
     }
 
 }

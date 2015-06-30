@@ -1,10 +1,7 @@
 package org.tlc.whereat.activities;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
-import android.provider.Settings;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,7 +22,7 @@ public class MainActivity
 
     public static final String TAG = MainActivity.class.getSimpleName();
     private LocationProvider mLocationProvider;
-    private Boolean mPollingOwnLocation;
+    private boolean mGo;
 
 
     // LIFE CYCLE METHODS
@@ -35,37 +32,36 @@ public class MainActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mPollingOwnLocation = false;
-        //if (mLocationProvider.hasPlayServices()) {
-            mLocationProvider = new LocationProvider(this, this);
-        //}
+        mLocationProvider = new LocationProvider(this, this);
+        mGo = false;
 
         final Button shareLocationButton = (Button) findViewById(R.id.go_button);
-        shareLocationButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mLocationProvider.getLocation();
-            }
-        });
         shareLocationButton.setOnLongClickListener(new View.OnLongClickListener(){
             @Override
             public boolean onLongClick(View v){
-                return mPollingOwnLocation ? turnOff(v) : turnOn(v);
+                return mLocationProvider.isPolling() ? stop(v) : go(v);
             }
         });
+        shareLocationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mLocationProvider.isPolling()){
+                    mLocationProvider.get();
+                }
+            }
+        });
+
     }
 
-        private boolean turnOn(View v){
+        private boolean go(View v){
             v.setBackground(getResources().getDrawable(R.drawable.go_button_on));
-            mLocationProvider.pollLocation();
-            mPollingOwnLocation = true;
+            mLocationProvider.poll();
             return true;
         }
 
-        private boolean turnOff(View v){
+        private boolean stop(View v){
             v.setBackground(getResources().getDrawable(R.drawable.go_button_off));
-            mLocationProvider.stopPollingLocation();
-            mPollingOwnLocation = false;
+            mLocationProvider.stopPolling();
             return true;
         }
 
@@ -75,17 +71,17 @@ public class MainActivity
         mLocationProvider.connect();
     }
 
-    @Override
-    protected void onResume(){
-        super.onResume();
-        mLocationProvider.connect();
-    }
-
-    @Override
-    protected void onPause(){
-        super.onPause();
-        mLocationProvider.disconnect();
-    }
+//    @Override
+//    protected void onResume(){
+//        super.onResume();
+//        mLocationProvider.connect();
+//    }
+//
+//    @Override
+//    protected void onPause(){
+//        super.onPause();
+//        mLocationProvider.disconnect();
+//    }
 
     @Override
     protected void onStop(){
@@ -114,7 +110,7 @@ public class MainActivity
     // LOCATION SERVICE CALLBACKS
 
     public void handleNewLocation(Location loc){
-        Log.i(TAG, "Received own location: " + loc.toString());
+        Log.i(TAG, "Received location: " + loc.toString());
         toastLocation(loc);
     }
 
