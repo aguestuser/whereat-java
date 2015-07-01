@@ -73,11 +73,16 @@ public class MapActivity extends AppCompatActivity {
 
     private void setUpMap(List<Location> ls){
         mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map_fragment)).getMap();
-        LatLng ctr = parseLatLon(ls.get(0));
-
-        for (Location l : ls) mMap.addMarker(parseMarker(l));
         mMap.setMyLocationEnabled(true);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ctr, 15));
+        addLocations(mMap,ls);
+    }
+
+    private void addLocations(GoogleMap m, List<Location> ls){
+        if(!ls.isEmpty()){
+            LatLng ctr = parseLatLon(ls.get(0));
+            for (Location l : ls) mMap.addMarker(parseMarker(l));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ctr, 15));
+        }
     }
 
     private LatLng parseLatLon(Location loc){
