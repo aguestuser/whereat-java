@@ -15,8 +15,6 @@ import org.tlc.whereat.R;
 import org.tlc.whereat.db.LocationDao;
 import org.tlc.whereat.modules.LocationProvider;
 
-import java.sql.SQLException;
-
 public class MainActivity
         extends AppCompatActivity
         implements LocationProvider.LocationCallback {
@@ -39,7 +37,7 @@ public class MainActivity
         mLocationProvider.connect();
 
         mDao = new LocationDao(this);
-        mDao.open();
+        mDao.connect();
 
         final Button shareLocationButton = (Button) findViewById(R.id.go_button);
 
@@ -69,14 +67,14 @@ public class MainActivity
     protected void onResume(){
         super.onResume();
         mLocationProvider.connect();
-        mDao.open();
+        mDao.connect();
     }
 
     @Override
     protected void onPause(){
         super.onPause();
         mLocationProvider.disconnect();
-        mDao.close();
+        mDao.disconnect();
     }
 
 //    @Override
@@ -124,7 +122,7 @@ public class MainActivity
 
     public void handleNewLocation(Location loc){
         Log.i(TAG, "Received location: " + loc.toString());
-        mDao.saveLocation(loc);
+        mDao.save(loc); // TODO make this an AsyncTask?
         toastLocation(loc);
     }
 
