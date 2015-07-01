@@ -19,8 +19,6 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationListener;
 
-import java.util.Timer;
-
 public class LocationProvider implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
@@ -32,8 +30,10 @@ public class LocationProvider implements
         void handleNoPlayServices();
     }
 
+    // FIELDS
+
     public static final String TAG = LocationProvider.class.getSimpleName();
-    public static final int INTERVAL = 5 * 1000; // 60 seconds
+    public static final int POLLING_INTERVAL = 5 * 1000; // 5 seconds
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000; //TODO: move to resources
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1000; //TODO: move to resources
 
@@ -42,10 +42,10 @@ public class LocationProvider implements
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
 
-    private boolean mRequestingLocations;
     private boolean mPolling;
 
-    // Constructor
+    // CONSTRUCTOR
+
     public LocationProvider(Context ctx, LocationCallback cb) {
 
         mGoogleApiClient = new GoogleApiClient.Builder(ctx)
@@ -56,17 +56,15 @@ public class LocationProvider implements
 
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(INTERVAL)
-                .setFastestInterval(INTERVAL);
+                .setInterval(POLLING_INTERVAL)
+                .setFastestInterval(POLLING_INTERVAL);
 
         mLocationCallback = cb;
         mContext = ctx;
-
-        mRequestingLocations = false;
         mPolling = false;
     }
 
-    // Public Methods
+    // PUBLIC METHODS
 
     public void connect(){
         if (shouldConnect()) {
@@ -76,7 +74,7 @@ public class LocationProvider implements
 
     public void disconnect(){
         if (shouldDisconnect()) {
-            turnOffLocationRequests();
+            turnOffLocationUpdates();
             stopPolling();
             mGoogleApiClient.disconnect();
         }
@@ -84,17 +82,20 @@ public class LocationProvider implements
 
     public void get(){
         Location loc = lastApiLocation();
-        if (loc == null) enableLocations();
+        if (loc == null) {
+            enableLocationServices();
+            mLocationCallback.handleFailedLocationRequest("Location request failed.");
+        }
         else mLocationCallback.handleNewLocation(loc);
     }
 
     public void poll(){
-        Log.i(TAG, "Location polling turned on.");
+        turnOnLocationUpdates();
         mPolling = true;
     }
 
     public void stopPolling(){
-        Log.i(TAG, "Location polling turned off.");
+        turnOffLocationUpdates();
         mPolling = false;
     }
 
@@ -102,12 +103,23 @@ public class LocationProvider implements
         return mPolling;
     }
 
-    // Location API Callbacks
+    // LOCATION ACCESSORS
+
+    @Override
+    public void onLocationChanged(Location location) {
+        mLocationCallback.handleNewLocation(location);
+    }
+
+    private Location lastApiLocation(){
+        return LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+    }
+
+    // CONNECTION CALLBACKS
 
     @Override
     public void onConnected(Bundle bundle) {
         Log.i(TAG, "Location services connected.");
-        turnOnLocationRequests();
+        //if (mPolling) turnOnLocationUpdates();
     }
 
     @Override
@@ -115,12 +127,9 @@ public class LocationProvider implements
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.i(TAG, "Location services connection failed.");
         if (connectionResult.hasResolution() && mContext instanceof Activity) {
             try {
-                Log.i(TAG, "Trying to resolve location services connection.");
-                Activity activity = (Activity)mContext;
-                connectionResult.startResolutionForResult(activity, CONNECTION_FAILURE_RESOLUTION_REQUEST);
+                connectionResult.startResolutionForResult((Activity)mContext, CONNECTION_FAILURE_RESOLUTION_REQUEST);
             } catch (IntentSender.SendIntentException e) {
                 e.printStackTrace();
             }
@@ -129,80 +138,28 @@ public class LocationProvider implements
         }
     }
 
+    // LOCATION SERVICE SWITCH
 
-    // API GETTERS
+    private void enableLocationServices() { if (locationServicesOff()) turnOnLocationServices(); }
 
-    @Override
-    public void onLocationChanged(Location location) {
-        if (mPolling) mLocationCallback.handleNewLocation(location);
-    }
+    private boolean locationServicesOff(){ return newerThanKitKat() ? newLsOff() : oldLsOff(); }
 
-    private Location lastApiLocation(){
-        Location loc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        boolean connected = mGoogleApiClient.isConnected();
-        return loc;
-    }
-
-
-
-    // LOCATION API HELPERS
-
-    private boolean shouldConnect(){
-        return hasPlayServices() && !mGoogleApiClient.isConnected();
-        // return !mGoogleApiClient.isConnected();
-    }
-
-    private boolean shouldDisconnect(){
-        return mGoogleApiClient.isConnected();
-    }
-
-    public boolean hasPlayServices() {
-        Log.i(TAG, "hasPlayServices() ran");
-        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(mContext);
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-                GooglePlayServicesUtil
-                        .getErrorDialog(resultCode, (Activity) mContext, PLAY_SERVICES_RESOLUTION_REQUEST)
-                        .show();
-            } else {
-                mLocationCallback.handleNoPlayServices();
-            }
-            return false;
-        }
-        return true;
-    }
-
-    private void enableLocations(){
-        if (locationSharingOff()) {
-            turnOnLocationServices();
-        }
-        if (!mRequestingLocations) {
-            turnOnLocationRequests();
-        }
-        else {
-            mLocationCallback.handleFailedLocationRequest("Location request failed.");
-        }
-    }
-
-    private boolean locationSharingOff(){
-        return runningKitKatOrHigher() ? newLocationSharingTest() : oldLocationSharingTest();
-    }
-
-    private boolean runningKitKatOrHigher(){
+    private boolean newerThanKitKat(){
         return Build.VERSION.SDK_INT > 19;
     }
 
-    private boolean newLocationSharingTest(){
+    private boolean newLsOff(){
         int off = Settings.Secure.LOCATION_MODE_OFF;
         int current = Settings.Secure.getInt(mContext.getContentResolver(), Settings.Secure.LOCATION_MODE, off);
         return current == off;
     }
 
-    private boolean oldLocationSharingTest(){
-        String locProviders = Settings.Secure.getString(mContext.getContentResolver(),
-                Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+    private boolean oldLsOff(){
+        String locProviders = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
         return locProviders == null || locProviders.equals("");
     }
+
+    // LOCATION REQUEST SWITCH
 
     private void turnOnLocationServices(){
         new AlertDialog.Builder(mContext)
@@ -223,16 +180,38 @@ public class LocationProvider implements
                 .show();
     }
 
-    private void turnOnLocationRequests(){
+    private void turnOnLocationUpdates(){
         Log.i(TAG, "Turning on location updates.");
-        mRequestingLocations = true;
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
     }
 
-    private void turnOffLocationRequests(){
+    private void turnOffLocationUpdates(){
         Log.i(TAG, "Turning on location updates.");
-        mRequestingLocations = false;
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
     }
 
+    // HELPERS
+
+    private boolean shouldConnect(){
+        return hasPlayServices() && !mGoogleApiClient.isConnected();
+    }
+
+    private boolean shouldDisconnect(){
+        return mGoogleApiClient.isConnected();
+    }
+
+    public boolean hasPlayServices() {
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(mContext);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+                GooglePlayServicesUtil
+                        .getErrorDialog(resultCode, (Activity) mContext, PLAY_SERVICES_RESOLUTION_REQUEST)
+                        .show();
+            } else {
+                mLocationCallback.handleNoPlayServices();
+            }
+            return false;
+        }
+        return true;
+    }
 }
