@@ -12,7 +12,10 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import org.tlc.whereat.R;
+import org.tlc.whereat.db.LocationDao;
 import org.tlc.whereat.modules.LocationProvider;
+
+import java.sql.SQLException;
 
 public class MainActivity
         extends AppCompatActivity
@@ -22,14 +25,21 @@ public class MainActivity
 
     public static final String TAG = MainActivity.class.getSimpleName();
     private LocationProvider mLocationProvider;
+    private LocationDao mDao;
 
     // LIFE CYCLE METHODS
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         mLocationProvider = new LocationProvider(this, this);
+        mLocationProvider.connect();
+
+        mDao = new LocationDao(this);
+        mDao.open();
 
         final Button shareLocationButton = (Button) findViewById(R.id.go_button);
 
@@ -49,29 +59,31 @@ public class MainActivity
 
     }
 
-    @Override
-    protected void onStart(){
-        super.onStart();
-        mLocationProvider.connect();
-    }
+//    @Override
+//    protected void onStart(){
+//        super.onStart();
+//        mLocationProvider.connect();
+//    }
 
     @Override
     protected void onResume(){
         super.onResume();
         mLocationProvider.connect();
+        mDao.open();
     }
 
     @Override
     protected void onPause(){
         super.onPause();
         mLocationProvider.disconnect();
+        mDao.close();
     }
 
-    @Override
-    protected void onStop(){
-        super.onStop();
-        mLocationProvider.disconnect();
-    }
+//    @Override
+//    protected void onStop(){
+//        super.onStop();
+//        mLocationProvider.disconnect();
+//    }
 
     // GO BUTTON HELPERS
 
@@ -112,6 +124,7 @@ public class MainActivity
 
     public void handleNewLocation(Location loc){
         Log.i(TAG, "Received location: " + loc.toString());
+        mDao.saveLocation(loc);
         toastLocation(loc);
     }
 

@@ -4,6 +4,8 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
+import android.nfc.Tag;
+import android.util.Log;
 
 import java.sql.SQLException;
 
@@ -11,7 +13,8 @@ public class LocationDao {
 
     // FIELDS
 
-    private SQLiteDatabase mDb;
+    public static final String TAG = LocationDao.class.getSimpleName();
+    protected SQLiteDatabase mDb;
     private Dao mDao;
     private String[] mAllColumns = {
         Dao.COLUMN_ID,
@@ -19,21 +22,33 @@ public class LocationDao {
         Dao.COLUMN_LON,
         Dao.COLUMN_TIME
     };
+    private Context mCtx;
 
     // CONSTRUCTOR
 
     public LocationDao(Context ctx){
-        mDao = new Dao(ctx);
+        mCtx = ctx;
+        mDao = Dao.getInstance(ctx);
     }
 
     // PUBLIC METHODS
 
-    public void open() throws SQLException {
-        mDb = mDao.getWritableDatabase();
+    public void open() {
+        try {
+            tryOpen();
+        } catch (SQLException e) {
+            Log.e(TAG, "Error connecting to DB.");
+            e.printStackTrace();
+        }
     }
 
     public void close() {
         mDao.close();
+    }
+
+    private void tryOpen() throws SQLException {
+        if (mDao == null) mDao = Dao.getInstance(mCtx);
+        mDb = mDao.getWritableDatabase();
     }
 
     // CRUD

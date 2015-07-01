@@ -19,17 +19,26 @@ public class Dao extends SQLiteOpenHelper {
     private static final int DB_VERSION = 1;
 
     private static final String DB_CREATE =
-        "create table" + TABLE_LOCATIONS + "(" +
+        "create table " + TABLE_LOCATIONS + " (" +
             COLUMN_ID + " integer primary key autoincrement, " +
-            COLUMN_LAT + " real not null" +
-            COLUMN_LON + "real not null" +
-            COLUMN_TIME + "integer not null);";
+            COLUMN_LAT + " real not null, " +
+            COLUMN_LON + " real not null, " +
+            COLUMN_TIME + " integer not null);";
+
+    private static Dao sInstance;
 
     // CONSTRUCTOR
+
+    public static synchronized Dao getInstance(Context ctx){
+        if (sInstance == null) sInstance = new Dao(ctx);
+        return sInstance;
+    }
 
     public Dao(Context ctx){
         super(ctx, DB_NAME, null, DB_VERSION);
     }
+
+    // INTERFACE IMPLEMENTATION
 
     @Override
     public void onCreate(SQLiteDatabase db) {
