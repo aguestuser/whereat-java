@@ -23,7 +23,7 @@ public class Dao extends SQLiteOpenHelper {
             COLUMN_ID + " integer primary key autoincrement, " +
             COLUMN_LAT + " real not null" +
             COLUMN_LON + "real not null" +
-            COLUMN_TIME + "text not null);";
+            COLUMN_TIME + "integer not null);";
 
     // CONSTRUCTOR
 
@@ -38,10 +38,8 @@ public class Dao extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        Log.w(
-            Dao.class.getName(),
-            "Upgrading DB from v. " + oldVersion + " to " + newVersion + "; will destroy all old data"
-        );
+        String msg = "Upgrading DB from v. " + oldVersion + " to " + newVersion + "; will destroy all old data";
+        Log.w(Dao.class.getName(), msg);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOCATIONS);
         onCreate(db);
     }
