@@ -56,12 +56,14 @@ public class MainActivity
         private boolean go(View v){
             v.setBackground(getResources().getDrawable(R.drawable.go_button_on));
             mLocationProvider.poll();
+            shortToast("Location sharing on.");
             return true;
         }
 
         private boolean stop(View v){
             v.setBackground(getResources().getDrawable(R.drawable.go_button_off));
             mLocationProvider.stopPolling();
+            shortToast("Location sharing off.");
             return true;
         }
 
@@ -71,17 +73,17 @@ public class MainActivity
         mLocationProvider.connect();
     }
 
-//    @Override
-//    protected void onResume(){
-//        super.onResume();
-//        mLocationProvider.connect();
-//    }
-//
-//    @Override
-//    protected void onPause(){
-//        super.onPause();
-//        mLocationProvider.disconnect();
-//    }
+    @Override
+    protected void onResume(){
+        super.onResume();
+        mLocationProvider.connect();
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+        mLocationProvider.disconnect();
+    }
 
     @Override
     protected void onStop(){
