@@ -35,13 +35,14 @@ public class LocationDao {
 
     // PUBLIC METHODS
 
-    public void connect() {
+    public LocationDao connect() {
         try {
             tryConnect();
         } catch (SQLException e) {
             Log.e(TAG, "Error connecting to DB.");
             e.printStackTrace();
         }
+        return this;
     }
 
     public void disconnect() {
@@ -49,7 +50,7 @@ public class LocationDao {
     }
 
     private void tryConnect() throws SQLException {
-        if (mDao == null) mDao = Dao.getInstance(mCtx);
+        mDao = mDao == null ? Dao.getInstance(mCtx) : mDao;
         mDb = mDao.getWritableDatabase();
     }
 

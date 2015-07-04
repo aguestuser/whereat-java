@@ -11,18 +11,21 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.tlc.whereat.R;
+import org.tlc.whereat.broadcast.location.MapLocationSubscriber;
 import org.tlc.whereat.db.LocationDao;
+import org.tlc.whereat.modules.MapUtils;
 
 import java.util.List;
 
 public class MapActivity extends AppCompatActivity {
 
     private static final LatLng LIBERTY = new LatLng(40.7092529,-74.0112551);
+
     private GoogleMap mMap;
-    private LocationDao mLocationDao;
+    private LocationDao mLocDao;
+    private MapLocationSubscriber mLocSub;
 
     // LIFE CYCLE METHODS
 
@@ -31,21 +34,25 @@ public class MapActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        mLocationDao = new LocationDao(this);
-        mLocationDao.connect();
+        mLocDao = new LocationDao(this).connect();
 
         setUpMap(allLocations()); // TODO DB call should be async
     }
 
-
     @Override
     protected void onResume(){
         super.onResume();
+        mLocSub.register();
         //TODO implement updateMap(newLocations());
     }
 
+    @Override
+    protected void onPause(){
+        super.onPause();
+        mLocSub.unregister();
+    }
 
-    // UI EVENT HANDLERS
+    // EVENT HANDLERS
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -59,8 +66,6 @@ public class MapActivity extends AppCompatActivity {
             case R.id.action_main:
                 startActivity(new Intent(this, MainActivity.class));
                 break;
-            case R.id.action_map:
-                startActivity(new Intent(this, MapActivity.class));
         }
         return super.onOptionsItemSelected(item);
     }
@@ -68,32 +73,29 @@ public class MapActivity extends AppCompatActivity {
     // HELPERS
 
     private List<Location> allLocations(){
-        return mLocationDao.getAll();
+        return mLocDao.getAll();
     }
 
     private void setUpMap(List<Location> ls){
         mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map_fragment)).getMap();
         mMap.setMyLocationEnabled(true);
-        addLocations(mMap,ls);
-    }
 
-    private void addLocations(GoogleMap m, List<Location> ls){
         if(!ls.isEmpty()){
-            LatLng ctr = parseLatLon(ls.get(0));
-            for (Location l : ls) mMap.addMarker(parseMarker(l));
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ctr, 15));
+            center(MapUtils.parseLatLon(ls.get(0)));
+            addLocations(ls);
         }
+        else center(LIBERTY);
+
+        mLocSub = new MapLocationSubscriber(this, mMap);
     }
 
-    private LatLng parseLatLon(Location loc){
-        return new LatLng(loc.getLatitude(), loc.getLongitude());
+    private void addLocations(List<Location> ls){
+        for (Location l : ls) mMap.addMarker(MapUtils.parseMarker(l));
     }
 
-    private MarkerOptions parseMarker(Location l){
-        return new MarkerOptions().position(parseLatLon(l)).title(parseTime(l));
+    private void center(LatLng ctr){
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ctr, 15));
     }
 
-    private String parseTime(Location loc){
-        return "time when this was posted";
-    }
+
 }

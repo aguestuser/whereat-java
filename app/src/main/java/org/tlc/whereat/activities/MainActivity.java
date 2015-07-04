@@ -1,29 +1,23 @@
 package org.tlc.whereat.activities;
 
 import android.content.Intent;
-import android.location.Location;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import org.tlc.whereat.R;
-import org.tlc.whereat.db.LocationDao;
-import org.tlc.whereat.modules.LocationProvider;
+import org.tlc.whereat.broadcast.location.MainLocationSubscriber;
+import org.tlc.whereat.services.LocationServiceManager;
+import org.tlc.whereat.modules.PopToast;
 
-public class MainActivity
-        extends AppCompatActivity
-        implements LocationProvider.LocationCallback {
-
-    // FIELDS
+public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = MainActivity.class.getSimpleName();
-    private LocationProvider mLocationProvider;
-    private LocationDao mDao;
+    private LocationServiceManager mLocPub;
+    private MainLocationSubscriber mLocSub;
 
     // LIFE CYCLE METHODS
 
@@ -33,72 +27,63 @@ public class MainActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mLocationProvider = new LocationProvider(this, this);
-        mLocationProvider.connect();
-
-        mDao = new LocationDao(this);
-        mDao.connect();
+        mLocPub = new LocationServiceManager(this).start();
+        mLocSub = new MainLocationSubscriber(this);
+        mLocSub.register();
 
         final Button shareLocationButton = (Button) findViewById(R.id.go_button);
 
         shareLocationButton.setOnLongClickListener(new View.OnLongClickListener(){
             @Override
             public boolean onLongClick(View v){
-                return mLocationProvider.isPolling() ? stop(v) : go(v);
+                return mLocPub.isPolling() ? stop(v) : go(v);
             }
         });
 
         shareLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!mLocationProvider.isPolling()) mLocationProvider.get();
+                if (!mLocPub.isPolling()) mLocPub.get(); //TODO fix state loss (if set to green then click to map, turns red)
             }
         });
 
     }
 
-//    @Override
-//    protected void onStart(){
-//        super.onStart();
-//        mLocationProvider.connect();
-//    }
-
     @Override
     protected void onResume(){
         super.onResume();
-        mLocationProvider.connect();
-        mDao.connect();
+        mLocPub.bind();
+        mLocSub.register();
     }
 
     @Override
     protected void onPause(){
         super.onPause();
-        mLocationProvider.disconnect();
-        mDao.disconnect();
+        mLocPub.unbind();
+        mLocSub.unregister();
     }
 
-//    @Override
-//    protected void onStop(){
-//        super.onStop();
-//        mLocationProvider.disconnect();
-//    }
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        mLocPub.stop();
+    }
 
     // GO BUTTON HELPERS
 
     private boolean go(View v){
         v.setBackground(getResources().getDrawable(R.drawable.go_button_on));
-        mLocationProvider.poll();
-        shortToast("Location sharing on.");
+        mLocPub.poll();
+        PopToast.briefly(this, "Location sharing on.");
         return true;
     }
 
     private boolean stop(View v){
         v.setBackground(getResources().getDrawable(R.drawable.go_button_off));
-        mLocationProvider.stopPolling();
-        shortToast("Location sharing off.");
+        mLocPub.stopPolling();
+        PopToast.briefly(this, "Location sharing off.");
         return true;
     }
-
 
     // MENU CALLBACKS
 
@@ -117,32 +102,4 @@ public class MainActivity
         }
         return super.onOptionsItemSelected(item);
     }
-
-    // LOCATION PROVIDER CALLBACKS
-
-    public void handleNewLocation(Location loc){
-        Log.i(TAG, "Received location: " + loc.toString());
-        mDao.save(loc); // TODO make this an AsyncTask?
-        toastLocation(loc);
-    }
-
-    public void handleFailedLocationRequest(String msg) {
-        shortToast(msg);
-    }
-
-    public void handleNoPlayServices(){
-        shortToast("This device does not support Google Play Services, which is required for location sharing.");
-        finish();
-    }
-
-    // TOASTERS
-
-    private void toastLocation(Location loc) {
-        shortToast("Location shared: " + loc.toString());
-    }
-
-    private void shortToast(String msg){
-        Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
-    }
-
 }
