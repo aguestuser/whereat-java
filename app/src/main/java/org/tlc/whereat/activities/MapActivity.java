@@ -26,6 +26,7 @@ public class MapActivity extends AppCompatActivity {
     private GoogleMap mMap;
     private LocationDao mLocDao;
     private MapLocationSubscriber mLocSub;
+    private Long mLastPing;
 
     // LIFE CYCLE METHODS
 
@@ -34,16 +35,17 @@ public class MapActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
+        mLocSub = new MapLocationSubscriber(this);
         mLocDao = new LocationDao(this).connect();
 
-        setUpMap(allLocations()); // TODO DB call should be async
+        initialize(); // TODO make DB call async?
     }
 
     @Override
     protected void onResume(){
         super.onResume();
         mLocSub.register();
-        //TODO implement updateMap(newLocations());
+        refresh();
     }
 
     @Override
@@ -64,38 +66,72 @@ public class MapActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) { // The action bar will automatically handle clicks on the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
         switch(item.getItemId()){
             case R.id.action_main:
-                startActivity(new Intent(this, MainActivity.class));
+                Intent i = new Intent(this, MainActivity.class);
+                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(i);
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    // HELPERS
+    // ACCESSORS
 
-    private List<Location> allLocations(){
-        return mLocDao.getAll();
+    public void addLocation(Location l){
+        mMap.addMarker(MapUtils.parseMarker(l));
+        mLastPing = l.getTime();
     }
 
-    private void setUpMap(List<Location> ls){
+    // MAP MUTATORS
+
+    private void initialize(){
+        List<Location> ls = allLocations();
+        mLastPing = getLastPing(ls);
+        createMap(ls);
+    }
+
+    private void createMap(List<Location> ls) {
         mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map_fragment)).getMap();
         mMap.setMyLocationEnabled(true);
+        createMarkers(ls);
+    }
 
+    private void createMarkers(List<Location> ls){
         if(!ls.isEmpty()){
-            center(MapUtils.parseLatLon(ls.get(0)));
+            center(MapUtils.parseLatLon(ls.get(ls.size() - 1)));
             addLocations(ls);
         }
         else center(LIBERTY);
-
-        mLocSub = new MapLocationSubscriber(this, mMap);
     }
 
+    private void refresh(){
+        if (hasBeenViewed()) {
+            List<Location> ls = mLocDao.getAllSince(mLastPing);
+            mLastPing = getLastPing(ls);
+            addLocations(ls);
+        }
+    }
+
+    // HELPERS
+
     private void addLocations(List<Location> ls){
-        for (Location l : ls) mMap.addMarker(MapUtils.parseMarker(l));
+        if (!ls.isEmpty()) for (Location l : ls) mMap.addMarker(MapUtils.parseMarker(l));
+    }
+
+    private List<Location> allLocations(){
+        return mLocDao.getAll();
     }
 
     private void center(LatLng ctr){
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ctr, 15));
     }
 
+    private long getLastPing(List<Location> ls){
+        return ls.isEmpty() ? mLastPing : ls.get(ls.size() - 1).getTime();
+    }
+
+    private boolean hasBeenViewed(){
+        return mLastPing != null;
+    }
 
 }

@@ -1,6 +1,10 @@
 package org.tlc.whereat.activities;
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -18,6 +22,8 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG = MainActivity.class.getSimpleName();
     private LocationServiceManager mLocPub;
     private MainLocationSubscriber mLocSub;
+    private static final String STATE_POLLING = "polling";
+    private boolean mPolling;
 
     // LIFE CYCLE METHODS
 
@@ -26,10 +32,10 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+//        restore(savedInstanceState);
 
-        mLocPub = new LocationServiceManager(this).start();
+        mLocPub = LocationServiceManager.getInstance(this);
         mLocSub = new MainLocationSubscriber(this);
-        mLocSub.register();
 
         final Button shareLocationButton = (Button) findViewById(R.id.go_button);
 
@@ -43,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         shareLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!mLocPub.isPolling()) mLocPub.get(); //TODO fix state loss (if set to green then click to map, turns red)
+                if (!mLocPub.isPolling()) mLocPub.get();
             }
         });
 
@@ -72,18 +78,26 @@ public class MainActivity extends AppCompatActivity {
     // GO BUTTON HELPERS
 
     private boolean go(View v){
-        v.setBackground(getResources().getDrawable(R.drawable.go_button_on));
+        v.setBackground(getDrawn(R.drawable.go_button_on));
         mLocPub.poll();
+        mPolling = true;
         PopToast.briefly(this, "Location sharing on.");
         return true;
     }
 
     private boolean stop(View v){
-        v.setBackground(getResources().getDrawable(R.drawable.go_button_off));
+        v.setBackground(getDrawn(R.drawable.go_button_off));
         mLocPub.stopPolling();
+        mPolling = false;
         PopToast.briefly(this, "Location sharing off.");
         return true;
     }
+
+    private Drawable getDrawn(int id){
+        if (Build.VERSION.SDK_INT > 21) return super.getDrawable(id);
+        else return getResources().getDrawable(id);
+    }
+
 
     // MENU CALLBACKS
 

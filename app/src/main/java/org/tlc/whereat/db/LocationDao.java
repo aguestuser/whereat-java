@@ -10,6 +10,7 @@ import android.util.Log;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class LocationDao {
 
@@ -66,9 +67,20 @@ public class LocationDao {
     }
 
     public List<Location> getAll(){
-
-        List<Location> ls = new ArrayList<>();
         Cursor c = mDb.query(Dao.TABLE_LOCATIONS, mAllColumns, null, null, null, null, null);
+        return parseLocations(c);
+    }
+
+    public List<Location> getAllSince(long t){
+        Cursor c = mDb.rawQuery(
+            "select * from " + Dao.TABLE_LOCATIONS +
+                " where " + Dao.COLUMN_TIME + " > " + String.valueOf(t) + ";",
+            null);
+        return parseLocations(c);
+    };
+
+    private List<Location> parseLocations(Cursor c){
+        List<Location> ls = new ArrayList<>();
 
         c.moveToFirst();
         while(!c.isAfterLast()){

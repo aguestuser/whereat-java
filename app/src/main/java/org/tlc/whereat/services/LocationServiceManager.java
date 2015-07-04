@@ -15,22 +15,17 @@ public class LocationServiceManager {
     private Context mContext;
     private LocationService mLocationService;
     private ServiceConnection mLocationServiceConnection = getLocationServiceConnection();
-//    private ServiceConnection mLocationServiceConnection = new ServiceConnection() {
-//        @Override
-//        public void onServiceConnected(ComponentName name, IBinder service) {
-//            Log.i(TAG, "Location service connected.");
-//            mLocationService = ((LocationService.Binder) service).getService();
-//        }
-//        @Override
-//        public void onServiceDisconnected(ComponentName name) {
-//            Log.i(TAG, "Location service disconnected.");
-//            mLocationService = null;
-//        }
-//    };
+
+    private static LocationServiceManager mInstance;
 
     // CONSTRUCTOR
 
-    public LocationServiceManager(Context ctx){
+    public static LocationServiceManager getInstance(Context ctx){
+        if (mInstance == null) return new LocationServiceManager(ctx).start();
+        else return mInstance;
+    }
+
+    private LocationServiceManager(Context ctx){
         mContext = ctx;
     }
 
@@ -47,9 +42,9 @@ public class LocationServiceManager {
         mContext.stopService(i);
     }
 
-    public void bind(){
+    public boolean bind(){
         Intent i = new Intent(mContext, LocationService.class);
-        mContext.bindService(i, mLocationServiceConnection, Context.BIND_AUTO_CREATE);
+        return mContext.bindService(i, mLocationServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     public void unbind(){
