@@ -77,7 +77,13 @@ public class LocationDao {
                 " where " + Dao.COLUMN_TIME + " > " + String.valueOf(t) + ";",
             null);
         return parseLocations(c);
-    };
+    }
+
+    public void clear(){
+        mDb.delete(Dao.TABLE_LOCATIONS,null,null);
+    }
+
+    // HELPERS
 
     private List<Location> parseLocations(Cursor c){
         List<Location> ls = new ArrayList<>();

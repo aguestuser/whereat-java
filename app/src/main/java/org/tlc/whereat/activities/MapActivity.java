@@ -37,6 +37,7 @@ public class MapActivity extends AppCompatActivity {
 
         mLocSub = new MapLocationSubscriber(this);
         mLocDao = new LocationDao(this).connect();
+        mLastPing = -1L;
 
         initialize(); // TODO make DB call async?
     }
@@ -52,6 +53,14 @@ public class MapActivity extends AppCompatActivity {
     protected void onPause(){
         super.onPause();
         mLocSub.unregister();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mMap.clear();
+        mLocDao.clear();
+        mLocDao.disconnect();
     }
 
     // EVENT HANDLERS
@@ -75,19 +84,12 @@ public class MapActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    // ACCESSORS
-
-    public void addLocation(Location l){
-        mMap.addMarker(MapUtils.parseMarker(l));
-        mLastPing = l.getTime();
-    }
-
     // MAP MUTATORS
 
     private void initialize(){
         List<Location> ls = allLocations();
-        mLastPing = getLastPing(ls);
         createMap(ls);
+        recordPing(ls);
     }
 
     private void createMap(List<Location> ls) {
@@ -98,40 +100,66 @@ public class MapActivity extends AppCompatActivity {
 
     private void createMarkers(List<Location> ls){
         if(!ls.isEmpty()){
-            center(MapUtils.parseLatLon(ls.get(ls.size() - 1)));
             addLocations(ls);
+            centerZoom(last(ls));
         }
-        else center(LIBERTY);
+        else centerZoom(LIBERTY);
     }
 
     private void refresh(){
         if (hasBeenViewed()) {
             List<Location> ls = mLocDao.getAllSince(mLastPing);
-            mLastPing = getLastPing(ls);
             addLocations(ls);
+            recordPing(ls);
         }
+    }
+
+    public void addLocation(Location l){
+        plot(l);
+        center(l);
+        recordPing(l);
     }
 
     // HELPERS
 
     private void addLocations(List<Location> ls){
-        if (!ls.isEmpty()) for (Location l : ls) mMap.addMarker(MapUtils.parseMarker(l));
+        if (!ls.isEmpty()) for (Location l : ls) plot(l);
+    }
+
+    private void plot(Location l){
+        mMap.addMarker(MapUtils.parseMarker(l));
     }
 
     private List<Location> allLocations(){
         return mLocDao.getAll();
     }
 
-    private void center(LatLng ctr){
+    private void centerZoom(Location l){
+        centerZoom(MapUtils.parseLatLon(l));
+    }
+
+    private void centerZoom(LatLng ctr){
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ctr, 15));
     }
 
-    private long getLastPing(List<Location> ls){
-        return ls.isEmpty() ? mLastPing : ls.get(ls.size() - 1).getTime();
+    private void center(Location l){
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(MapUtils.parseLatLon(l)));
+    }
+
+    private void recordPing(List<Location> ls){
+        if (!ls.isEmpty()) recordPing(last(ls));
+    }
+
+    private void recordPing(Location l){
+        mLastPing =  l.getTime();
     }
 
     private boolean hasBeenViewed(){
         return mLastPing != null;
+    }
+
+    private Location last(List<Location> ls){
+        return ls.get(ls.size() - 1);
     }
 
 }

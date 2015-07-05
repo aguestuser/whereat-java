@@ -151,7 +151,7 @@ public class LocationService extends Service
     }
 
     private void turnOffLocationUpdates(){
-        Log.i(TAG, "Turning on location updates.");
+        Log.i(TAG, "Turning off location updates.");
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
     }
 
