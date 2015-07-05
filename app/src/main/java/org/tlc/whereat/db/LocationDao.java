@@ -48,6 +48,7 @@ public class LocationDao {
 
     public void disconnect() {
         mDao.close();
+        mDb.close();
     }
 
     private void tryConnect() throws SQLException {

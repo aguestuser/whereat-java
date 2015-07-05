@@ -100,18 +100,16 @@ public class LocationService extends Service
     }
 
     @Override
-    public void onDestroy(){ disconnect(); }
+    public void onDestroy(){
+        stopPolling();
+        mGoogleApiClient.disconnect();
+        mDao.clear();
+        mDao.disconnect();
+    }
 
     // PUBLIC METHODS
 
-    public void disconnect(){
-        if (shouldDisconnect()) {
-            stopPolling();
-            mGoogleApiClient.disconnect();
-        }
-    }
-
-    public void get(){
+    public void ping(){
         Location l = lastApiLocation();
         if (l == null) {
             broadcastFailedLocationRequest();

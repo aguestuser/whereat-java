@@ -59,7 +59,6 @@ public class MapActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         mMap.clear();
-        mLocDao.clear();
         mLocDao.disconnect();
     }
 

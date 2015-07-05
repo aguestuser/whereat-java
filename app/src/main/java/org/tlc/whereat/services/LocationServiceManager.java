@@ -68,8 +68,8 @@ public class LocationServiceManager {
 
     // LOCATION SERVICE ACCESSORS
 
-    public void get(){
-        mLocationService.get();
+    public void ping(){
+        mLocationService.ping();
     }
 
     public boolean isPolling(){

@@ -1,10 +1,8 @@
 package org.tlc.whereat.activities;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -20,9 +18,9 @@ import org.tlc.whereat.modules.PopToast;
 public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = MainActivity.class.getSimpleName();
+
     private LocationServiceManager mLocPub;
     private MainLocationSubscriber mLocSub;
-    private static final String STATE_POLLING = "polling";
     private boolean mPolling;
 
     // LIFE CYCLE METHODS
@@ -32,7 +30,6 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-//        restore(savedInstanceState);
 
         mLocPub = LocationServiceManager.getInstance(this);
         mLocSub = new MainLocationSubscriber(this);
@@ -49,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         shareLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!mLocPub.isPolling()) mLocPub.get();
+                if (!mLocPub.isPolling()) mLocPub.ping();
             }
         });
 
