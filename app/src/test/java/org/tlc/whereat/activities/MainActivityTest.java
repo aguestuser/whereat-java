@@ -19,10 +19,10 @@ import org.tlc.whereat.services.LocationServiceManager;
 import org.tlc.whereat.support.FakeMainActivity;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.tlc.whereat.support.TestHelpers.lastToast;
-import static org.tlc.whereat.support.TestHelpers.nextActivity;
-import static org.tlc.whereat.support.TestHelpers.nextService;
-import static org.tlc.whereat.support.TestHelpers.createActivity;
+import static org.tlc.whereat.support.ActivityHelpers.lastToast;
+import static org.tlc.whereat.support.ActivityHelpers.nextActivity;
+import static org.tlc.whereat.support.ActivityHelpers.nextService;
+import static org.tlc.whereat.support.ActivityHelpers.createActivity;
 
 
 @RunWith(RobolectricGradleTestRunner.class)

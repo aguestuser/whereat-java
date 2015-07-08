@@ -3,6 +3,7 @@ package org.tlc.whereat.db;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.util.Log;
@@ -20,14 +21,14 @@ public class LocationDao {
 
     public static final String TAG = LocationDao.class.getSimpleName();
     protected SQLiteDatabase mDb;
-    private Dao mDao;
+    protected Dao mDao;
+    protected Context mCtx;
     private String[] mAllColumns = {
         Dao.COLUMN_ID,
         Dao.COLUMN_LAT,
         Dao.COLUMN_LON,
         Dao.COLUMN_TIME
     };
-    private Context mCtx;
 
     // CONSTRUCTOR
 
@@ -54,7 +55,6 @@ public class LocationDao {
     }
 
     private void tryConnect() throws SQLException {
-        mDao = mDao == null ? Dao.getInstance(mCtx) : mDao;
         mDb = mDao.getWritableDatabase();
     }
 
@@ -78,6 +78,14 @@ public class LocationDao {
         return mDb.replace(Dao.TABLE_LOCATIONS, null, vals);
     }
 
+    public Location get(long id){
+        Cursor c = mDb.query(Dao.TABLE_LOCATIONS, mAllColumns, selectIdStatement(id), null, null, null, null);
+        c.moveToFirst();
+        Location l = parseLocation(c);
+        c.close();
+        return l;
+    }
+
     public List<Location> getAll(){
         Cursor c = mDb.query(Dao.TABLE_LOCATIONS, mAllColumns, null, null, null, null, null);
         return parseLocations(c);
@@ -91,8 +99,12 @@ public class LocationDao {
         return parseLocations(c);
     }
 
-    public void clear(){
-        mDb.delete(Dao.TABLE_LOCATIONS,null,null);
+    public long count(){
+        return DatabaseUtils.queryNumEntries(mDb, Dao.TABLE_LOCATIONS);
+    }
+
+    public int clear(){
+        return mDb.delete(Dao.TABLE_LOCATIONS,null,null);
     }
 
     // HELPERS
@@ -117,6 +129,10 @@ public class LocationDao {
         l.setLongitude(c.getDouble(2));
         l.setTime(c.getLong(3));
         return l;
+    }
+
+    private String selectIdStatement(long id){
+        return Dao.COLUMN_ID + " = " + id;
     }
 
 }

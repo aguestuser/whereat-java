@@ -15,10 +15,9 @@ public class Dao extends SQLiteOpenHelper {
     public static final String COLUMN_LON = "lon";
     public static final String COLUMN_TIME = "time";
 
-    private static final String DB_NAME = "whereat.db";
-    private static final int DB_VERSION = 1;
-
-    private static final String DB_CREATE =
+    protected static final String DB_NAME = "whereat.db";
+    protected static final int DB_VERSION = 1;
+    protected static final String DB_CREATE =
         "create table " + TABLE_LOCATIONS + " (" +
             COLUMN_ID + " integer primary key autoincrement, " +
             COLUMN_LAT + " real not null, " +
@@ -34,8 +33,12 @@ public class Dao extends SQLiteOpenHelper {
         return sInstance;
     }
 
-    public Dao(Context ctx){
+    private Dao(Context ctx){
         super(ctx, DB_NAME, null, DB_VERSION);
+    }
+
+    protected Dao(Context ctx, String dbName){
+        super(ctx, dbName, null, DB_VERSION);
     }
 
     // INTERFACE IMPLEMENTATION

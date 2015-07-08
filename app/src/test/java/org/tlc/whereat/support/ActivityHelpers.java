@@ -12,7 +12,7 @@ import org.robolectric.util.ActivityController;
 
 import static org.robolectric.Shadows.shadowOf;
 
-public class TestHelpers {
+public class ActivityHelpers {
 
     public static <T extends Activity> T createActivity(Class<T> activity){
         return Robolectric.buildActivity(activity).create().get();
@@ -32,11 +32,6 @@ public class TestHelpers {
 
     public static String lastToast(){
         return ShadowToast.getTextOfLatestToast();
-    }
-
-    public static void shadowBind(ComponentName cn, IBinder ib){
-        shadowOf(RuntimeEnvironment.application)
-            .setComponentNameAndServiceForBindService(cn, ib);
     }
 
 }
