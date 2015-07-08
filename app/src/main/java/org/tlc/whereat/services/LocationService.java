@@ -7,7 +7,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -39,7 +38,7 @@ public class LocationService extends Service
 
     private static LocationService sInstance;
 
-    private IBinder mBinder = new Binder();
+    private IBinder mBinder = new LocationServiceBinder();
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private LocationDao mDao;
@@ -93,7 +92,7 @@ public class LocationService extends Service
         return mBinder;
     }
 
-    public class Binder extends android.os.Binder {
+    public class LocationServiceBinder extends android.os.Binder {
         public LocationService getService(){
             return LocationService.this;
         }
@@ -159,6 +158,8 @@ public class LocationService extends Service
     public void onLocationChanged(Location l) {
         relay(l);
     }
+
+
 
     @Override
     public void onConnected(Bundle bundle) { Log.i(TAG, "Location services connected."); }

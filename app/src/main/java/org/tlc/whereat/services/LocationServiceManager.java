@@ -56,7 +56,7 @@ public class LocationServiceManager {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 Log.i(TAG, "Location service connected.");
-                mLocationService = ((LocationService.Binder) service).getService();
+                mLocationService = ((LocationService.LocationServiceBinder) service).getService();
             }
             @Override
             public void onServiceDisconnected(ComponentName name) {
