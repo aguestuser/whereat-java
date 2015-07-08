@@ -1,6 +1,6 @@
 package org.tlc.whereat.activities;
 
-import android.content.ComponentName;
+import android.widget.Button;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,69 +8,103 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.fakes.RoboMenuItem;
-import org.robolectric.shadows.ShadowService;
+
+import static org.mockito.Mockito.*;
+
 import org.tlc.whereat.BuildConfig;
 import org.tlc.whereat.R;
+import org.tlc.whereat.broadcast.location.MainLocationSubscriber;
 import org.tlc.whereat.services.LocationService;
+import org.tlc.whereat.services.LocationServiceManager;
+import org.tlc.whereat.support.FakeMainActivity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.tlc.whereat.support.TestHelpers.lastToast;
 import static org.tlc.whereat.support.TestHelpers.nextActivity;
 import static org.tlc.whereat.support.TestHelpers.nextService;
-import static org.tlc.whereat.support.TestHelpers.shadowBind;
+import static org.tlc.whereat.support.TestHelpers.createActivity;
 
-import static org.robolectric.Shadows.shadowOf;
-
-//import static org.junit.Assert.*;
 
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class)
 
 public class MainActivityTest {
 
-    private MainActivity createActivity(){
-        return Robolectric.buildActivity(MainActivity.class).create().get();
+    @Test
+    public void creatingActivity_should_startLocationPublisher(){
+        MainActivity a = createActivity(FakeMainActivity.class);
+
+        assertThat(nextService(a))
+            .isEqualTo(LocationService.class.getName());
     }
 
-    private MainActivity resumeActivity(){
-        return Robolectric.buildActivity(MainActivity.class).create().resume().visible().get();
+    @Test
+    public void resumingActivity_should_bindToLocPubAndRegisterToLocSub(){
+        LocationServiceManager mockLocPub = mock(LocationServiceManager.class);
+        MainLocationSubscriber mockLocSub = mock(MainLocationSubscriber.class);
+        FakeMainActivity a = createActivity(FakeMainActivity.class)
+            .setLocPub(mockLocPub)
+            .setLocSub(mockLocSub);
+
+        a.onResume();
+
+        verify(mockLocPub, times(1)).bind();
+        verify(mockLocSub, times(1)).register();
+    }
+
+
+    @Test
+    public void pausingActivity_should_unbindFromLocPubAndUnregisterFromLocSub(){
+        LocationServiceManager mockLocPub = mock(LocationServiceManager.class);
+        MainLocationSubscriber mockLocSub = mock(MainLocationSubscriber.class);
+        FakeMainActivity a = createActivity(FakeMainActivity.class)
+            .setLocPub(mockLocPub)
+            .setLocSub(mockLocSub);
+
+        a.onPause();
+
+        verify(mockLocPub, times(1)).unbind();
+        verify(mockLocSub, times(1)).unregister();
     }
 
     @Test
     public void selectingMapFromMenu_should_switchToMapView(){
-
-        MainActivity a = createActivity();
+        MainActivity a = createActivity(MainActivity.class);
         a.onOptionsItemSelected(new RoboMenuItem(R.id.action_map));
 
         assertThat(nextActivity(a))
             .isEqualTo(MapActivity.class.getName());
+    }
 
+
+
+    @Test
+    public void clickingGoButton_shouldPingLocation(){
+        FakeMainActivity a = Robolectric.buildActivity(FakeMainActivity.class).create().get();
+        LocationServiceManager mockLocPub = mock(LocationServiceManager.class);
+        a.setLocPub(mockLocPub);
+        Button go = (Button) a.findViewById(R.id.go_button);
+
+        go.performClick();
+        verify(mockLocPub, times(1)).ping();
+
+        go.performClick();
+        verify(mockLocPub, times(2)).ping();
     }
 
     @Test
-    public void creatingActivity_should_startLocationPublisher(){
+    public void longClickingGoButton_shouldToggleLocationPolling(){
+        LocationServiceManager mockLocPub = mock(LocationServiceManager.class);
+        FakeMainActivity a = createActivity(FakeMainActivity.class).setLocPub(mockLocPub);
+        Button go = (Button) a.findViewById(R.id.go_button);
 
-        MainActivity a = createActivity();
+        go.performLongClick();
+        verify(mockLocPub).poll();
+        assertThat(lastToast()).isEqualTo("Location sharing on.");
 
-        assertThat(nextService(a))
-            .isEqualTo(LocationService.class.getName());
-
+        go.performLongClick();
+        verify(mockLocPub).stopPolling();
+        assertThat(lastToast()).isEqualTo("Location sharing off.");
     }
-
-
-//    @Test
-//    public void clickingGoButton_should_toastLocation(){
-//
-//        ShadowService ls = shadowOf(Robolectric.setupService(LocationService.class));
-//        ComponentName cn = new ComponentName(LocationService.class.getCanonicalName(), LocationService.class.getSimpleName());
-//
-//        shadowBind(cn, new LocationService.LocationServiceBinder());
-//
-//        MainActivity sa = resumeActivity();
-//        sa.findViewById(R.id.go_button).performClick();
-//
-//        assertThat(lastToast()).contains("Location shared");
-//
-//    }
 
 }

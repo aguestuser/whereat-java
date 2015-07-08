@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.util.Log;
 
+import org.tlc.whereat.model.UserLocation;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,6 +67,15 @@ public class LocationDao {
         vals.put(Dao.COLUMN_TIME, loc.getTime());
 
         return mDb.insert(Dao.TABLE_LOCATIONS, null, vals);
+    }
+
+    public long replace(UserLocation ul){
+        ContentValues vals = new ContentValues();
+        vals.put(Dao.COLUMN_LAT, ul.getLat());
+        vals.put(Dao.COLUMN_LON, ul.getLon());
+        vals.put(Dao.COLUMN_TIME, ul.getTime());
+
+        return mDb.replace(Dao.TABLE_LOCATIONS, null, vals);
     }
 
     public List<Location> getAll(){

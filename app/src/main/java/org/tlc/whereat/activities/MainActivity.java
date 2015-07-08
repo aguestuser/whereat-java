@@ -19,8 +19,8 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = MainActivity.class.getSimpleName();
 
-    private LocationServiceManager mLocPub;
-    private MainLocationSubscriber mLocSub;
+    protected LocationServiceManager mLocPub;
+    protected MainLocationSubscriber mLocSub;
     private boolean mPolling;
 
     // LIFE CYCLE METHODS
@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         shareLocationButton.setOnLongClickListener(new View.OnLongClickListener(){
             @Override
             public boolean onLongClick(View v){
-                return mLocPub.isPolling() ? stop(v) : go(v);
+                return mPolling ? stop(v) : go(v);
             }
         });
 

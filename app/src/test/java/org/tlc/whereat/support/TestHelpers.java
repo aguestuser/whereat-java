@@ -14,6 +14,14 @@ import static org.robolectric.Shadows.shadowOf;
 
 public class TestHelpers {
 
+    public static <T extends Activity> T createActivity(Class<T> activity){
+        return Robolectric.buildActivity(activity).create().get();
+    }
+
+    public static <T extends Activity> T resumeActivity(Class<T> activity){
+        return Robolectric.buildActivity(activity).create().resume().visible().get();
+    }
+
     public static String nextActivity(Activity a){
         return shadowOf(shadowOf(a).getNextStartedActivity()).getComponent().getClassName();
     }
