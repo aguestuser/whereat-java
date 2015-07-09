@@ -13,7 +13,6 @@ import org.tlc.whereat.model.UserLocation;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class LocationDao {
 
@@ -71,8 +70,8 @@ public class LocationDao {
 
     public long replace(UserLocation ul){
         ContentValues vals = new ContentValues();
-        vals.put(Dao.COLUMN_LAT, ul.getLat());
-        vals.put(Dao.COLUMN_LON, ul.getLon());
+        vals.put(Dao.COLUMN_LAT, ul.getLatitude());
+        vals.put(Dao.COLUMN_LON, ul.getLongitude());
         vals.put(Dao.COLUMN_TIME, ul.getTime());
 
         return mDb.replace(Dao.TABLE_LOCATIONS, null, vals);

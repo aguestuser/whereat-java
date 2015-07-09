@@ -3,6 +3,8 @@ package org.tlc.whereat.support;
 
 import android.location.Location;
 
+import org.tlc.whereat.model.UserLocation;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -18,7 +20,7 @@ public class LocationHelpers {
     public static final long N17_MILLIS = 1510876800000L;
     public static final String N17_UUID = "8d3f4369-e829-4ca5-8d9b-123264aeb469";
 
-    public static Location getS17Mock(){
+    public static Location s17AndroidLocationMock(){
         Location l = mock(Location.class);
         when(l.getLatitude()).thenReturn(S17_LAT);
         when(l.getLongitude()).thenReturn(S17_LON);
@@ -26,12 +28,24 @@ public class LocationHelpers {
         return l;
     }
 
-    public static Location getN17Mock(){
+    public static UserLocation s17UserLocationStub(){
+        return UserLocation.create(S17_UUID, S17_LAT, S17_LON, S17_MILLIS);
+    }
+
+    public static UserLocation s17UserLocationStub(String id){
+        return UserLocation.create(id, S17_LAT, S17_LON, S17_MILLIS);
+    }
+
+    public static Location n17AndroidLocationMock(){
         Location l = mock(Location.class);
         when(l.getLatitude()).thenReturn(N17_LAT);
         when(l.getLongitude()).thenReturn(N17_LON);
         when(l.getTime()).thenReturn(N17_MILLIS);
         return l;
+    }
+
+    public static UserLocation n17UserLocationStub(){
+        return UserLocation.create(N17_UUID, N17_LAT, N17_LON, N17_MILLIS);
     }
 
     public static boolean areEqual(Location l1, Location l2){

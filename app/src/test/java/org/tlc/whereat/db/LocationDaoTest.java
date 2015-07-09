@@ -17,7 +17,9 @@ import java.util.List;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.tlc.whereat.support.LocationHelpers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+
 
 
 @RunWith(Enclosed.class)
@@ -80,7 +82,7 @@ public class LocationDaoTest {
 
         @Test
         public void save_should_saveLocationToDb(){
-            Location l = getS17Mock();
+            Location l = s17AndroidLocationMock();
             assertThat(mLocDao.getAll().size()).isEqualTo(0);
 
             mLocDao.save(l);
@@ -92,7 +94,7 @@ public class LocationDaoTest {
 
         @Test
         public void get_should_retrieveLocationFromDb(){
-            Location l = getS17Mock();
+            Location l = s17AndroidLocationMock();
             mLocDao.save(l);
             Location retrieved = mLocDao.get(1L);
 
@@ -101,8 +103,8 @@ public class LocationDaoTest {
 
         @Test
         public void count_should_countHowManyLocationsAreInTheDb(){
-            Location s17 = getS17Mock();
-            Location n17 = getN17Mock();
+            Location s17 = s17AndroidLocationMock();
+            Location n17 = n17AndroidLocationMock();
 
             mLocDao.save(s17);
             assertThat(mLocDao.count()).isEqualTo(1);
@@ -119,8 +121,8 @@ public class LocationDaoTest {
     public static class ManyRecords {
 
         private FakeLocationDao mLocDao;
-        private Location s17 = getS17Mock();
-        private Location n17 = getN17Mock();
+        private Location s17 = s17AndroidLocationMock();
+        private Location n17 = n17AndroidLocationMock();
 
         @Before
         public void setup() {

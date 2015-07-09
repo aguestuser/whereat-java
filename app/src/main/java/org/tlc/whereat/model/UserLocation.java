@@ -5,7 +5,7 @@ import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.UUID;
+import static java.util.UUID.randomUUID;
 
 public class UserLocation implements Parcelable {
 
@@ -17,29 +17,33 @@ public class UserLocation implements Parcelable {
 
     // CONSTRUCTORS
 
-    protected UserLocation(Parcel in) {
-        mId = in.readString();
-        mLat = in.readDouble();
-        mLon = in.readDouble();
-        mTime = in.readLong();
+    public static UserLocation valueOf(Location l){
+        String id = randomUUID().toString();
+        return valueOf(id, l);
     }
 
-
-    public UserLocation valueOf(Location l){
+    public static UserLocation valueOf(String id, Location l){
         return new UserLocation(
-            UUID.randomUUID().toString(),
+            id,
             l.getLatitude(),
             l.getLongitude(),
             l.getTime()
         );
     }
 
-    public UserLocation create(String id, double lat, double lon, long time){
+    public static UserLocation create(String id, double lat, double lon, long time){
         return new UserLocation(id, lat, lon, time);
     }
 
     private UserLocation(String id, double lat, double lon, long time){
         mId = id; mLat = lat; mLon = lon; mTime = time;
+    }
+
+    protected UserLocation(Parcel in) {
+        mId = in.readString();
+        mLat = in.readDouble();
+        mLon = in.readDouble();
+        mTime = in.readLong();
     }
 
     // ACCESSORS
@@ -48,11 +52,11 @@ public class UserLocation implements Parcelable {
         return mId;
     }
 
-    public double getLat() {
+    public double getLatitude() {
         return mLat;
     }
 
-    public double getLon() {
+    public double getLongitude() {
         return mLon;
     }
 
@@ -91,4 +95,32 @@ public class UserLocation implements Parcelable {
         }
     };
 
+    // EQUALS AND HASH CODE
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        UserLocation that = (UserLocation) o;
+
+        if (Double.compare(that.mLat, mLat) != 0) return false;
+        if (Double.compare(that.mLon, mLon) != 0) return false;
+        if (mTime != that.mTime) return false;
+        return mId.equals(that.mId);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        result = mId.hashCode();
+        temp = Double.doubleToLongBits(mLat);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(mLon);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31 * result + (int) (mTime ^ (mTime >>> 32));
+        return result;
+    }
 }
