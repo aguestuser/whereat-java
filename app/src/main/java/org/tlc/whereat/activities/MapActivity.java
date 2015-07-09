@@ -1,7 +1,6 @@
 package org.tlc.whereat.activities;
 
 import android.content.Intent;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -11,6 +10,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 
 import org.tlc.whereat.R;
 import org.tlc.whereat.broadcast.location.MapLocationSubscriber;
@@ -19,6 +19,7 @@ import org.tlc.whereat.model.UserLocation;
 import org.tlc.whereat.modules.MapUtils;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MapActivity extends AppCompatActivity {
 
@@ -27,6 +28,7 @@ public class MapActivity extends AppCompatActivity {
     private GoogleMap mMap;
     private LocationDao mLocDao;
     private MapLocationSubscriber mLocSub;
+    private ConcurrentHashMap<String, Marker> mMarkers;
     private Long mLastPing;
 
     // LIFE CYCLE METHODS
@@ -38,6 +40,7 @@ public class MapActivity extends AppCompatActivity {
 
         mLocSub = new MapLocationSubscriber(this);
         mLocDao = new LocationDao(this).connect();
+        mMarkers = new ConcurrentHashMap<>();
         mLastPing = -1L;
 
         initialize(); // TODO make DB call async?
@@ -100,7 +103,7 @@ public class MapActivity extends AppCompatActivity {
 
     private void createMarkers(List<UserLocation> ls){
         if(!ls.isEmpty()){
-            addLocations(ls);
+            mapMany(ls);
             centerZoom(last(ls));
         }
         else centerZoom(LIBERTY);
@@ -109,12 +112,12 @@ public class MapActivity extends AppCompatActivity {
     private void refresh(){
         if (hasBeenViewed()) {
             List<UserLocation> ls = mLocDao.getAllSince(mLastPing);
-            addLocations(ls);
+            mapMany(ls);
             recordPing(ls);
         }
     }
 
-    public void addLocation(UserLocation l){
+    public void map(UserLocation l){
         plot(l);
         center(l);
         recordPing(l);
@@ -122,12 +125,25 @@ public class MapActivity extends AppCompatActivity {
 
     // HELPERS
 
-    private void addLocations(List<UserLocation> ls){
+    private void mapMany(List<UserLocation> ls){
         if (!ls.isEmpty()) for (UserLocation l : ls) plot(l);
     }
 
     private void plot(UserLocation l){
-        mMap.addMarker(MapUtils.parseMarker(l));
+        if (plotted(l)) rePlot(l);
+        else addPlot(l);
+    }
+
+    private boolean plotted(UserLocation l){
+        return mMarkers.containsKey(l.getId());
+    }
+
+    private void rePlot(UserLocation l){
+        mMarkers.get(l.getId()).setPosition(MapUtils.parseLatLon(l));
+    }
+
+    private void addPlot(UserLocation l){
+        mMarkers.put(l.getId(), mMap.addMarker(MapUtils.parseMarker(l)));
     }
 
     private List<UserLocation> allLocations(){

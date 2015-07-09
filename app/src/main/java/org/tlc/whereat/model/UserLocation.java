@@ -123,4 +123,14 @@ public class UserLocation implements Parcelable {
         result = 31 * result + (int) (mTime ^ (mTime >>> 32));
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "UserLocation{" +
+            "uuid=" + mId +
+            "lat=" + mLat +
+            ", lon=" + mLon +
+            ", time=" + mTime +
+            '}';
+    }
 }

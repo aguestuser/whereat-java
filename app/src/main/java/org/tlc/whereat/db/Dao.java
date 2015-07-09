@@ -17,7 +17,7 @@ public class Dao extends SQLiteOpenHelper {
 
     protected static final String DB_NAME = "whereat.db";
 
-    protected static final int DB_VERSION = 1;
+    protected static final int DB_VERSION = 3;
     protected static final String DB_CREATE =
         "create table " + TABLE_LOCATIONS + " (" +
             COLUMN_ID + " text primary key not null, " +
@@ -44,41 +44,41 @@ public class Dao extends SQLiteOpenHelper {
 
     // INTERFACE IMPLEMENTATION
 
-    @Override
-    public void onCreate(SQLiteDatabase db) {
-        for(Patch p : PATCHES){
-            p.apply(db);
-        }
-    }
-
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldV, int newV) {
-        log("Upgrading DB from version " + oldV + " to version " + newV);
-        for(int i = oldV; i < newV; i++){
-            PATCHES[i].apply(db);
-        }
-    }
-
-    @Override
-    public void onDowngrade(SQLiteDatabase db, int oldV, int newV) {
-        log("Downgrading DB from version " + oldV + " to version " + newV);
-        for(int i = oldV; i > newV; i++){
-            PATCHES[i-1].revert(db);
-        }
-    }
-
-    //    @Override
+//    @Override
 //    public void onCreate(SQLiteDatabase db) {
-//        db.execSQL(DB_CREATE);
+//        for(Patch p : PATCHES){
+//            p.apply(db);
+//        }
 //    }
 //
 //    @Override
-//    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-//        Log.w(Dao.class.getName(), "Upgrading DB from v. " + oldVersion + " to " + newVersion;);
-//        db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOCATIONS);
-//        onCreate(db);
+//    public void onUpgrade(SQLiteDatabase db, int oldV, int newV) {
+//        log("Upgrading DB from version " + oldV + " to version " + newV);
+//        for(int i = oldV; i < newV; i++){
+//            PATCHES[i].apply(db);
+//        }
 //    }
 //
+//    @Override
+//    public void onDowngrade(SQLiteDatabase db, int oldV, int newV) {
+//        log("Downgrading DB from version " + oldV + " to version " + newV);
+//        for(int i = oldV; i > newV; i++){
+//            PATCHES[i-1].revert(db);
+//        }
+//    }
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        db.execSQL(DB_CREATE);
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        Log.w(Dao.class.getName(), "Upgrading DB from v. " + oldVersion + " to " + newVersion);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOCATIONS);
+        onCreate(db);
+    }
+
 
 
     // MIGRATIONS

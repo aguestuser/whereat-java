@@ -17,6 +17,7 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
+import org.tlc.whereat.model.UserLocation;
 import org.tlc.whereat.modules.PopToast;
 import org.tlc.whereat.services.LocationService;
 import org.tlc.whereat.broadcast.Dispatcher;
@@ -67,7 +68,7 @@ public class MainLocationSubscriber implements LocationSubscriber {
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent i) {
-                Location l = i.getExtras().getParcelable(LocationService.ACTION_LOCATION_RECEIVED);
+                UserLocation l = i.getExtras().getParcelable(LocationService.ACTION_LOCATION_RECEIVED);
                 PopToast.location(mContext, l);
             }
         };

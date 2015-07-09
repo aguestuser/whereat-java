@@ -1,6 +1,6 @@
 <resources>
     <!--
-    TODO: addLocation api key for release version of app
+    TODO: map api key for release version of app
     see: https://developers.google.com/maps/documentation/android/start
     -->
     <string name="google_maps_key" translatable="false" templateMergeStrategy="preserve">

@@ -20,6 +20,8 @@ import org.tlc.whereat.broadcast.Dispatcher;
 import org.tlc.whereat.db.LocationDao;
 import org.tlc.whereat.model.UserLocation;
 
+import java.util.UUID;
+
 public class LocationService extends Service
     implements GoogleApiClient.ConnectionCallbacks,
     GoogleApiClient.OnConnectionFailedListener,
@@ -44,6 +46,7 @@ public class LocationService extends Service
     private LocationRequest mLocationRequest;
     private LocationDao mDao;
 
+    private String mUserId;
     private boolean mPolling;
 
 
@@ -79,8 +82,10 @@ public class LocationService extends Service
             .setInterval(POLLING_INTERVAL)
             .setFastestInterval(POLLING_INTERVAL);
 
-        mPolling = false;
         mDao = new LocationDao(this).connect();
+        mUserId = UUID.randomUUID().toString();
+        mPolling = false;
+
         connect();
     }
 
@@ -135,8 +140,11 @@ public class LocationService extends Service
     // API HELPERS
 
     private void relay(Location l){
-        mDao.save(UserLocation.valueOf(l)); //TODO insert persistent user id here!!!
-        broadcastLocation(l);
+        UserLocation ul = UserLocation.valueOf(mUserId, l);
+        long res = mDao.save(ul);
+        if (res != -1L){
+            broadcastLocation(ul);
+        }
     }
 
     private Location lastApiLocation(){
@@ -160,8 +168,6 @@ public class LocationService extends Service
         relay(l);
     }
 
-
-
     @Override
     public void onConnected(Bundle bundle) { Log.i(TAG, "Location services connected."); }
 
@@ -173,7 +179,7 @@ public class LocationService extends Service
 
     // BROADCASTS
 
-    private void broadcastLocation(Location l){
+    private void broadcastLocation(UserLocation l){
         Intent i = new Intent(ACTION_LOCATION_RECEIVED);
         i.setAction(ACTION_LOCATION_RECEIVED);
         i.putExtra(ACTION_LOCATION_RECEIVED, l);
@@ -208,9 +214,6 @@ public class LocationService extends Service
     // HELPERS
 
     private boolean shouldConnect(){return !mGoogleApiClient.isConnected(); }
-    private boolean shouldDisconnect(){
-        return mGoogleApiClient.isConnected();
-    }
     private boolean playServicesDisabled() { return (GooglePlayServicesUtil.isGooglePlayServicesAvailable(this) != ConnectionResult.SUCCESS); }
     private boolean locationServicesDisabled(){ return newerThanKitKat() ? newLsOff() : oldLsOff(); }
 
