@@ -18,6 +18,7 @@ import com.google.android.gms.location.LocationListener;
 
 import org.tlc.whereat.broadcast.Dispatcher;
 import org.tlc.whereat.db.LocationDao;
+import org.tlc.whereat.model.UserLocation;
 
 public class LocationService extends Service
     implements GoogleApiClient.ConnectionCallbacks,
@@ -134,7 +135,7 @@ public class LocationService extends Service
     // API HELPERS
 
     private void relay(Location l){
-        mDao.save(l);
+        mDao.save(UserLocation.valueOf(l)); //TODO insert persistent user id here!!!
         broadcastLocation(l);
     }
 

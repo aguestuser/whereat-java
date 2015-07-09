@@ -10,6 +10,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import com.google.android.gms.maps.GoogleMap;
 
 import org.tlc.whereat.activities.MapActivity;
+import org.tlc.whereat.model.UserLocation;
 import org.tlc.whereat.services.LocationService;
 import org.tlc.whereat.broadcast.Dispatcher;
 
@@ -44,7 +45,7 @@ public class MapLocationSubscriber implements LocationSubscriber {
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent i) {
-                Location l = i.getExtras().getParcelable(LocationService.ACTION_LOCATION_RECEIVED);
+                UserLocation l = i.getExtras().getParcelable(LocationService.ACTION_LOCATION_RECEIVED);
                 mContext.addLocation(l);
             }
         };

@@ -11,8 +11,10 @@ import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.tlc.whereat.BuildConfig;
+import org.tlc.whereat.model.UserLocation;
 import org.tlc.whereat.support.FakeLocationDao;
 import java.util.List;
+
 
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.*;
@@ -81,30 +83,50 @@ public class LocationDaoTest {
         }
 
         @Test
-        public void save_should_saveLocationToDb(){
-            Location l = s17AndroidLocationMock();
+        public void save_should_saveANewLocation(){
+            UserLocation l = s17UserLocationStub();
             assertThat(mLocDao.getAll().size()).isEqualTo(0);
 
-            mLocDao.save(l);
-            List<Location> saved = mLocDao.getAll();
+            long res = mLocDao.save(l);
 
-            assertThat(saved.size()).isEqualTo(1);
-            assertTrue(areEqual(l, saved.get(0)));
+            assertThat(res).isEqualTo(1L);
+            assertThat(mLocDao.count()).isEqualTo(1);
+            assertTrue(l.equals(mLocDao.getAll().get(0)));
         }
 
         @Test
-        public void get_should_retrieveLocationFromDb(){
-            Location l = s17AndroidLocationMock();
-            mLocDao.save(l);
-            Location retrieved = mLocDao.get(1L);
+        public void save_should_overWriteAnOldLocation(){
+            UserLocation l1 = UserLocation.create(S17_UUID, S17_LAT, S17_LON, S17_MILLIS);
+            UserLocation l2 = UserLocation.create(S17_UUID, N17_LAT, N17_LON, N17_MILLIS);
 
-            assertTrue(areEqual(l, retrieved));
+            long res = mLocDao.save(l1);
+
+            assertThat(res).isEqualTo(1L);
+            assertThat(mLocDao.count()).isEqualTo(1);
+            assertTrue(mLocDao.get(S17_UUID).equals(l1));
+
+            long res2 = mLocDao.save(l2);
+
+            assertThat(res2).isEqualTo(2L);
+            assertThat(mLocDao.count()).isEqualTo(1);
+            assertThat(mLocDao.getAll().size()).isEqualTo(1);
+            assertTrue(mLocDao.get(S17_UUID).equals(l2));
+        }
+
+
+        @Test
+        public void get_should_retrieveLocationFromDb(){
+            UserLocation ul = s17UserLocationStub();
+            mLocDao.save(ul);
+            UserLocation retrieved = mLocDao.get(S17_UUID);
+
+            assertTrue(areEqual(ul, retrieved));
         }
 
         @Test
         public void count_should_countHowManyLocationsAreInTheDb(){
-            Location s17 = s17AndroidLocationMock();
-            Location n17 = n17AndroidLocationMock();
+            UserLocation s17 = s17UserLocationStub();
+            UserLocation n17 = n17UserLocationStub();
 
             mLocDao.save(s17);
             assertThat(mLocDao.count()).isEqualTo(1);
@@ -121,8 +143,8 @@ public class LocationDaoTest {
     public static class ManyRecords {
 
         private FakeLocationDao mLocDao;
-        private Location s17 = s17AndroidLocationMock();
-        private Location n17 = n17AndroidLocationMock();
+        private UserLocation s17 = s17UserLocationStub();
+        private UserLocation n17 = n17UserLocationStub();
 
         @Before
         public void setup() {
@@ -140,7 +162,7 @@ public class LocationDaoTest {
 
         @Test
         public void getAll_should_retrieveAllLocationsFromDb(){
-            List<Location> all = mLocDao.getAll();
+            List<UserLocation> all = mLocDao.getAll();
 
             assertTrue(areEqual(all.get(0), s17));
             assertTrue(areEqual(all.get(1), n17));
@@ -148,7 +170,7 @@ public class LocationDaoTest {
 
         @Test
         public void getAllSince_should_retrieveAllLocationsNewerThanX(){
-            List<Location> all = mLocDao.getAllSince(S17_MILLIS + 1);
+            List<UserLocation> all = mLocDao.getAllSince(S17_MILLIS + 1);
 
             assertThat(all.size()).isEqualTo(1);
             assertFalse(areEqual(all.get(0), s17));

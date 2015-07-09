@@ -15,6 +15,7 @@ import com.google.android.gms.maps.model.LatLng;
 import org.tlc.whereat.R;
 import org.tlc.whereat.broadcast.location.MapLocationSubscriber;
 import org.tlc.whereat.db.LocationDao;
+import org.tlc.whereat.model.UserLocation;
 import org.tlc.whereat.modules.MapUtils;
 
 import java.util.List;
@@ -86,18 +87,18 @@ public class MapActivity extends AppCompatActivity {
     // MAP MUTATORS
 
     private void initialize(){
-        List<Location> ls = allLocations();
+        List<UserLocation> ls = allLocations();
         createMap(ls);
         recordPing(ls);
     }
 
-    private void createMap(List<Location> ls) {
+    private void createMap(List<UserLocation> ls) {
         mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map_fragment)).getMap();
         mMap.setMyLocationEnabled(true);
         createMarkers(ls);
     }
 
-    private void createMarkers(List<Location> ls){
+    private void createMarkers(List<UserLocation> ls){
         if(!ls.isEmpty()){
             addLocations(ls);
             centerZoom(last(ls));
@@ -107,13 +108,13 @@ public class MapActivity extends AppCompatActivity {
 
     private void refresh(){
         if (hasBeenViewed()) {
-            List<Location> ls = mLocDao.getAllSince(mLastPing);
+            List<UserLocation> ls = mLocDao.getAllSince(mLastPing);
             addLocations(ls);
             recordPing(ls);
         }
     }
 
-    public void addLocation(Location l){
+    public void addLocation(UserLocation l){
         plot(l);
         center(l);
         recordPing(l);
@@ -121,19 +122,19 @@ public class MapActivity extends AppCompatActivity {
 
     // HELPERS
 
-    private void addLocations(List<Location> ls){
-        if (!ls.isEmpty()) for (Location l : ls) plot(l);
+    private void addLocations(List<UserLocation> ls){
+        if (!ls.isEmpty()) for (UserLocation l : ls) plot(l);
     }
 
-    private void plot(Location l){
+    private void plot(UserLocation l){
         mMap.addMarker(MapUtils.parseMarker(l));
     }
 
-    private List<Location> allLocations(){
+    private List<UserLocation> allLocations(){
         return mLocDao.getAll();
     }
 
-    private void centerZoom(Location l){
+    private void centerZoom(UserLocation l){
         centerZoom(MapUtils.parseLatLon(l));
     }
 
@@ -141,15 +142,15 @@ public class MapActivity extends AppCompatActivity {
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ctr, 15));
     }
 
-    private void center(Location l){
+    private void center(UserLocation l){
         mMap.moveCamera(CameraUpdateFactory.newLatLng(MapUtils.parseLatLon(l)));
     }
 
-    private void recordPing(List<Location> ls){
+    private void recordPing(List<UserLocation> ls){
         if (!ls.isEmpty()) recordPing(last(ls));
     }
 
-    private void recordPing(Location l){
+    private void recordPing(UserLocation l){
         mLastPing =  l.getTime();
     }
 
@@ -157,7 +158,7 @@ public class MapActivity extends AppCompatActivity {
         return mLastPing != null;
     }
 
-    private Location last(List<Location> ls){
+    private UserLocation last(List<UserLocation> ls){
         return ls.get(ls.size() - 1);
     }
 

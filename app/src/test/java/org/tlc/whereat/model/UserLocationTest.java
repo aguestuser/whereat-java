@@ -38,5 +38,12 @@ public class UserLocationTest {
         assertFalse(ul1.equals(ul2));
     }
 
+    @Test
+    public void create_should_constructUserLocation(){
+        UserLocation ul = UserLocation.create(S17_UUID, S17_LAT, S17_LON, S17_MILLIS);
+
+        assertTrue(ul.equals(s17UserLocationStub()));
+    }
+
 
 }

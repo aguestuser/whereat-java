@@ -20,8 +20,7 @@ public class Dao extends SQLiteOpenHelper {
     protected static final int DB_VERSION = 1;
     protected static final String DB_CREATE =
         "create table " + TABLE_LOCATIONS + " (" +
-            //COLUMN_ID + " text primary key not null, " +
-            COLUMN_ID + " integer primary key autoincrement, " +
+            COLUMN_ID + " text primary key not null, " +
             COLUMN_LAT + " real not null, " +
             COLUMN_LON + " real not null, " +
             COLUMN_TIME + " integer not null);";

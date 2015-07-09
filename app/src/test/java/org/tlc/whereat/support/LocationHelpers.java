@@ -36,19 +36,11 @@ public class LocationHelpers {
         return UserLocation.create(id, S17_LAT, S17_LON, S17_MILLIS);
     }
 
-    public static Location n17AndroidLocationMock(){
-        Location l = mock(Location.class);
-        when(l.getLatitude()).thenReturn(N17_LAT);
-        when(l.getLongitude()).thenReturn(N17_LON);
-        when(l.getTime()).thenReturn(N17_MILLIS);
-        return l;
-    }
-
     public static UserLocation n17UserLocationStub(){
         return UserLocation.create(N17_UUID, N17_LAT, N17_LON, N17_MILLIS);
     }
 
-    public static boolean areEqual(Location l1, Location l2){
+    public static boolean areEqual(UserLocation l1, UserLocation l2){
         return
             l1.getLatitude() == l2.getLatitude() &&
             l1.getLongitude() == l2.getLongitude() &&

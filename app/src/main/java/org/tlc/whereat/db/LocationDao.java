@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
-import android.location.Location;
 import android.util.Log;
 
 import org.tlc.whereat.model.UserLocation;
@@ -59,43 +58,23 @@ public class LocationDao {
 
     // CRUD
 
-    public long save(Location loc){
-        ContentValues vals = new ContentValues();
-        vals.put(Dao.COLUMN_LAT, loc.getLatitude());
-        vals.put(Dao.COLUMN_LON, loc.getLongitude());
-        vals.put(Dao.COLUMN_TIME, loc.getTime());
-
-        return mDb.insert(Dao.TABLE_LOCATIONS, null, vals);
+    public long save(UserLocation loc){
+        return mDb.replace(Dao.TABLE_LOCATIONS, null, parseRow(loc));
     }
 
-    public long replace(UserLocation ul){
-        ContentValues vals = new ContentValues();
-        vals.put(Dao.COLUMN_LAT, ul.getLatitude());
-        vals.put(Dao.COLUMN_LON, ul.getLongitude());
-        vals.put(Dao.COLUMN_TIME, ul.getTime());
-
-        return mDb.replace(Dao.TABLE_LOCATIONS, null, vals);
+    public UserLocation get(String id){
+        Cursor c = mDb.query(Dao.TABLE_LOCATIONS, mAllColumns, idEquals(id), null, null, null, null);
+        return parseUserLocation(c);
     }
 
-    public Location get(long id){
-        Cursor c = mDb.query(Dao.TABLE_LOCATIONS, mAllColumns, selectIdStatement(id), null, null, null, null);
-        c.moveToFirst();
-        Location l = parseLocation(c);
-        c.close();
-        return l;
-    }
-
-    public List<Location> getAll(){
+    public List<UserLocation> getAll(){
         Cursor c = mDb.query(Dao.TABLE_LOCATIONS, mAllColumns, null, null, null, null, null);
-        return parseLocations(c);
+        return parseUserLocations(c);
     }
 
-    public List<Location> getAllSince(long t){
-        Cursor c = mDb.rawQuery(
-            "select * from " + Dao.TABLE_LOCATIONS +
-                " where " + Dao.COLUMN_TIME + " > " + String.valueOf(t) + ";",
-            null);
-        return parseLocations(c);
+    public List<UserLocation> getAllSince(long t){
+        Cursor c = mDb.query(Dao.TABLE_LOCATIONS, mAllColumns, timeGreaterThan(t), null, null, null, null, null);
+        return parseUserLocations(c);
     }
 
     public long count(){
@@ -108,12 +87,30 @@ public class LocationDao {
 
     // HELPERS
 
-    private List<Location> parseLocations(Cursor c){
-        List<Location> ls = new ArrayList<>();
+    private ContentValues parseRow(UserLocation loc){
+        ContentValues vals = new ContentValues();
+        vals.put(Dao.COLUMN_ID, loc.getId());
+        vals.put(Dao.COLUMN_LAT, loc.getLatitude());
+        vals.put(Dao.COLUMN_LON, loc.getLongitude());
+        vals.put(Dao.COLUMN_TIME, loc.getTime());
+
+        return vals;
+    }
+
+    private UserLocation parseUserLocation(Cursor c){
+        c.moveToFirst();
+        UserLocation l = doParseUserLocation(c);
+        c.close();
+
+        return l;
+    }
+
+    private List<UserLocation> parseUserLocations(Cursor c){
+        List<UserLocation> ls = new ArrayList<>();
 
         c.moveToFirst();
         while(!c.isAfterLast()){
-            Location l = parseLocation(c);
+            UserLocation l = doParseUserLocation(c);
             ls.add(l);
             c.moveToNext();
         }
@@ -122,16 +119,22 @@ public class LocationDao {
         return ls;
     }
 
-    private Location parseLocation(Cursor c){
-        Location l = new Location("");
-        l.setLatitude(c.getDouble(1));
-        l.setLongitude(c.getDouble(2));
-        l.setTime(c.getLong(3));
-        return l;
+    private UserLocation doParseUserLocation(Cursor c){
+        //TODO use a builder here for greater type safety?
+        return UserLocation.create(
+            c.getString(0), //id
+            c.getDouble(1), //lat
+            c.getDouble(2), //lon
+            c.getLong(3)    //time
+        );
     }
 
-    private String selectIdStatement(long id){
-        return Dao.COLUMN_ID + " = " + id;
+    private String idEquals(String id){
+        return String.format("%s = '%s'", Dao.COLUMN_ID, id);
+    }
+
+    private String timeGreaterThan(long t){
+        return String.format("%s > %s", Dao.COLUMN_TIME, t);
     }
 
 }
