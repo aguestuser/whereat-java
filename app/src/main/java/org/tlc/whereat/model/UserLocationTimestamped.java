@@ -3,12 +3,12 @@ package org.tlc.whereat.model;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
-public class LocationWithPing {
+public class UserLocationTimestamped {
 
     @SerializedName("lastPing") private Long mLastPing;
     @SerializedName("location") private UserLocation mUserLocation;
 
-    public LocationWithPing(Long lp, UserLocation ul) {
+    public UserLocationTimestamped(Long lp, UserLocation ul) {
         mLastPing = lp;
         mUserLocation = ul;
     }
@@ -19,8 +19,8 @@ public class LocationWithPing {
         return new Gson().toJson(this);
     }
 
-    public static LocationWithPing fromJson(String json){
-        return new Gson().fromJson(json, LocationWithPing.class);
+    public static UserLocationTimestamped fromJson(String json){
+        return new Gson().fromJson(json, UserLocationTimestamped.class);
     }
 
     // ACESSORS
@@ -37,7 +37,7 @@ public class LocationWithPing {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        LocationWithPing that = (LocationWithPing) o;
+        UserLocationTimestamped that = (UserLocationTimestamped) o;
 
         if (!mLastPing.equals(that.mLastPing)) return false;
         return mUserLocation.equals(that.mUserLocation);
@@ -53,7 +53,7 @@ public class LocationWithPing {
 
     @Override
     public String toString() {
-        return "LocationWithPing{" +
+        return "UserLocationTimestamped{" +
             "lastPing=" + mLastPing +
             ", userLocation=" + mUserLocation +
             '}';

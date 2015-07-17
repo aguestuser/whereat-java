@@ -1,6 +1,4 @@
-package org.tlc.whereat.broadcast.location;
-
-import android.content.BroadcastReceiver;
+package org.tlc.whereat.pubsub;
 
 public interface LocationSubscriber {
 

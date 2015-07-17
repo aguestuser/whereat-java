@@ -3,7 +3,7 @@ package org.tlc.whereat.support;
 
 import android.location.Location;
 
-import org.tlc.whereat.model.LocationWithPing;
+import org.tlc.whereat.model.UserLocationTimestamped;
 import org.tlc.whereat.model.UserLocation;
 
 import static org.mockito.Mockito.mock;
@@ -65,8 +65,8 @@ public class LocationHelpers {
         return UserLocation.create(N17_UUID, N17_LAT, N17_LON, N17_MILLIS);
     }
 
-    public static LocationWithPing s17LocationWithPingStub(){
-        return new LocationWithPing(S17_MILLIS, s17UserLocationStubModified());
+    public static UserLocationTimestamped s17LocationWithPingStub(){
+        return new UserLocationTimestamped(S17_MILLIS, s17UserLocationStubModified());
     }
 
     public static boolean areEqual(UserLocation l1, UserLocation l2){

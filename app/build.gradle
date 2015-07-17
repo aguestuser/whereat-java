@@ -1,6 +1,26 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'me.tatarka:gradle-retrolambda:3.2.0'
+    }
+}
+
+// Required because retrolambda is on maven central
+repositories {
+    mavenCentral()
+}
+
 apply plugin: 'com.android.application'
+apply plugin: 'me.tatarka.retrolambda'
 
 android {
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
 
@@ -43,6 +63,8 @@ dependencies {
     //    testCompile 'org.easytesting:fest:1.0.16'
     //    testCompile 'com.squareup:fest-android:1.0.8'
 }
+
+
 
 
 //

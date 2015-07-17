@@ -1,4 +1,4 @@
-package org.tlc.whereat.services;
+package org.tlc.whereat.pubsub;
 
 
 import android.content.ComponentName;
@@ -8,42 +8,42 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.util.Log;
 
-public class LocationServiceManager {
+public class LocationPublisherManager {
 
-    public static final String TAG = LocationServiceManager.class.getSimpleName();
+    public static final String TAG = LocationPublisherManager.class.getSimpleName();
 
     private Context mContext;
-    private LocationService mLocationService;
+    private LocationPublisher mLocationPublisher;
     private ServiceConnection mLocationServiceConnection = getLocationServiceConnection();
 
-    private static LocationServiceManager mInstance;
+    private static LocationPublisherManager mInstance;
 
     // CONSTRUCTOR
 
-    public static LocationServiceManager getInstance(Context ctx){
-        if (mInstance == null) return new LocationServiceManager(ctx).start();
+    public static LocationPublisherManager getInstance(Context ctx){
+        if (mInstance == null) return new LocationPublisherManager(ctx).start();
         else return mInstance;
     }
 
-    private LocationServiceManager(Context ctx){
+    private LocationPublisherManager(Context ctx){
         mContext = ctx;
     }
 
     // LIFE CYCLE METHODS
 
-    public LocationServiceManager start(){
-        Intent i = new Intent(mContext, LocationService.class);
+    public LocationPublisherManager start(){
+        Intent i = new Intent(mContext, LocationPublisher.class);
         mContext.startService(i);
         return this;
     }
 
     public void stop(){
-        Intent i = new Intent(mContext, LocationService.class);
+        Intent i = new Intent(mContext, LocationPublisher.class);
         mContext.stopService(i);
     }
 
     public boolean bind(){
-        Intent i = new Intent(mContext, LocationService.class);
+        Intent i = new Intent(mContext, LocationPublisher.class);
         return mContext.bindService(i, mLocationServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
@@ -56,12 +56,12 @@ public class LocationServiceManager {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 Log.i(TAG, "Location service connected.");
-                mLocationService = ((LocationService.LocationServiceBinder) service).getService();
+                mLocationPublisher = ((LocationPublisher.LocationServiceBinder) service).getService();
             }
             @Override
             public void onServiceDisconnected(ComponentName name) {
                 Log.i(TAG, "Location service disconnected.");
-                mLocationService = null;
+                mLocationPublisher = null;
             }
         };
     }
@@ -69,19 +69,19 @@ public class LocationServiceManager {
     // LOCATION SERVICE ACCESSORS
 
     public void ping(){
-        mLocationService.ping();
+        mLocationPublisher.ping();
     }
 
     public boolean isPolling(){
-        return mLocationService.isPolling();
+        return mLocationPublisher.isPolling();
     }
 
     public void poll(){
-        mLocationService.poll();
+        mLocationPublisher.poll();
     }
 
     public void stopPolling(){
-        mLocationService.stopPolling();
+        mLocationPublisher.stopPolling();
     }
 
 

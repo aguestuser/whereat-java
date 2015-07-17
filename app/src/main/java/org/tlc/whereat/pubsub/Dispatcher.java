@@ -1,4 +1,4 @@
-package org.tlc.whereat.broadcast;
+package org.tlc.whereat.pubsub;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

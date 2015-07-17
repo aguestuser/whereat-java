@@ -1,4 +1,4 @@
-package org.tlc.whereat.broadcast.location;
+package org.tlc.whereat.pubsub;
 
 
 import android.content.BroadcastReceiver;
@@ -8,19 +8,17 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import org.tlc.whereat.activities.MapActivity;
 import org.tlc.whereat.model.UserLocation;
-import org.tlc.whereat.services.LocationService;
-import org.tlc.whereat.broadcast.Dispatcher;
 
-public class MapLocationSubscriber implements LocationSubscriber {
+public class LocationSubscriberMap implements LocationSubscriber {
 
-    public static final String TAG = MapLocationSubscriber.class.getSimpleName();
+    public static final String TAG = LocationSubscriberMap.class.getSimpleName();
 
     private MapActivity mContext;
     private BroadcastReceiver mLocationReceiver = locationReceiver();
 
     // CONSTRUCTOR
 
-    public MapLocationSubscriber(MapActivity ctx){
+    public LocationSubscriberMap(MapActivity ctx){
         mContext = ctx;
     }
 
@@ -28,7 +26,7 @@ public class MapLocationSubscriber implements LocationSubscriber {
 
     public void register(){
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(mContext);
-        Dispatcher.register(bm, mLocationReceiver, LocationService.ACTION_LOCATION_RECEIVED);
+        Dispatcher.register(bm, mLocationReceiver, LocationPublisher.ACTION_LOCATION_RECEIVED);
     }
 
     public void unregister(){
@@ -42,7 +40,7 @@ public class MapLocationSubscriber implements LocationSubscriber {
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent i) {
-                UserLocation l = i.getExtras().getParcelable(LocationService.ACTION_LOCATION_RECEIVED);
+                UserLocation l = i.getExtras().getParcelable(LocationPublisher.ACTION_LOCATION_RECEIVED);
                 mContext.map(l);
             }
         };

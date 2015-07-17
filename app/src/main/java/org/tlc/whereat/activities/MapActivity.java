@@ -13,10 +13,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
 import org.tlc.whereat.R;
-import org.tlc.whereat.broadcast.location.MapLocationSubscriber;
+import org.tlc.whereat.pubsub.LocationSubscriberMap;
 import org.tlc.whereat.db.LocationDao;
 import org.tlc.whereat.model.UserLocation;
-import org.tlc.whereat.modules.MapUtils;
+import org.tlc.whereat.util.MapUtils;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,7 +27,7 @@ public class MapActivity extends AppCompatActivity {
 
     private GoogleMap mMap;
     private LocationDao mLocDao;
-    private MapLocationSubscriber mLocSub;
+    private LocationSubscriberMap mLocSub;
     private ConcurrentHashMap<String, Marker> mMarkers;
     private Long mLastPing;
 
@@ -38,7 +38,7 @@ public class MapActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        mLocSub = new MapLocationSubscriber(this);
+        mLocSub = new LocationSubscriberMap(this);
         mLocDao = new LocationDao(this).connect();
         mMarkers = new ConcurrentHashMap<>();
         mLastPing = -1L;

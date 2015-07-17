@@ -50,8 +50,8 @@ public class UserLocation implements Parcelable {
 
     // CONVERTERS
 
-    public LocationWithPing asLocationWithPing(Long ping) {
-        return new LocationWithPing(ping, this);
+    public UserLocationTimestamped asLocationWithPing(Long ping) {
+        return new UserLocationTimestamped(ping, this);
     }
 
     public String toJson(){

@@ -40,7 +40,7 @@
         </activity>
 
         <service
-            android:name=".services.LocationService"
+            android:name=".pubsub.LocationPublisher"
             android:label="@string/location_service_name" >
         </service>
 

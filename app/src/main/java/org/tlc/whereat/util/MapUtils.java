@@ -1,6 +1,4 @@
-package org.tlc.whereat.modules;
-
-import android.location.Location;
+package org.tlc.whereat.util;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;

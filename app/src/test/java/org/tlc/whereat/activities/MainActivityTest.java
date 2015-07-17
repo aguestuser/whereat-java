@@ -13,9 +13,9 @@ import static org.mockito.Mockito.*;
 
 import org.tlc.whereat.BuildConfig;
 import org.tlc.whereat.R;
-import org.tlc.whereat.broadcast.location.MainLocationSubscriber;
-import org.tlc.whereat.services.LocationService;
-import org.tlc.whereat.services.LocationServiceManager;
+import org.tlc.whereat.pubsub.LocationSubscriberMain;
+import org.tlc.whereat.pubsub.LocationPublisher;
+import org.tlc.whereat.pubsub.LocationPublisherManager;
 import org.tlc.whereat.support.FakeMainActivity;
 
 import static org.assertj.core.api.Assertions.*;
@@ -32,13 +32,13 @@ public class MainActivityTest {
         MainActivity a = createActivity(FakeMainActivity.class);
 
         assertThat(nextService(a))
-            .isEqualTo(LocationService.class.getName());
+            .isEqualTo(LocationPublisher.class.getName());
     }
 
     @Test
     public void resumingActivity_should_bindToLocPubAndRegisterToLocSub(){
-        LocationServiceManager mockLocPub = mock(LocationServiceManager.class);
-        MainLocationSubscriber mockLocSub = mock(MainLocationSubscriber.class);
+        LocationPublisherManager mockLocPub = mock(LocationPublisherManager.class);
+        LocationSubscriberMain mockLocSub = mock(LocationSubscriberMain.class);
         FakeMainActivity a = createActivity(FakeMainActivity.class)
             .setLocPub(mockLocPub)
             .setLocSub(mockLocSub);
@@ -52,8 +52,8 @@ public class MainActivityTest {
 
     @Test
     public void pausingActivity_should_unbindFromLocPubAndUnregisterFromLocSub(){
-        LocationServiceManager mockLocPub = mock(LocationServiceManager.class);
-        MainLocationSubscriber mockLocSub = mock(MainLocationSubscriber.class);
+        LocationPublisherManager mockLocPub = mock(LocationPublisherManager.class);
+        LocationSubscriberMain mockLocSub = mock(LocationSubscriberMain.class);
         FakeMainActivity a = createActivity(FakeMainActivity.class)
             .setLocPub(mockLocPub)
             .setLocSub(mockLocSub);
@@ -78,7 +78,7 @@ public class MainActivityTest {
     @Test
     public void clickingGoButton_shouldPingLocation(){
         FakeMainActivity a = Robolectric.buildActivity(FakeMainActivity.class).create().get();
-        LocationServiceManager mockLocPub = mock(LocationServiceManager.class);
+        LocationPublisherManager mockLocPub = mock(LocationPublisherManager.class);
         a.setLocPub(mockLocPub);
         Button go = (Button) a.findViewById(R.id.go_button);
 
@@ -91,7 +91,7 @@ public class MainActivityTest {
 
     @Test
     public void longClickingGoButton_shouldToggleLocationPolling(){
-        LocationServiceManager mockLocPub = mock(LocationServiceManager.class);
+        LocationPublisherManager mockLocPub = mock(LocationPublisherManager.class);
         FakeMainActivity a = createActivity(FakeMainActivity.class).setLocPub(mockLocPub);
         Button go = (Button) a.findViewById(R.id.go_button);
 

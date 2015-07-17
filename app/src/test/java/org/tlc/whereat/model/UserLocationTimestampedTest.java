@@ -6,7 +6,7 @@ import org.junit.Test;
 import static org.tlc.whereat.support.LocationHelpers.*;
 import static org.assertj.core.api.Assertions.*;
 
-public class LocationWithPingTest {
+public class UserLocationTimestampedTest {
 
     @Test
     public void toJson_should_serializeToJson(){
@@ -18,7 +18,7 @@ public class LocationWithPingTest {
     @Test
     public void fromJson_should_deserializeFromJson(){
         assertThat(
-            LocationWithPing.fromJson(S17_WITH_PING_JSON))
+            UserLocationTimestamped.fromJson(S17_WITH_PING_JSON))
             .isEqualTo(s17LocationWithPingStub());
     }
 

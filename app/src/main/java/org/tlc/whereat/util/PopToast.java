@@ -1,7 +1,6 @@
-package org.tlc.whereat.modules;
+package org.tlc.whereat.util;
 
 import android.content.Context;
-import android.location.Location;
 import android.widget.Toast;
 
 import org.tlc.whereat.model.UserLocation;

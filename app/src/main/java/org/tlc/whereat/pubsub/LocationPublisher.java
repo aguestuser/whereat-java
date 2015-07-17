@@ -1,4 +1,4 @@
-package org.tlc.whereat.services;
+package org.tlc.whereat.pubsub;
 
 import android.app.Service;
 import android.content.Intent;
@@ -16,38 +16,42 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationListener;
 
-import org.tlc.whereat.broadcast.Dispatcher;
+import org.tlc.whereat.api.WhereatApiClient;
 import org.tlc.whereat.db.LocationDao;
 import org.tlc.whereat.model.UserLocation;
 
 import java.util.UUID;
 
-public class LocationService extends Service
+import rx.Observable;
+
+public class LocationPublisher extends Service
     implements GoogleApiClient.ConnectionCallbacks,
     GoogleApiClient.OnConnectionFailedListener,
     LocationListener {
 
     // FIELDS
 
-    public static final String TAG = LocationService.class.getSimpleName();
-    public static final String ACTION_GOOGLE_API_CLIENT_DISCONNECTED = "org.tlc.whereat.LocationService.GOOGLE_API_CLIENT_DISCONNECTED";
-    public static final String ACTION_LOCATION_RECEIVED = "org.tlc.whereat.LocationService.LOCATION_RECEIVED";
-    public static final String ACTION_LOCATION_REQUEST_FAILED = "org.tlc.whereat.LocationService.LOCATION_REQUEST_FAILED";
-    public static final String ACTION_LOCATION_SERVICES_DISABLED = "org.tlc.whereat.LocationService.LOCATION_SERVICES_DISABLED";
-    public static final String ACTION_PLAY_SERVICES_DISABLED = "org.tlc.whereat.LocationService.PLAY_SERVICES_DISABLED";
+    public static final String TAG = LocationPublisher.class.getSimpleName();
+    public static final String ACTION_GOOGLE_API_CLIENT_DISCONNECTED = "org.tlc.whereat.LocationPublisher.GOOGLE_API_CLIENT_DISCONNECTED";
+    public static final String ACTION_LOCATION_RECEIVED = "org.tlc.whereat.LocationPublisher.LOCATION_RECEIVED";
+    public static final String ACTION_LOCATION_REQUEST_FAILED = "org.tlc.whereat.LocationPublisher.LOCATION_REQUEST_FAILED";
+    public static final String ACTION_LOCATION_SERVICES_DISABLED = "org.tlc.whereat.LocationPublisher.LOCATION_SERVICES_DISABLED";
+    public static final String ACTION_PLAY_SERVICES_DISABLED = "org.tlc.whereat.LocationPublisher.PLAY_SERVICES_DISABLED";
 
 
     private static final int POLLING_INTERVAL = 5 * 1000; // 5 seconds
 
-    private static LocationService sInstance;
+    private static LocationPublisher sInstance;
 
     private IBinder mBinder = new LocationServiceBinder();
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private LocationDao mDao;
+    private WhereatApiClient mWhereatClient;
 
     private String mUserId;
-    private boolean mPolling;
+    private boolean mPolling = false;
+    private long mLastPing = -1L;
 
 
     // LIFE CYCLE METHODS
@@ -86,6 +90,8 @@ public class LocationService extends Service
         mUserId = UUID.randomUUID().toString();
         mPolling = false;
 
+        mWhereatClient = WhereatApiClient.getInstance();
+
         connect();
     }
 
@@ -99,8 +105,8 @@ public class LocationService extends Service
     }
 
     public class LocationServiceBinder extends android.os.Binder {
-        public LocationService getService(){
-            return LocationService.this;
+        public LocationPublisher getService(){
+            return LocationPublisher.this;
         }
     }
 
@@ -141,10 +147,23 @@ public class LocationService extends Service
 
     private void relay(Location l){
         UserLocation ul = UserLocation.valueOf(mUserId, l);
-        long res = mDao.save(ul);
-        if (res != -1L){
-            broadcastLocation(ul);
-        }
+        mDao.save(ul);
+        if (!hasPinged()) pingInit(ul);
+        else pingRefresh(ul);
+        //TODO test this!
+    }
+
+    private void pingInit(UserLocation ul){
+        mWhereatClient.init(ul)
+            .flatMap(Observable::from)
+            .subscribe(this::broadcastLocation);
+    }
+
+
+    private void pingRefresh(UserLocation ul){
+        mWhereatClient.refresh(ul.asLocationWithPing(mLastPing))
+            .flatMap(Observable::from) // to pass locations 1 by 1
+            .subscribe(this::broadcastLocation);
     }
 
     private Location lastApiLocation(){
@@ -228,5 +247,9 @@ public class LocationService extends Service
     private boolean oldLsOff(){
         String locProviders = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
         return locProviders == null || locProviders.equals("");
+    }
+
+    private boolean hasPinged(){
+        return mLastPing > -1L;
     }
 }

@@ -1,4 +1,4 @@
-package org.tlc.whereat.broadcast.location;
+package org.tlc.whereat.pubsub;
 
 
 import android.app.Activity;
@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.location.Location;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
@@ -18,13 +17,11 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
 import org.tlc.whereat.model.UserLocation;
-import org.tlc.whereat.modules.PopToast;
-import org.tlc.whereat.services.LocationService;
-import org.tlc.whereat.broadcast.Dispatcher;
+import org.tlc.whereat.util.PopToast;
 
-public class MainLocationSubscriber implements LocationSubscriber {
+public class LocationSubscriberMain implements LocationSubscriber {
 
-    public static final String TAG = MainLocationSubscriber.class.getSimpleName();
+    public static final String TAG = LocationSubscriberMain.class.getSimpleName();
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000; //TODO: move to resources
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1000; //TODO: move to resources
 
@@ -38,7 +35,7 @@ public class MainLocationSubscriber implements LocationSubscriber {
 
     // CONSTRUCTOR
 
-    public MainLocationSubscriber(Context ctx){
+    public LocationSubscriberMain(Context ctx){
         mContext = ctx;
     }
 
@@ -46,11 +43,11 @@ public class MainLocationSubscriber implements LocationSubscriber {
 
     public void register(){
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(mContext);
-        Dispatcher.register(bm, mLocationReceiver, LocationService.ACTION_LOCATION_RECEIVED);
-        Dispatcher.register(bm, mFailedLocationRequestReceiver, LocationService.ACTION_LOCATION_REQUEST_FAILED);
-        Dispatcher.register(bm, mApiClientDisconnected, LocationService.ACTION_GOOGLE_API_CLIENT_DISCONNECTED);
-        Dispatcher.register(bm, mLocationServicesDisabledReceiver, LocationService.ACTION_LOCATION_SERVICES_DISABLED);
-        Dispatcher.register(bm, mPlayServicesDisabledReceiver, LocationService.ACTION_PLAY_SERVICES_DISABLED);
+        Dispatcher.register(bm, mLocationReceiver, LocationPublisher.ACTION_LOCATION_RECEIVED);
+        Dispatcher.register(bm, mFailedLocationRequestReceiver, LocationPublisher.ACTION_LOCATION_REQUEST_FAILED);
+        Dispatcher.register(bm, mApiClientDisconnected, LocationPublisher.ACTION_GOOGLE_API_CLIENT_DISCONNECTED);
+        Dispatcher.register(bm, mLocationServicesDisabledReceiver, LocationPublisher.ACTION_LOCATION_SERVICES_DISABLED);
+        Dispatcher.register(bm, mPlayServicesDisabledReceiver, LocationPublisher.ACTION_PLAY_SERVICES_DISABLED);
     }
 
     public void unregister(){
@@ -64,11 +61,14 @@ public class MainLocationSubscriber implements LocationSubscriber {
 
     // BROADCAST RECEIVERS
 
+    //TODO replace BroadcastReceivers with calls to AndroidObservable.fromBroacast()
+    // see http://blog.danlew.net/2014/10/08/grokking-rxjava-part-4/
+
     private BroadcastReceiver locationReceiver(){
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent i) {
-                UserLocation l = i.getExtras().getParcelable(LocationService.ACTION_LOCATION_RECEIVED);
+                UserLocation l = i.getExtras().getParcelable(LocationPublisher.ACTION_LOCATION_RECEIVED);
                 PopToast.location(mContext, l);
             }
         };
@@ -87,7 +87,7 @@ public class MainLocationSubscriber implements LocationSubscriber {
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent i) {
-                ConnectionResult cr = i.getExtras().getParcelable(LocationService.ACTION_GOOGLE_API_CLIENT_DISCONNECTED);
+                ConnectionResult cr = i.getExtras().getParcelable(LocationPublisher.ACTION_GOOGLE_API_CLIENT_DISCONNECTED);
                 fixApiConnection(cr);
             }
         };
