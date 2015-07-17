@@ -5,15 +5,17 @@ import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
+
 import static java.util.UUID.randomUUID;
 
 public class UserLocation implements Parcelable {
 
-    private String mId;
-    private double mLat;
-    private double mLon;
-    private long mTime;
-
+    @SerializedName("id") private String mId;
+    @SerializedName("lat") private double mLat;
+    @SerializedName("lon") private double mLon;
+    @SerializedName("time") private long mTime;
 
     // CONSTRUCTORS
 
@@ -45,6 +47,17 @@ public class UserLocation implements Parcelable {
         mLon = in.readDouble();
         mTime = in.readLong();
     }
+
+    // CONVERTER
+
+    public LocationWithPing asLocationWithPing(Long ping) {
+        return new LocationWithPing(ping, this);
+    }
+
+    public String toJson(){
+        return new Gson().toJson(this);
+    }
+
 
     // ACCESSORS
 

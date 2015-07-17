@@ -2,6 +2,8 @@ package org.tlc.whereat.model;
 
 import android.location.Location;
 
+import com.google.gson.Gson;
+
 import org.junit.Test;
 
 import static org.tlc.whereat.support.LocationHelpers.*;
@@ -43,6 +45,13 @@ public class UserLocationTest {
         UserLocation ul = UserLocation.create(S17_UUID, S17_LAT, S17_LON, S17_MILLIS);
 
         assertTrue(ul.equals(s17UserLocationStub()));
+    }
+
+    @Test
+    public void toJson_should_serializeToJson(){
+        UserLocation l = s17UserLocationStub();
+
+        assertThat(l.toJson()).isEqualTo(S17_JSON);
     }
 
 

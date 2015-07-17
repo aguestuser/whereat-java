@@ -3,6 +3,7 @@ package org.tlc.whereat.support;
 
 import android.location.Location;
 
+import org.tlc.whereat.model.LocationWithPing;
 import org.tlc.whereat.model.UserLocation;
 
 import static org.mockito.Mockito.mock;
@@ -19,6 +20,25 @@ public class LocationHelpers {
     public static final double N17_LAT = 40.706877;
     public static final double N17_LON = -74.0112654;
     public static final long N17_MILLIS = 1510876800000L;
+    
+    public static final String S17_JSON =
+        "{" +
+            "\"id\":\"75782cd4-1a42-4af1-9130-05c63b2aa9ff\"," +
+            "\"lat\":40.7092529," +
+            "\"lon\":-74.0112551," +
+            "\"time\":1505606400000" +
+        "}";
+
+    public static final String S17_WITH_PING_JSON =
+        "{" +
+            "\"lastPing\":1505606400000," +
+            "\"location\":{" +
+                "\"id\":\"75782cd4-1a42-4af1-9130-05c63b2aa9ff\"," +
+                "\"lat\":40.7092529," +
+                "\"lon\":-74.0112551," +
+                "\"time\":1505606400001" +
+            "}" +
+        "}";
 
     public static Location s17AndroidLocationMock(){
         Location l = mock(Location.class);
@@ -32,12 +52,21 @@ public class LocationHelpers {
         return UserLocation.create(S17_UUID, S17_LAT, S17_LON, S17_MILLIS);
     }
 
+    public static UserLocation s17UserLocationStubModified(){
+        return UserLocation.create(S17_UUID, S17_LAT, S17_LON, S17_MILLIS + 1L);
+    }
+
+
     public static UserLocation s17UserLocationStub(String id){
         return UserLocation.create(id, S17_LAT, S17_LON, S17_MILLIS);
     }
 
     public static UserLocation n17UserLocationStub(){
         return UserLocation.create(N17_UUID, N17_LAT, N17_LON, N17_MILLIS);
+    }
+
+    public static LocationWithPing s17LocationWithPingStub(){
+        return new LocationWithPing(S17_MILLIS, s17UserLocationStubModified());
     }
 
     public static boolean areEqual(UserLocation l1, UserLocation l2){
