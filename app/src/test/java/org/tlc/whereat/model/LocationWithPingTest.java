@@ -9,10 +9,18 @@ import static org.assertj.core.api.Assertions.*;
 public class LocationWithPingTest {
 
     @Test
-    public void toJson_should_serializeToJsonCorrectly(){
-        LocationWithPing l = s17LocationWithPingStub();
-
-        assertThat(l.toJson()).isEqualTo(S17_WITH_PING_JSON);
+    public void toJson_should_serializeToJson(){
+        assertThat(
+            s17LocationWithPingStub().toJson())
+            .isEqualTo(S17_WITH_PING_JSON);
     }
+
+    @Test
+    public void fromJson_should_deserializeFromJson(){
+        assertThat(
+            LocationWithPing.fromJson(S17_WITH_PING_JSON))
+            .isEqualTo(s17LocationWithPingStub());
+    }
+
 
 }

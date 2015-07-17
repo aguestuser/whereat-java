@@ -42,16 +42,23 @@ public class UserLocationTest {
 
     @Test
     public void create_should_constructUserLocation(){
-        UserLocation ul = UserLocation.create(S17_UUID, S17_LAT, S17_LON, S17_MILLIS);
-
-        assertTrue(ul.equals(s17UserLocationStub()));
+        assertThat(
+            UserLocation.create(S17_UUID, S17_LAT, S17_LON, S17_MILLIS))
+            .isEqualTo(s17UserLocationStub());
     }
 
     @Test
     public void toJson_should_serializeToJson(){
-        UserLocation l = s17UserLocationStub();
+        assertThat(
+            s17UserLocationStub().toJson())
+            .isEqualTo(S17_JSON);
+    }
 
-        assertThat(l.toJson()).isEqualTo(S17_JSON);
+    @Test
+    public void fromJson_should_deserializeFromJson(){
+        assertThat(
+            UserLocation.fromJson(S17_JSON))
+            .isEqualTo(s17UserLocationStub());
     }
 
 

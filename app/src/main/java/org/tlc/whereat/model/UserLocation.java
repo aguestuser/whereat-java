@@ -48,7 +48,7 @@ public class UserLocation implements Parcelable {
         mTime = in.readLong();
     }
 
-    // CONVERTER
+    // CONVERTERS
 
     public LocationWithPing asLocationWithPing(Long ping) {
         return new LocationWithPing(ping, this);
@@ -56,6 +56,10 @@ public class UserLocation implements Parcelable {
 
     public String toJson(){
         return new Gson().toJson(this);
+    }
+
+    public static UserLocation fromJson(String json){
+        return new Gson().fromJson(json, UserLocation.class);
     }
 
 
@@ -140,7 +144,7 @@ public class UserLocation implements Parcelable {
     @Override
     public String toString() {
         return "UserLocation{" +
-            "uuid=" + mId +
+            "id=" + mId +
             "lat=" + mLat +
             ", lon=" + mLon +
             ", time=" + mTime +
