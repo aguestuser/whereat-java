@@ -7,6 +7,10 @@ import android.os.Parcelable;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.List;
 
 import static java.util.UUID.randomUUID;
 
@@ -58,8 +62,17 @@ public class UserLocation implements Parcelable {
         return new Gson().toJson(this);
     }
 
+    public static String toJsonList(List<UserLocation> uls){
+        return new Gson().toJson(uls);
+    }
+
     public static UserLocation fromJson(String json){
         return new Gson().fromJson(json, UserLocation.class);
+    }
+
+    public static List<UserLocation> fromJsonList(String json){
+        Type type = new TypeToken<List<UserLocation>>(){}.getType();
+        return new Gson().fromJson(json, type);
     }
 
 

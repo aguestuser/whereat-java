@@ -29,6 +29,27 @@ public class LocationHelpers {
             "\"time\":1505606400000" +
         "}";
 
+    public static final String API_INIT_RESPONSE =
+        "[{" +
+            "\"id\":\"75782cd4-1a42-4af1-9130-05c63b2aa9ff\"," +
+            "\"lat\":40.7092529," +
+            "\"lon\":-74.0112551," +
+            "\"time\":1505606400000" +
+        "}]";
+
+    public static final String API_REFRESH_RESPONSE =
+        "[{" +
+            "\"id\":\"75782cd4-1a42-4af1-9130-05c63b2aa9ff\"," +
+            "\"lat\":40.7092529," +
+            "\"lon\":-74.0112551," +
+            "\"time\":1505606400000" +
+        "},{" +
+            "\"id\":\"8d3f4369-e829-4ca5-8d9b-123264aeb469\"," +
+            "\"lat\":40.706877," +
+            "\"lon\":-74.0112654," +
+            "\"time\":1510876800000" +
+        "}]";
+
     public static final String S17_WITH_PING_JSON =
         "{" +
             "\"lastPing\":1505606400000," +
@@ -65,9 +86,14 @@ public class LocationHelpers {
         return UserLocation.create(N17_UUID, N17_LAT, N17_LON, N17_MILLIS);
     }
 
-    public static UserLocationTimestamped s17LocationWithPingStub(){
+    public static UserLocationTimestamped s17LocationTimestampedStub(){
         return new UserLocationTimestamped(S17_MILLIS, s17UserLocationStubModified());
     }
+
+    public static UserLocationTimestamped n17LocationTimestampedStub(){
+        return new UserLocationTimestamped(S17_MILLIS - 1L, n17UserLocationStub());
+    }
+
 
     public static boolean areEqual(UserLocation l1, UserLocation l2){
         return

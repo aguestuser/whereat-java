@@ -150,6 +150,7 @@ public class LocationPublisher extends Service
         mDao.save(ul);
         if (!hasPinged()) pingInit(ul);
         else pingRefresh(ul);
+        mLastPing = ul.getTime();
         //TODO test this!
     }
 

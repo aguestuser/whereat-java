@@ -11,7 +11,7 @@ public class UserLocationTimestampedTest {
     @Test
     public void toJson_should_serializeToJson(){
         assertThat(
-            s17LocationWithPingStub().toJson())
+            s17LocationTimestampedStub().toJson())
             .isEqualTo(S17_WITH_PING_JSON);
     }
 
@@ -19,7 +19,7 @@ public class UserLocationTimestampedTest {
     public void fromJson_should_deserializeFromJson(){
         assertThat(
             UserLocationTimestamped.fromJson(S17_WITH_PING_JSON))
-            .isEqualTo(s17LocationWithPingStub());
+            .isEqualTo(s17LocationTimestampedStub());
     }
 
 

@@ -6,6 +6,8 @@ import com.google.gson.Gson;
 
 import org.junit.Test;
 
+import java.util.Arrays;
+
 import static org.tlc.whereat.support.LocationHelpers.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.assertTrue;
@@ -54,12 +56,26 @@ public class UserLocationTest {
             .isEqualTo(S17_JSON);
     }
 
+
     @Test
-    public void fromJson_should_deserializeFromJson(){
+    public void fromJson_should_deserializeALocation(){
         assertThat(
             UserLocation.fromJson(S17_JSON))
             .isEqualTo(s17UserLocationStub());
     }
 
+    @Test
+    public void fromJson_should_deserializeAListOfLocations(){
+        assertThat(
+            UserLocation.fromJsonList(API_REFRESH_RESPONSE))
+            .isEqualTo(Arrays.asList(s17UserLocationStub(), n17UserLocationStub()));
+    }
+
+    @Test
+    public void toJsonList_should_serializeToJsonList(){
+        assertThat(
+            UserLocation.toJsonList(Arrays.asList(s17UserLocationStub(), n17UserLocationStub())))
+            .isEqualTo(API_REFRESH_RESPONSE);
+    }
 
 }

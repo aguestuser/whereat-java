@@ -15,22 +15,29 @@ import rx.Observable;
 
 public class WhereatApiClient implements WhereatApi {
 
-    private static final String BASE_URL = "https://whereat-server.herokuapp.com";
+    private static String mRoot = "https://whereat-server.herokuapp.com";
+    private static WhereatApiClient mInstance;
     private WhereatApi mApi;
 
-    // CONSTRUCTORS
-    private static final WhereatApiClient INSTANCE = new WhereatApiClient();
 
-    private WhereatApiClient(){
+    // CONSTRUCTORS
+
+    public static WhereatApiClient getInstance(){
+        if (mInstance == null) mInstance = new WhereatApiClient(mRoot);
+        return mInstance;
+    }
+
+    public static WhereatApiClient getInstance(String root){
+        if (mInstance == null) mInstance = new WhereatApiClient(root);
+        return mInstance;
+    }
+
+    private WhereatApiClient(String root){
         RestAdapter ra = new RestAdapter.Builder()
-            .setEndpoint(BASE_URL)
+            .setEndpoint(root)
             .build();
 
         mApi = ra.create(WhereatApi.class);
-    }
-
-    public static WhereatApiClient getInstance(){
-        return INSTANCE;
     }
 
     // API METHODS
