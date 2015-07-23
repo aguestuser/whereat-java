@@ -119,7 +119,6 @@ public class MapActivity extends AppCompatActivity {
 
     public void map(UserLocation l){
         plot(l);
-        center(l);
         recordPing(l);
     }
 
