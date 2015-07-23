@@ -160,6 +160,7 @@ public class LocationDaoTest {
             mLocDao.disconnect();
         }
 
+
         @Test
         public void getAll_should_retrieveAllLocationsFromDb(){
             List<UserLocation> all = mLocDao.getAll();
@@ -176,6 +177,16 @@ public class LocationDaoTest {
             assertFalse(areEqual(all.get(0), s17));
             assertTrue(areEqual(all.get(0), n17));
         }
+
+        @Test
+        public void delete_should_deleteOneRecord(){
+            assertThat(mLocDao.count()).isEqualTo(2);
+            int deleteCount = mLocDao.delete(s17.getId());
+
+            assertThat(deleteCount).isEqualTo(1);
+            assertThat(mLocDao.count()).isEqualTo(1);
+        }
+
 
         @Test
         public void clear_should_clearTheDb(){

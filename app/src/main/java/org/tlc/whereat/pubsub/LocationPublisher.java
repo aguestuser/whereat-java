@@ -143,6 +143,10 @@ public class LocationPublisher extends Service
         return mPolling;
     }
 
+//    public int remove(String id){
+//        mDao.delete()
+//    }
+
     // API HELPERS
 
     private void relay(Location l){

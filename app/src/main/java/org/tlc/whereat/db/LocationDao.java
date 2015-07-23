@@ -77,12 +77,16 @@ public class LocationDao {
         return parseUserLocations(c);
     }
 
-    public long count(){
-        return DatabaseUtils.queryNumEntries(mDb, Dao.TABLE_LOCATIONS);
+    public int delete(String id) {
+        return mDb.delete(Dao.TABLE_LOCATIONS, idEquals(id), null);
     }
 
     public int clear(){
         return mDb.delete(Dao.TABLE_LOCATIONS,null,null);
+    }
+
+    public long count(){
+        return DatabaseUtils.queryNumEntries(mDb, Dao.TABLE_LOCATIONS);
     }
 
     // HELPERS

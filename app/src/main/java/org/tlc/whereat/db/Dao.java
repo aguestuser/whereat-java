@@ -30,8 +30,10 @@ public class Dao extends SQLiteOpenHelper {
     // CONSTRUCTOR
 
     public static synchronized Dao getInstance(Context ctx){
-        if (sInstance == null) sInstance = new Dao(ctx);
-        return sInstance;
+        return new Dao(ctx);
+        //TODO can multiple activities share the same instance? Should they?
+//        if (sInstance == null) sInstance = new Dao(ctx);
+//        return sInstance;
     }
 
     private Dao(Context ctx){
