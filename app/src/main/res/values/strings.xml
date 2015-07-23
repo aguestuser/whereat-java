@@ -6,4 +6,5 @@
     <string name="main_button_text">Home</string>
     <string name="map_activity_title">Map</string>
     <string name="map_button_text">Map</string>
+    <string name="clear_map_button_x">X</string>
 </resources>

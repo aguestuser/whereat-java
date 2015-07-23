@@ -87,7 +87,22 @@ public class MapActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    // MAP MUTATORS
+    // PUBLIC MAP MUTATORS
+
+    public void map(UserLocation l){
+        plot(l);
+        recordPing(l);
+    }
+
+    public void clear(){
+        mMap.clear();
+        mMarkers.clear();
+        mLocDao.clear();
+        //TODO tell the server to delete this particular location ? Via broadcast to LocationPublisher? (which knows the id?)
+    }
+
+    // PRIVATE MAP MUTATORS
+
 
     private void initialize(){
         List<UserLocation> ls = allLocations();
@@ -117,10 +132,6 @@ public class MapActivity extends AppCompatActivity {
         }
     }
 
-    public void map(UserLocation l){
-        plot(l);
-        recordPing(l);
-    }
 
     // HELPERS
 

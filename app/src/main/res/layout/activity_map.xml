@@ -19,4 +19,19 @@
         map:uiRotateGestures="true"
         />
 
+    <Button
+        android:layout_width="@dimen/clear_map_button_radius"
+        android:layout_height="@dimen/clear_map_button_radius"
+        android:text="@string/clear_map_button_x"
+        android:id="@id/clear_map_button"
+        android:background="@drawable/clear_map_button"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="@dimen/clear_map_button_margin"
+        android:layout_marginBottom="@dimen/clear_map_button_margin"
+        android:layout_marginStart="@dimen/clear_map_button_margin"
+        android:textSize="@dimen/clear_map_button_text_height"
+        android:textColor="#FFFFFF"/>
+
 </RelativeLayout>
