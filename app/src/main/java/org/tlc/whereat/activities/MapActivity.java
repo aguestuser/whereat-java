@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -25,11 +27,11 @@ public class MapActivity extends AppCompatActivity {
 
     private static final LatLng LIBERTY = new LatLng(40.7092529,-74.0112551);
 
-    private GoogleMap mMap;
-    private LocationDao mLocDao;
-    private LocationSubscriberMap mLocSub;
-    private ConcurrentHashMap<String, Marker> mMarkers;
-    private Long mLastPing;
+    protected GoogleMap mMap;
+    protected LocationDao mLocDao;
+    protected LocationSubscriberMap mLocSub;
+    protected ConcurrentHashMap<String, Marker> mMarkers;
+    protected Long mLastPing;
 
     // LIFE CYCLE METHODS
 
@@ -43,7 +45,11 @@ public class MapActivity extends AppCompatActivity {
         mMarkers = new ConcurrentHashMap<>();
         mLastPing = -1L;
 
-        initialize(); // TODO make DB call async?
+        findViewById(R.id.clear_map_button)
+            .setOnClickListener((View v) -> clear());
+
+        initialize(); // TODO make DB calls async?
+
     }
 
     @Override
@@ -104,7 +110,7 @@ public class MapActivity extends AppCompatActivity {
     // PRIVATE MAP MUTATORS
 
 
-    private void initialize(){
+    protected void initialize(){
         List<UserLocation> ls = allLocations();
         createMap(ls);
         recordPing(ls);
