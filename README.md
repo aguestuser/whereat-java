@@ -17,8 +17,9 @@ __In its mature form, Where@ will:__
 
 ## Components
 
-This is the server portion of the application. There are also:
+This is the Android portion of the application. There are also:
 
 * [The server](https://github.com/the-learning-collective/whereat-server)
 * The web / mobile-web client (not started)
 * The IOS client (not started)
+* [Some simulation scripts](https://github.com/the-learning-collective/whereat-simulate)
