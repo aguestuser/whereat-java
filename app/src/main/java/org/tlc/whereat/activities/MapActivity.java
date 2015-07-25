@@ -104,6 +104,7 @@ public class MapActivity extends AppCompatActivity {
         mMap.clear();
         mMarkers.clear();
         mLocDao.clear();
+        mLastPing = null;
         //TODO tell the server to delete this particular location ? Via broadcast to LocationPublisher? (which knows the id?)
     }
 

@@ -33,6 +33,7 @@ public class LocationPublisher extends Service
 
     public static final String TAG = LocationPublisher.class.getSimpleName();
     public static final String ACTION_GOOGLE_API_CLIENT_DISCONNECTED = "org.tlc.whereat.LocationPublisher.GOOGLE_API_CLIENT_DISCONNECTED";
+    public static final String ACTION_LOCATION_PUBLISHED = "org.tlc.whereat.LocationPublisher.LOCATION_PUBLISHED";
     public static final String ACTION_LOCATION_RECEIVED = "org.tlc.whereat.LocationPublisher.LOCATION_RECEIVED";
     public static final String ACTION_LOCATION_REQUEST_FAILED = "org.tlc.whereat.LocationPublisher.LOCATION_REQUEST_FAILED";
     public static final String ACTION_LOCATION_SERVICES_DISABLED = "org.tlc.whereat.LocationPublisher.LOCATION_SERVICES_DISABLED";
@@ -151,24 +152,28 @@ public class LocationPublisher extends Service
 
     private void relay(Location l){
         UserLocation ul = UserLocation.valueOf(mUserId, l);
+
+        broadcastLocationPublished(ul);
+        ping(ul);
         mDao.save(ul);
+        mLastPing = ul.getTime();
+    }
+
+    private void ping(UserLocation ul) {
         if (!hasPinged()) pingInit(ul);
         else pingRefresh(ul);
-        mLastPing = ul.getTime();
-        //TODO test this!
     }
 
     private void pingInit(UserLocation ul){
         mWhereatClient.init(ul)
             .flatMap(Observable::from)
-            .subscribe(this::broadcastLocation);
+            .subscribe(this::broadcastLocationReceived);
     }
-
 
     private void pingRefresh(UserLocation ul){
         mWhereatClient.refresh(ul.asLocationWithPing(mLastPing))
             .flatMap(Observable::from) // to pass locations 1 by 1
-            .subscribe(this::broadcastLocation);
+            .subscribe(this::broadcastLocationReceived);
     }
 
     private Location lastApiLocation(){
@@ -203,7 +208,13 @@ public class LocationPublisher extends Service
 
     // BROADCASTS
 
-    private void broadcastLocation(UserLocation l){
+    private void broadcastLocationPublished(UserLocation l) {
+        Intent i = new Intent(ACTION_LOCATION_PUBLISHED);
+        i.setAction(ACTION_LOCATION_PUBLISHED);
+        Dispatcher.broadcast(this, i);
+    }
+
+    private void broadcastLocationReceived(UserLocation l){
         Intent i = new Intent(ACTION_LOCATION_RECEIVED);
         i.setAction(ACTION_LOCATION_RECEIVED);
         i.putExtra(ACTION_LOCATION_RECEIVED, l);

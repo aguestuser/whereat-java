@@ -27,7 +27,7 @@ public class LocationSubscriberMain implements LocationSubscriber {
 
     private Context mContext;
 
-    private BroadcastReceiver mLocationReceiver = locationReceiver();
+    private BroadcastReceiver mLocationPublicationReceiver = locationPublicationReceiver();
     private BroadcastReceiver mFailedLocationRequestReceiver = failedLocationRequestReceiver();
     private BroadcastReceiver mApiClientDisconnected = apiClientDisconnected();
     private BroadcastReceiver mLocationServicesDisabledReceiver = locationServicesDisabledReceiver();
@@ -43,7 +43,7 @@ public class LocationSubscriberMain implements LocationSubscriber {
 
     public void register(){
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(mContext);
-        Dispatcher.register(bm, mLocationReceiver, LocationPublisher.ACTION_LOCATION_RECEIVED);
+        Dispatcher.register(bm, mLocationPublicationReceiver, LocationPublisher.ACTION_LOCATION_PUBLISHED);
         Dispatcher.register(bm, mFailedLocationRequestReceiver, LocationPublisher.ACTION_LOCATION_REQUEST_FAILED);
         Dispatcher.register(bm, mApiClientDisconnected, LocationPublisher.ACTION_GOOGLE_API_CLIENT_DISCONNECTED);
         Dispatcher.register(bm, mLocationServicesDisabledReceiver, LocationPublisher.ACTION_LOCATION_SERVICES_DISABLED);
@@ -52,7 +52,7 @@ public class LocationSubscriberMain implements LocationSubscriber {
 
     public void unregister(){
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(mContext);
-        bm.unregisterReceiver(mLocationReceiver);
+        bm.unregisterReceiver(mLocationPublicationReceiver);
         bm.unregisterReceiver(mFailedLocationRequestReceiver);
         bm.unregisterReceiver(mApiClientDisconnected);
         bm.unregisterReceiver(mLocationServicesDisabledReceiver);
@@ -63,6 +63,15 @@ public class LocationSubscriberMain implements LocationSubscriber {
 
     //TODO replace BroadcastReceivers with calls to AndroidObservable.fromBroacast()
     // see http://blog.danlew.net/2014/10/08/grokking-rxjava-part-4/
+
+    private BroadcastReceiver locationPublicationReceiver(){
+        return new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                PopToast.briefly(mContext, "Location shared.");
+            }
+        };
+    }
 
     private BroadcastReceiver locationReceiver(){
         return new BroadcastReceiver() {
