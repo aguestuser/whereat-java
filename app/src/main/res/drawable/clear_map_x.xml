@@ -1,15 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<vector
+<bitmap
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:height="20dp"
-    android:width="20dp"
-    android:viewportWidth="800"
-    android:viewportHeight="800">
-    <path
-        android:fillColor="@color/clear_map_x"
-        android:pathData="M498.7,400.5L694.1,205c16.4-16.4,16.4-43.1,0-59.7l-39.8-39.8c-16.4-16.4-43.1-16.4-59.7,0L399.2,301L204.9,106.7
-	c-16.4-16.4-43.1-16.4-59.7,0l-39.8,39.8c-16.4,16.4-16.4,43.1,0,59.7l194.3,194.3L105.6,594.5c-16.4,16.4-16.4,43.1,0,59.7
-	l39.8,39.8c16.4,16.4,43.1,16.4,59.7,0L399.2,500l194.5,194.5c16.4,16.4,43.1,16.4,59.7,0l39.8-39.8c16.4-16.4,16.4-43.1,0-59.7
-	L498.7,400.5z" />
-
-</vector>
+    android:src="@drawable/grey_x_20px" />
