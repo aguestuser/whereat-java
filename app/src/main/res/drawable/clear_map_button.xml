@@ -1,21 +1,24 @@
 <selector
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@id/clear_map_button">
+    android:id="@id/clear_map_button"
+    >
 
     <item android:state_pressed="false">
-        <shape android:shape="oval" >
+        <shape android:shape="rectangle" >
             <size
-                android:height="@dimen/clear_map_button_radius"
+                android:height="@dimen/clear_map_button_width"
                 android:width="@dimen/clear_map_button_radius" />
             <solid android:color="@color/clear_map_button" />
+            <corners android:radius="@dimen/clear_map_button_corner_radius" />
         </shape>
     </item>
     <item android:state_pressed="true">
-        <shape android:shape="oval" >
+        <shape android:shape="rectangle" >
             <size
-                android:height="@dimen/clear_map_button_radius"
+                android:height="@dimen/clear_map_button_width"
                 android:width="@dimen/clear_map_button_radius" />
             <solid android:color="@color/clear_map_button_pressed" />
+            <corners android:radius="@dimen/clear_map_button_corner_radius" />
         </shape>
     </item>
 </selector>

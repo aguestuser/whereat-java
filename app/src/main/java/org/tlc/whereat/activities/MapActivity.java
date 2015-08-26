@@ -23,6 +23,7 @@ import org.tlc.whereat.util.MapUtils;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+
 public class MapActivity extends AppCompatActivity {
 
     private static final LatLng LIBERTY = new LatLng(40.7092529,-74.0112551);
