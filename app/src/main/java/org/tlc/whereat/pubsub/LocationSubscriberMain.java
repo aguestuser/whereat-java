@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
@@ -28,6 +29,7 @@ public class LocationSubscriberMain implements LocationSubscriber {
     private Context mContext;
 
     private BroadcastReceiver mLocationPublicationReceiver = locationPublicationReceiver();
+    private BroadcastReceiver mLocationsClearedReceiver = locationsClearedReceiver();
     private BroadcastReceiver mFailedLocationRequestReceiver = failedLocationRequestReceiver();
     private BroadcastReceiver mApiClientDisconnected = apiClientDisconnected();
     private BroadcastReceiver mLocationServicesDisabledReceiver = locationServicesDisabledReceiver();
@@ -44,6 +46,7 @@ public class LocationSubscriberMain implements LocationSubscriber {
     public void register(){
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(mContext);
         Dispatcher.register(bm, mLocationPublicationReceiver, LocationPublisher.ACTION_LOCATION_PUBLISHED);
+        Dispatcher.register(bm, mLocationsClearedReceiver, LocationPublisher.ACTION_LOCATIONS_CLEARED);
         Dispatcher.register(bm, mFailedLocationRequestReceiver, LocationPublisher.ACTION_LOCATION_REQUEST_FAILED);
         Dispatcher.register(bm, mApiClientDisconnected, LocationPublisher.ACTION_GOOGLE_API_CLIENT_DISCONNECTED);
         Dispatcher.register(bm, mLocationServicesDisabledReceiver, LocationPublisher.ACTION_LOCATION_SERVICES_DISABLED);
@@ -53,6 +56,7 @@ public class LocationSubscriberMain implements LocationSubscriber {
     public void unregister(){
         LocalBroadcastManager bm = LocalBroadcastManager.getInstance(mContext);
         bm.unregisterReceiver(mLocationPublicationReceiver);
+        bm.unregisterReceiver(mLocationsClearedReceiver);
         bm.unregisterReceiver(mFailedLocationRequestReceiver);
         bm.unregisterReceiver(mApiClientDisconnected);
         bm.unregisterReceiver(mLocationServicesDisabledReceiver);
@@ -73,6 +77,15 @@ public class LocationSubscriberMain implements LocationSubscriber {
         };
     }
 
+    private BroadcastReceiver locationsClearedReceiver(){
+        return new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                PopToast.briefly(mContext, "User data cleared from server.");
+            }
+        };
+    }
+
     private BroadcastReceiver locationReceiver(){
         return new BroadcastReceiver() {
             @Override
@@ -82,6 +95,9 @@ public class LocationSubscriberMain implements LocationSubscriber {
             }
         };
     }
+
+    IntentFilter clearFilter = new IntentFilter(LocationPublisher.ACTION_LOCATIONS_CLEARED);
+
 
     private BroadcastReceiver failedLocationRequestReceiver(){
         return new BroadcastReceiver() {

@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -15,6 +14,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
 import org.tlc.whereat.R;
+import org.tlc.whereat.pubsub.LocationPublisherManager;
 import org.tlc.whereat.pubsub.LocationSubscriberMap;
 import org.tlc.whereat.db.LocationDao;
 import org.tlc.whereat.model.UserLocation;
@@ -29,8 +29,9 @@ public class MapActivity extends AppCompatActivity {
     private static final LatLng LIBERTY = new LatLng(40.7092529,-74.0112551);
 
     protected GoogleMap mMap;
-    protected LocationDao mLocDao;
+    protected LocationPublisherManager mLocPub;
     protected LocationSubscriberMap mLocSub;
+    protected LocationDao mLocDao;
     protected ConcurrentHashMap<String, Marker> mMarkers;
     protected Long mLastPing;
 
@@ -41,8 +42,10 @@ public class MapActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
+        mLocPub = LocationPublisherManager.getInstance(this); // TODO: can this instance be shared w/ MainActivity? TEST!!!
         mLocSub = new LocationSubscriberMap(this);
         mLocDao = new LocationDao(this).connect();
+
         mMarkers = new ConcurrentHashMap<>();
         mLastPing = -1L;
 
@@ -56,6 +59,7 @@ public class MapActivity extends AppCompatActivity {
     @Override
     protected void onResume(){
         super.onResume();
+        mLocPub.bind();
         mLocSub.register();
         refresh();
     }
@@ -63,6 +67,7 @@ public class MapActivity extends AppCompatActivity {
     @Override
     protected void onPause(){
         super.onPause();
+        mLocPub.bind();
         mLocSub.unregister();
     }
 
@@ -105,8 +110,8 @@ public class MapActivity extends AppCompatActivity {
         mMap.clear();
         mMarkers.clear();
         mLocDao.clear();
+        mLocPub.clear(); //TODO test this!!!
         mLastPing = null;
-        //TODO tell the server to delete this particular location ? Via broadcast to LocationPublisher? (which knows the id?)
     }
 
     // PRIVATE MAP MUTATORS

@@ -18,6 +18,7 @@ import com.google.android.gms.location.LocationListener;
 
 import org.tlc.whereat.api.WhereatApiClient;
 import org.tlc.whereat.db.LocationDao;
+import org.tlc.whereat.model.ApiMessage;
 import org.tlc.whereat.model.UserLocation;
 
 import java.util.UUID;
@@ -38,6 +39,8 @@ public class LocationPublisher extends Service
     public static final String ACTION_LOCATION_REQUEST_FAILED = "org.tlc.whereat.LocationPublisher.LOCATION_REQUEST_FAILED";
     public static final String ACTION_LOCATION_SERVICES_DISABLED = "org.tlc.whereat.LocationPublisher.LOCATION_SERVICES_DISABLED";
     public static final String ACTION_PLAY_SERVICES_DISABLED = "org.tlc.whereat.LocationPublisher.PLAY_SERVICES_DISABLED";
+    public static final String ACTION_LOCATIONS_CLEARED = "org.tlc.whereat.LocationPublisher.ACTION_LOCATIONS_CLEARED";
+
 
 
     private static final int POLLING_INTERVAL = 5 * 1000; // 5 seconds
@@ -144,9 +147,12 @@ public class LocationPublisher extends Service
         return mPolling;
     }
 
-//    public int remove(String id){
-//        mDao.delete()
-//    }
+    public void clear(){
+        UserLocation ul = mDao.get(mUserId);
+
+        mWhereatClient.remove(ul).subscribe(this::broadcastLocationsCleared);
+        mDao.clear();
+    }
 
     // API HELPERS
 
@@ -159,20 +165,9 @@ public class LocationPublisher extends Service
         mLastPing = ul.getTime();
     }
 
-    private void ping(UserLocation ul) {
-        if (!hasPinged()) pingInit(ul);
-        else pingRefresh(ul);
-    }
-
-    private void pingInit(UserLocation ul){
-        mWhereatClient.init(ul)
+    private void ping(UserLocation ul){
+        mWhereatClient.update(ul.withTimestamp(mLastPing))
             .flatMap(Observable::from)
-            .subscribe(this::broadcastLocationReceived);
-    }
-
-    private void pingRefresh(UserLocation ul){
-        mWhereatClient.refresh(ul.asLocationWithPing(mLastPing))
-            .flatMap(Observable::from) // to pass locations 1 by 1
             .subscribe(this::broadcastLocationReceived);
     }
 
@@ -211,6 +206,12 @@ public class LocationPublisher extends Service
     private void broadcastLocationPublished(UserLocation l) {
         Intent i = new Intent(ACTION_LOCATION_PUBLISHED);
         i.setAction(ACTION_LOCATION_PUBLISHED);
+        Dispatcher.broadcast(this, i);
+    }
+
+    private void broadcastLocationsCleared(ApiMessage msg){
+        Intent i = new Intent(ACTION_LOCATIONS_CLEARED);
+        i.setAction(ACTION_LOCATIONS_CLEARED);
         Dispatcher.broadcast(this, i);
     }
 

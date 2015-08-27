@@ -10,6 +10,8 @@ import android.util.Log;
 
 public class LocationPublisherManager {
 
+    //TODO test this!!!!!
+
     public static final String TAG = LocationPublisherManager.class.getSimpleName();
 
     private Context mContext;
@@ -21,7 +23,7 @@ public class LocationPublisherManager {
     // CONSTRUCTOR
 
     public static LocationPublisherManager getInstance(Context ctx){
-        if (mInstance == null) return new LocationPublisherManager(ctx).start();
+        if (mInstance == null) return new LocationPublisherManager(ctx).start(); //TODO: can two contexts share an instance?
         else return mInstance;
     }
 
@@ -83,6 +85,8 @@ public class LocationPublisherManager {
     public void stopPolling(){
         mLocationPublisher.stopPolling();
     }
+
+    public void clear() { mLocationPublisher.clear(); }
 
 
 }

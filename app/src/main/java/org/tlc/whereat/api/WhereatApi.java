@@ -20,7 +20,7 @@ public interface WhereatApi {
     @POST("/locations/update")
     Observable<List<UserLocation>> update(@Body UserLocationTimestamped ult);
 
-    @POST("/locations/remove")
+    @POST("/locations/clear")
     Observable<ApiMessage> remove(@Body UserLocation ul);
 
 }
