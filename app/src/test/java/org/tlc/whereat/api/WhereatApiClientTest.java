@@ -4,17 +4,14 @@ package org.tlc.whereat.api;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
 
-import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.tlc.whereat.model.UserLocation;
 
 import java.util.Arrays;
-import java.util.List;
 
 import static org.tlc.whereat.support.LocationHelpers.*;
+import static org.tlc.whereat.support.ApiHelpers.*;
 import static org.assertj.core.api.Assertions.*;
 
 /**
@@ -40,24 +37,34 @@ public class WhereatApiClientTest {
         mServer.shutdown();
     }
 
+
     @Test
-    public void testInit() throws Exception {
+    public void update_onInitialPing_should_returnAllLocations(){
         mServer.enqueue(new MockResponse().setResponseCode(200).setBody(API_INIT_RESPONSE));
         mClient = WhereatApiClient.getInstance(mServerRoot);
 
         assertThat(
-            mClient.init(s17UserLocationStub()).toBlocking().first())
-            .isEqualTo(Arrays.asList(s17UserLocationStub()));
+            mClient.update(updateInitStub()).toBlocking().first())
+            .isEqualTo(Arrays.asList(s17UserLocationStub(), n17UserLocationStub()));
     }
 
     @Test
-    public void testRefresh() throws Exception {
+    public void update_onSubsequentPings_should_returnLocsPostedSinceLastPing(){
         mServer.enqueue(new MockResponse().setResponseCode(200).setBody(API_REFRESH_RESPONSE));
         mClient = WhereatApiClient.getInstance(mServerRoot);
 
         assertThat(
-            mClient.refresh(s17LocationTimestampedStub()).toBlocking().first())
-            .isEqualTo(Arrays.asList(s17UserLocationStub(), n17UserLocationStub()));
+            mClient.update(updateRefreshStub()).toBlocking().first())
+            .isEqualTo(Arrays.asList(n17UserLocationStub()));
+    }
 
+    @Test
+    public void remove_should_returnDeletionNotification() throws Exception {
+        mServer.enqueue(new MockResponse().setResponseCode(200).setBody(REMOVE_MSG_JSON));
+        mClient = WhereatApiClient.getInstance(mServerRoot);
+
+        assertThat(
+            mClient.remove(s17UserLocationStub()).toBlocking().first())
+            .isEqualTo(removeMsgStub());
     }
 }

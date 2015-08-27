@@ -1,5 +1,6 @@
 package org.tlc.whereat.api;
 
+import org.tlc.whereat.model.ApiMessage;
 import org.tlc.whereat.model.UserLocationTimestamped;
 import org.tlc.whereat.model.UserLocation;
 
@@ -15,9 +16,11 @@ import rx.Observable;
  */
 
 public interface WhereatApi {
-    @POST("/locations/init")
-    Observable<List<UserLocation>> init(@Body UserLocation l);
 
-    @POST("/locations/refresh")
-    Observable<List<UserLocation>> refresh(@Body UserLocationTimestamped lwp);
+    @POST("/locations/update")
+    Observable<List<UserLocation>> update(@Body UserLocationTimestamped ult);
+
+    @POST("/locations/remove")
+    Observable<ApiMessage> remove(@Body UserLocation ul);
+
 }

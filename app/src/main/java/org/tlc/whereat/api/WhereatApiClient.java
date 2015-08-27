@@ -1,11 +1,14 @@
 package org.tlc.whereat.api;
 
+import org.tlc.whereat.model.ApiMessage;
 import org.tlc.whereat.model.UserLocationTimestamped;
 import org.tlc.whereat.model.UserLocation;
 
 import java.util.List;
 
 import retrofit.RestAdapter;
+import retrofit.http.Body;
+import retrofit.http.POST;
 import rx.Observable;
 
 /**
@@ -43,12 +46,13 @@ public class WhereatApiClient implements WhereatApi {
     // API METHODS
 
     @Override
-    public Observable<List<UserLocation>> init(UserLocation l) {
-        return mApi.init(l);
+    public Observable<List<UserLocation>> update(UserLocationTimestamped ult) {
+        return mApi.update(ult);
     }
 
     @Override
-    public Observable<List<UserLocation>> refresh(UserLocationTimestamped l) {
-        return mApi.refresh(l);
+    public Observable<ApiMessage> remove(UserLocation ul) {
+        return mApi.remove(ul);
     }
+
 }

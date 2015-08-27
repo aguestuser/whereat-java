@@ -3,6 +3,8 @@ package org.tlc.whereat.support;
 import android.net.Uri;
 import android.util.Log;
 
+import org.tlc.whereat.model.ApiMessage;
+
 import java.io.IOException;
 import java.util.Collections;
 
@@ -17,24 +19,32 @@ import retrofit.mime.TypedByteArray;
  */
 public class ApiHelpers {
 
-    public class MockClient implements Client {
-        @Override
-        public Response execute(Request request) throws IOException {
+    public static final String REMOVE_MSG = "1 record(s) deleted.";
 
-            Uri uri = Uri.parse(request.getUrl());
+    public static final String REMOVE_MSG_JSON = "{\"msg\":\"" + REMOVE_MSG + "\"}";
 
-            Log.d("MOCK SERVER", "fetching uri: " + uri.toString());
-
-            String responseString = "";
-
-            if(uri.getPath().equals("/locations/req")) {
-                responseString = "JSON STRING HERE";
-            } else {
-                responseString = "OTHER JSON RESPONSE STRING";
-            }
-
-            return new Response(request.getUrl(), 200, "nothing", Collections.EMPTY_LIST, new TypedByteArray("application/json", responseString.getBytes()));
-        }
+    public static ApiMessage removeMsgStub(){
+        return ApiMessage.of(REMOVE_MSG);
     }
+
+//    public class MockClient implements Client {
+//        @Override
+//        public Response execute(Request request) throws IOException {
+//
+//            Uri uri = Uri.parse(request.getUrl());
+//
+//            Log.d("MOCK SERVER", "fetching uri: " + uri.toString());
+//
+//            String responseString = "";
+//
+//            if(uri.getPath().equals("/locations/req")) {
+//                responseString = "JSON STRING HERE";
+//            } else {
+//                responseString = "OTHER JSON RESPONSE STRING";
+//            }
+//
+//            return new Response(request.getUrl(), 200, "nothing", Collections.EMPTY_LIST, new TypedByteArray("application/json", responseString.getBytes()));
+//        }
+//    }
 
 }
