@@ -14,8 +14,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
 import org.tlc.whereat.R;
-import org.tlc.whereat.pubsub.LocationPublisherManager;
-import org.tlc.whereat.pubsub.LocationSubscriberMap;
+import org.tlc.whereat.pubsub.LocPubManager;
+import org.tlc.whereat.pubsub.LocSubMap;
 import org.tlc.whereat.db.LocationDao;
 import org.tlc.whereat.model.UserLocation;
 import org.tlc.whereat.util.MapUtils;
@@ -29,8 +29,8 @@ public class MapActivity extends AppCompatActivity {
     private static final LatLng LIBERTY = new LatLng(40.7092529,-74.0112551);
 
     protected GoogleMap mMap;
-    protected LocationPublisherManager mLocPub;
-    protected LocationSubscriberMap mLocSub;
+    protected LocPubManager mLocPub;
+    protected LocSubMap mLocSub;
     protected LocationDao mLocDao;
     protected ConcurrentHashMap<String, Marker> mMarkers;
     protected Long mLastPing;
@@ -42,15 +42,14 @@ public class MapActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        mLocPub = LocationPublisherManager.getInstance(this); // TODO: can this instance be shared w/ MainActivity? TEST!!!
-        mLocSub = new LocationSubscriberMap(this);
+        mLocPub = new LocPubManager(this); // TODO: can this instance be shared w/ MainActivity? TEST!!!
+        mLocSub = new LocSubMap(this);
         mLocDao = new LocationDao(this).connect();
 
         mMarkers = new ConcurrentHashMap<>();
         mLastPing = -1L;
 
-        findViewById(R.id.clear_map_button)
-            .setOnClickListener((View v) -> clear());
+        findViewById(R.id.clear_map_button).setOnClickListener((View v) -> clear());
 
         initialize(); // TODO make DB calls async?
 
@@ -67,7 +66,7 @@ public class MapActivity extends AppCompatActivity {
     @Override
     protected void onPause(){
         super.onPause();
-        mLocPub.bind();
+        mLocPub.unbind();
         mLocSub.unregister();
     }
 
@@ -109,8 +108,7 @@ public class MapActivity extends AppCompatActivity {
     public void clear(){
         mMap.clear();
         mMarkers.clear();
-        mLocDao.clear();
-        mLocPub.clear(); //TODO test this!!!
+        mLocPub.clear();
         mLastPing = null;
     }
 

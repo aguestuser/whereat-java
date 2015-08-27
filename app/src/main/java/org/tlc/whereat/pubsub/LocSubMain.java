@@ -20,9 +20,9 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import org.tlc.whereat.model.UserLocation;
 import org.tlc.whereat.util.PopToast;
 
-public class LocationSubscriberMain implements LocationSubscriber {
+public class LocSubMain implements LocationSubscriber {
 
-    public static final String TAG = LocationSubscriberMain.class.getSimpleName();
+    public static final String TAG = LocSubMain.class.getSimpleName();
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000; //TODO: move to resources
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1000; //TODO: move to resources
 
@@ -37,7 +37,7 @@ public class LocationSubscriberMain implements LocationSubscriber {
 
     // CONSTRUCTOR
 
-    public LocationSubscriberMain(Context ctx){
+    public LocSubMain(Context ctx){
         mContext = ctx;
     }
 

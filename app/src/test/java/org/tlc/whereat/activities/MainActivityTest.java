@@ -13,9 +13,9 @@ import static org.mockito.Mockito.*;
 
 import org.tlc.whereat.BuildConfig;
 import org.tlc.whereat.R;
-import org.tlc.whereat.pubsub.LocationSubscriberMain;
+import org.tlc.whereat.pubsub.LocPubManager;
+import org.tlc.whereat.pubsub.LocSubMain;
 import org.tlc.whereat.pubsub.LocationPublisher;
-import org.tlc.whereat.pubsub.LocationPublisherManager;
 import org.tlc.whereat.support.FakeMainActivity;
 
 import static org.assertj.core.api.Assertions.*;
@@ -37,8 +37,8 @@ public class MainActivityTest {
 
     @Test
     public void resumingActivity_should_bindToLocPubAndRegisterToLocSub(){
-        LocationPublisherManager mockLocPub = mock(LocationPublisherManager.class);
-        LocationSubscriberMain mockLocSub = mock(LocationSubscriberMain.class);
+        LocPubManager mockLocPub = mock(LocPubManager.class);
+        LocSubMain mockLocSub = mock(LocSubMain.class);
         FakeMainActivity a = createActivity(FakeMainActivity.class)
             .setLocPub(mockLocPub)
             .setLocSub(mockLocSub);
@@ -52,8 +52,8 @@ public class MainActivityTest {
 
     @Test
     public void pausingActivity_should_unbindFromLocPubAndUnregisterFromLocSub(){
-        LocationPublisherManager mockLocPub = mock(LocationPublisherManager.class);
-        LocationSubscriberMain mockLocSub = mock(LocationSubscriberMain.class);
+        LocPubManager mockLocPub = mock(LocPubManager.class);
+        LocSubMain mockLocSub = mock(LocSubMain.class);
         FakeMainActivity a = createActivity(FakeMainActivity.class)
             .setLocPub(mockLocPub)
             .setLocSub(mockLocSub);
@@ -78,7 +78,7 @@ public class MainActivityTest {
     @Test
     public void clickingGoButton_shouldPingLocation(){
         FakeMainActivity a = Robolectric.buildActivity(FakeMainActivity.class).create().get();
-        LocationPublisherManager mockLocPub = mock(LocationPublisherManager.class);
+        LocPubManager mockLocPub = mock(LocPubManager.class);
         a.setLocPub(mockLocPub);
         Button go = (Button) a.findViewById(R.id.go_button);
 
@@ -91,7 +91,7 @@ public class MainActivityTest {
 
     @Test
     public void longClickingGoButton_shouldToggleLocationPolling(){
-        LocationPublisherManager mockLocPub = mock(LocationPublisherManager.class);
+        LocPubManager mockLocPub = mock(LocPubManager.class);
         FakeMainActivity a = createActivity(FakeMainActivity.class).setLocPub(mockLocPub);
         Button go = (Button) a.findViewById(R.id.go_button);
 

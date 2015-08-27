@@ -1,6 +1,7 @@
 package org.tlc.whereat.activities;
 
 import android.widget.Button;
+import android.widget.ImageButton;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
@@ -11,10 +12,9 @@ import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 import org.tlc.whereat.BuildConfig;
 import org.tlc.whereat.db.LocationDao;
-import org.tlc.whereat.pubsub.LocationSubscriberMap;
+import org.tlc.whereat.pubsub.LocPubManager;
 import org.tlc.whereat.support.FakeMapActivity;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.assertj.core.api.Assertions.*;
@@ -37,20 +37,21 @@ public class MapActivityTest {
     public void pressingClearMapButton_should_clearTheMap(){
 
         GoogleMap mockMap = mock(GoogleMap.class);
-        LocationDao mockDao = mock(LocationDao.class);
+        LocPubManager mockLocPub = mock(LocPubManager.class);
+
         Marker m = mock(Marker.class);
         ConcurrentHashMap<String,Marker> stubMarkers = new ConcurrentHashMap<>();
         stubMarkers.put("fakeId", m);
+
         FakeMapActivity a = createActivity(FakeMapActivity.class)
             .setMap(mockMap)
-            .setLocDao(mockDao)
+            .setLocPub(mockLocPub)
             .setMarkers(stubMarkers);
 
-        Button clear = (Button) a.findViewById(R.id.clear_map_button);
-        clear.performClick();
+        a.findViewById(R.id.clear_map_button).performClick();
 
         verify(mockMap, times(1)).clear();
-        verify(mockDao, times(1)).clear();
+        verify(mockLocPub, times(1)).clear();
         assertThat(stubMarkers).isEmpty();
     }
 

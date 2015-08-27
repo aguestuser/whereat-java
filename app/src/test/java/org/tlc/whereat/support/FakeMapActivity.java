@@ -5,8 +5,8 @@ import com.google.android.gms.maps.model.Marker;
 
 import org.tlc.whereat.activities.MapActivity;
 import org.tlc.whereat.db.LocationDao;
-import org.tlc.whereat.pubsub.LocationSubscriber;
-import org.tlc.whereat.pubsub.LocationSubscriberMap;
+import org.tlc.whereat.pubsub.LocPubManager;
+import org.tlc.whereat.pubsub.LocSubMap;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -26,7 +26,12 @@ public class FakeMapActivity extends MapActivity {
         return this;
     }
 
-    public FakeMapActivity setLocSub(LocationSubscriberMap locSub){
+    public FakeMapActivity setLocPub(LocPubManager locPub){
+        mLocPub = locPub;
+        return this;
+    }
+
+    public FakeMapActivity setLocSub(LocSubMap locSub){
         mLocSub = locSub;
         return this;
     }

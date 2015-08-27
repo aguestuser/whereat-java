@@ -67,7 +67,7 @@ public class UserLocationTest {
     @Test
     public void fromJson_should_deserializeAListOfLocations(){
         assertThat(
-            UserLocation.fromJsonList(API_REFRESH_RESPONSE))
+            UserLocation.fromJsonList(API_INIT_RESPONSE))
             .isEqualTo(Arrays.asList(s17UserLocationStub(), n17UserLocationStub()));
     }
 
@@ -75,7 +75,7 @@ public class UserLocationTest {
     public void toJsonList_should_serializeToJsonList(){
         assertThat(
             UserLocation.toJsonList(Arrays.asList(s17UserLocationStub(), n17UserLocationStub())))
-            .isEqualTo(API_REFRESH_RESPONSE);
+            .isEqualTo(API_INIT_RESPONSE);
     }
 
 }

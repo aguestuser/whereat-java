@@ -149,7 +149,6 @@ public class LocationPublisher extends Service
 
     public void clear(){
         UserLocation ul = mDao.get(mUserId);
-
         mWhereatClient.remove(ul).subscribe(this::broadcastLocationsCleared);
         mDao.clear();
     }

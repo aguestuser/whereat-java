@@ -9,16 +9,16 @@ import android.support.v4.content.LocalBroadcastManager;
 import org.tlc.whereat.activities.MapActivity;
 import org.tlc.whereat.model.UserLocation;
 
-public class LocationSubscriberMap implements LocationSubscriber {
+public class LocSubMap implements LocationSubscriber {
 
-    public static final String TAG = LocationSubscriberMap.class.getSimpleName();
+    public static final String TAG = LocSubMap.class.getSimpleName();
 
     private MapActivity mContext;
     private BroadcastReceiver mLocationReceiver = locationReceiver();
 
     // CONSTRUCTOR
 
-    public LocationSubscriberMap(MapActivity ctx){
+    public LocSubMap(MapActivity ctx){
         mContext = ctx;
     }
 

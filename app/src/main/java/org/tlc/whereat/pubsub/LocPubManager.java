@@ -8,32 +8,37 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.util.Log;
 
-public class LocationPublisherManager {
+public class LocPubManager {
 
     //TODO test this!!!!!
 
-    public static final String TAG = LocationPublisherManager.class.getSimpleName();
+    public static final String TAG = LocPubManager.class.getSimpleName();
 
     private Context mContext;
     private LocationPublisher mLocationPublisher;
     private ServiceConnection mLocationServiceConnection = getLocationServiceConnection();
 
-    private static LocationPublisherManager mInstance;
+//    private static LocPubManager mInstance;
 
     // CONSTRUCTOR
 
-    public static LocationPublisherManager getInstance(Context ctx){
-        if (mInstance == null) return new LocationPublisherManager(ctx).start(); //TODO: can two contexts share an instance?
-        else return mInstance;
-    }
+//    public static LocPubManager getInstance(Context ctx){
+//        if (mInstance == null) return new LocPubManager(ctx).start(); //TODO: can two contexts share an instance?
+//        else return mInstance;
+//    }
 
-    private LocationPublisherManager(Context ctx){
+//    private LocPubManager(Context ctx){
+//        mContext = ctx;
+//    }
+
+    public LocPubManager(Context ctx){
         mContext = ctx;
     }
 
+
     // LIFE CYCLE METHODS
 
-    public LocationPublisherManager start(){
+    public LocPubManager start(){
         Intent i = new Intent(mContext, LocationPublisher.class);
         mContext.startService(i);
         return this;

@@ -11,16 +11,16 @@ import android.view.View;
 import android.widget.Button;
 
 import org.tlc.whereat.R;
-import org.tlc.whereat.pubsub.LocationSubscriberMain;
-import org.tlc.whereat.pubsub.LocationPublisherManager;
+import org.tlc.whereat.pubsub.LocPubManager;
+import org.tlc.whereat.pubsub.LocSubMain;
 import org.tlc.whereat.util.PopToast;
 
 public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = MainActivity.class.getSimpleName();
 
-    protected LocationPublisherManager mLocPub;
-    protected LocationSubscriberMain mLocSub;
+    protected LocPubManager mLocPub;
+    protected LocSubMain mLocSub;
     private boolean mPolling;
 
     // LIFE CYCLE METHODS
@@ -31,8 +31,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mLocPub = LocationPublisherManager.getInstance(this);
-        mLocSub = new LocationSubscriberMain(this);
+        mLocPub = new LocPubManager(this).start();
+        mLocSub = new LocSubMain(this);
 
         final Button shareLocationButton = (Button) findViewById(R.id.go_button);
 
