@@ -165,8 +165,8 @@ public class LocationPublisher extends Service
         mLastPing = ul.getTime();
     }
 
-    protected Subscription update(UserLocation ul){
-        return mWhereatClient.update(ul.withTimestamp(mLastPing))
+    protected void update(UserLocation ul){
+        mWhereatClient.update(ul.withTimestamp(mLastPing))
             .flatMap(Observable::from)
             .subscribe(this::broadcastLocationReceived);
     }

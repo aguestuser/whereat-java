@@ -20,6 +20,7 @@ import org.tlc.whereat.BuildConfig;
 
 import static org.mockito.Mockito.*;
 import static org.tlc.whereat.support.LocationHelpers.*;
+import static org.tlc.whereat.support.ReflectionHelpers.*;
 
 import org.tlc.whereat.api.WhereatApiClient;
 import org.tlc.whereat.db.LocationDao;
@@ -31,6 +32,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import rx.Observable;
+import rx.Subscription;
+import rx.observers.TestSubscriber;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -144,22 +147,17 @@ public class LocationPublisherTest {
         public void relay_broadcastsPostsAndSavesLocThenSetsLastPing(){
             Location s17 = s17AndroidLocationMock();
             UserLocation s17ul = s17UserLocationStub();
-
-            Field lastPing; try { lastPing = LocationPublisher.class.getDeclaredField("mLastPing"); } catch (Exception e) { return; }
-            lastPing.setAccessible(true);
-
-            Field userId; try { userId = LocationPublisher.class.getDeclaredField("mUserId"); } catch (Exception e) { return; }
-            lastPing.setAccessible(true);
-
             LocationDao mockDao = mock(LocationDao.class);
             doReturn(1L).when(mockDao).save(s17ul);
-            Field dao; try { dao = LocationPublisher.class.getDeclaredField("mDao"); } catch (Exception e) { return; }
-            dao.setAccessible(true);
 
             LocationPublisher lp = spy(LocationPublisher.class);
-            try { userId.set(lp, S17_UUID); } catch (Exception e) { return; }
+            Field lastPing = publicify(LocationPublisher.class, "mLastPing");
             try { lastPing.set(lp, -1L); } catch (Exception e) { return; }
+            Field userId = publicify(LocationPublisher.class, "mUserId");
+            try { userId.set(lp, S17_UUID); } catch (Exception e) { return; }
+            Field dao = publicify(LocationPublisher.class, "mLocDao");
             try { dao.set(lp, mockDao); } catch (Exception e) { return; }
+            doNothing().when(lp).update(s17ul);
 
             lp.relay(s17);
 
@@ -173,20 +171,16 @@ public class LocationPublisherTest {
 
         @Test
         public void update_returnsAnObservableThatResultsInManyBroadcasts(){
-
             List<UserLocation> locs = Arrays.asList(s17UserLocationStub(), n17UserLocationStub());
             UserLocation s17ul = s17UserLocationStub();
             UserLocationTimestamped s17ult = s17ul.withTimestamp(-1L);
-
             WhereatApiClient mockClient = mock(WhereatApiClient.class);
             doReturn(Observable.from(locs)).when(mockClient).update(s17ult);
-            Field client; try { client = LocationPublisher.class.getDeclaredField("mWhereatClient"); } catch (Exception e) { return; }
-
-            Field lastPing; try { lastPing = LocationPublisher.class.getDeclaredField("mLastPing"); } catch (Exception e) { return; }
-            lastPing.setAccessible(true);
 
             LocationPublisher lp = spy(LocationPublisher.class);
-            try { client.set(lp, mockClient); } catch (Exception e) { return; }
+            Field client = publicify(LocationPublisher.class, "mWhereatClient");
+            try { client.set(LocationPublisher.class, mockClient); } catch (Exception e) { return; }
+            Field lastPing = publicify(LocationPublisher.class, "mLastPing");
             try { lastPing.set(lp, -1L); } catch (Exception e) { return; }
 
             lp.update(s17ul);
