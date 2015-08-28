@@ -24,6 +24,7 @@ import org.tlc.whereat.model.UserLocation;
 import java.util.UUID;
 
 import rx.Observable;
+import rx.Subscription;
 
 public class LocationPublisher extends Service
     implements GoogleApiClient.ConnectionCallbacks,
@@ -155,22 +156,22 @@ public class LocationPublisher extends Service
 
     // API HELPERS
 
-    private void relay(Location l){
+    protected void relay(Location l){
         UserLocation ul = UserLocation.valueOf(mUserId, l);
 
         broadcastLocationPublished(ul);
-        ping(ul);
+        update(ul);
         mDao.save(ul);
         mLastPing = ul.getTime();
     }
 
-    private void ping(UserLocation ul){
-        mWhereatClient.update(ul.withTimestamp(mLastPing))
+    protected Subscription update(UserLocation ul){
+        return mWhereatClient.update(ul.withTimestamp(mLastPing))
             .flatMap(Observable::from)
             .subscribe(this::broadcastLocationReceived);
     }
 
-    private Location lastApiLocation(){
+    protected Location lastApiLocation(){
         return LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
     }
 
@@ -202,7 +203,7 @@ public class LocationPublisher extends Service
 
     // BROADCASTS
 
-    private void broadcastLocationPublished(UserLocation l) {
+    protected void broadcastLocationPublished(UserLocation l) {
         Intent i = new Intent(ACTION_LOCATION_PUBLISHED);
         i.setAction(ACTION_LOCATION_PUBLISHED);
         Dispatcher.broadcast(this, i);

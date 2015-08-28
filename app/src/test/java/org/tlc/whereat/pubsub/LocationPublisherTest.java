@@ -1,17 +1,38 @@
 package org.tlc.whereat.pubsub;
 
+import android.app.Activity;
+import android.app.NotificationManager;
+import android.content.ComponentName;
+import android.location.Location;
+import android.os.IBinder;
+
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
+
 import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+import static org.robolectric.Shadows.shadowOf;
 import org.tlc.whereat.BuildConfig;
 
+import static org.mockito.Mockito.*;
+import static org.tlc.whereat.support.LocationHelpers.*;
 
-import org.tlc.whereat.pubsub.LocationPublisher;
+import org.tlc.whereat.api.WhereatApiClient;
+import org.tlc.whereat.db.LocationDao;
+import org.tlc.whereat.model.UserLocation;
+import org.tlc.whereat.model.UserLocationTimestamped;
+
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
+
+import rx.Observable;
 
 import static org.assertj.core.api.Assertions.*;
-
 
 /**
  * Author: @aguestuser
@@ -19,87 +40,194 @@ import static org.assertj.core.api.Assertions.*;
  */
 
 
-@RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class)
+@RunWith(Enclosed.class)
 
 public class LocationPublisherTest {
 
-    // LIFE CYCLE METHODS
+    @RunWith(RobolectricGradleTestRunner.class)
+    @Config(constants = BuildConfig.class)
 
-    //#onStartCommand()
+    public static class LifeCycleMethods {
 
-    @Test
-    private void onStartCommand_whenPlayServicesEnabled_initalizesLocPub(){
+        //#onStartCommand()
 
+        @Test
+        private void onStartCommand_whenPlayServicesEnabled_initalizesLocPub(){
+
+        }
+
+        @Test
+        private void onStartCommand_whenPlayServicesDisabled_broadcastsPlayServicesDisabled() {
+
+        }
+
+        //#initialize()
+
+        @Test
+        private void initialize_should_initializePrivateFields(){
+
+        }
+
+        //#connect()
+        @Test
+        private void connect_whenAlreadyConnected_doesNothing(){
+
+        }
+
+        @Test
+        private void connect_whenNotConnected_connectsGoogleApiClient(){
+
+        }
+
+        //#onBind()
+
+        @Test
+        private void onBind_returnsLocationServiceBinderWith_getServiceThatReturnsThis(){
+
+        }
+
+        //#onDestroy()
+
+        @Test
+        private void onDestory_cleansUpResources(){
+
+        }
     }
 
-    @Test
-    private void onStartCommand_whenPlayServicesDisabled_broadcastsPlayServicesDisabled() {
+    @RunWith(RobolectricGradleTestRunner.class)
+    @Config(constants = BuildConfig.class)
 
+    public static class PublicMethods {
+
+
+
+        @Before
+        public void setup(){
+//            LocationPublisher.LocationServiceBinder mockBinder = mock(LocationPublisher.LocationServiceBinder.class);
+//            when(mockBinder.getService()).thenReturn(mock(LocationPublisher.class));
+            shadowOf(RuntimeEnvironment.application).setComponentNameAndServiceForBindService(
+                new ComponentName("org.tlc.whereat.pubsub", "LocationPublisher"), mock(IBinder.class));
+
+
+        }
+
+        @After
+        public void teardown(){
+
+        }
+
+        //#ping()
+
+        @Test
+        public void ping_whenLocationNull_broadcastsFailedLocationRequest(){
+            // mock LocationServices.FusedLocationApi.getLastLocation for call to lastApiLocation()
+            // test broadcasts (maybe just mock Dispatcher, but in Dispatcher, then:)
+            // https://github.com/upsight/playhaven-robolectric/blob/master/src/test/java/com/xtremelabs/robolectric/shadows/LocalBroadcastManagerTest.java
+            // https://searchcode.com/codesearch/view/25270441/
+
+        }
+
+        @Test
+        public void ping_whenLocationExists_relaysLocation(){
+            Location s17 = s17AndroidLocationMock();
+            LocationPublisher lp = spy(LocationPublisher.class);
+            doReturn(s17).when(lp).lastApiLocation();
+            doNothing().when(lp).relay(s17);
+
+            lp.ping();
+            verify(lp).relay(s17);
+        }
+
+        //#ping helpers
+
+        @Test
+        public void relay_broadcastsPostsAndSavesLocThenSetsLastPing(){
+            Location s17 = s17AndroidLocationMock();
+            UserLocation s17ul = s17UserLocationStub();
+
+            Field lastPing; try { lastPing = LocationPublisher.class.getDeclaredField("mLastPing"); } catch (Exception e) { return; }
+            lastPing.setAccessible(true);
+
+            Field userId; try { userId = LocationPublisher.class.getDeclaredField("mUserId"); } catch (Exception e) { return; }
+            lastPing.setAccessible(true);
+
+            LocationDao mockDao = mock(LocationDao.class);
+            doReturn(1L).when(mockDao).save(s17ul);
+            Field dao; try { dao = LocationPublisher.class.getDeclaredField("mDao"); } catch (Exception e) { return; }
+            dao.setAccessible(true);
+
+            LocationPublisher lp = spy(LocationPublisher.class);
+            try { userId.set(lp, S17_UUID); } catch (Exception e) { return; }
+            try { lastPing.set(lp, -1L); } catch (Exception e) { return; }
+            try { dao.set(lp, mockDao); } catch (Exception e) { return; }
+
+            lp.relay(s17);
+
+            verify(lp).broadcastLocationPublished(s17ul);
+            verify(lp).update(s17ul);
+            verify(mockDao).save(s17ul);
+            try { assertThat(lastPing.getLong(lp)).isEqualTo(s17ul.getTime()); } catch (Exception e) { return; }
+        }
+
+        // #update
+
+        @Test
+        public void update_returnsAnObservableThatResultsInManyBroadcasts(){
+
+            List<UserLocation> locs = Arrays.asList(s17UserLocationStub(), n17UserLocationStub());
+            UserLocation s17ul = s17UserLocationStub();
+            UserLocationTimestamped s17ult = s17ul.withTimestamp(-1L);
+
+            WhereatApiClient mockClient = mock(WhereatApiClient.class);
+            doReturn(Observable.from(locs)).when(mockClient).update(s17ult);
+            Field client; try { client = LocationPublisher.class.getDeclaredField("mWhereatClient"); } catch (Exception e) { return; }
+
+            Field lastPing; try { lastPing = LocationPublisher.class.getDeclaredField("mLastPing"); } catch (Exception e) { return; }
+            lastPing.setAccessible(true);
+
+            LocationPublisher lp = spy(LocationPublisher.class);
+            try { client.set(lp, mockClient); } catch (Exception e) { return; }
+            try { lastPing.set(lp, -1L); } catch (Exception e) { return; }
+
+            lp.update(s17ul);
+            try { Thread.sleep(30L); } catch (Exception e) { return ; }
+
+            verify(lp, times(1)).broadcastLocationPublished(s17UserLocationStub());
+            verify(lp, times(1)).broadcastLocationPublished(n17UserLocationStub());
+        }
+
+        // #broadcastLocationPublished
+
+        @Test
+
+            public void broadcastLocationPublished_broadcastsIntentContainingLocation(){
+
+        }
+
+        //#poll
+
+        @Test
+        public void poll_turnsOnPolling(){
+            // calls LocationServices.FusedLocationApi.requestLocationUpdates
+            // sets mPolling true
+        }
+
+        //#stopPolling
+        public void stopPolling_stopsPolling(){
+            // calls LocationServices.FusedLocationApi.removeLocationUpdates
+            // sets mPolling false
+        }
+
+        //#clear
+        public void clear_clearsUserFromServerAllLocsFromPhone(){
+            // requires mock DAO, API (dao has to mock getting (mUserId)
+            // calls clien.remove()
+            // calls dao.clear()
+        }
     }
 
-    //#initialize()
 
-    @Test
-    private void initialize_should_initializePrivateFields(){
 
-    }
-
-    //#connect()
-    @Test
-    private void connect_whenAlreadyConnected_doesNothing(){
-
-    }
-
-    @Test
-    private void connect_whenNotConnected_connectsGoogleApiClient(){
-
-    }
-
-    //#onBind()
-
-    @Test
-    private void onBind_returnsLocationServiceBinderWith_getServiceThatReturnsThis(){
-
-    }
-
-    //#onDestroy()
-
-    @Test
-    private void onDestory_cleansUpResources(){
-
-    }
-
-    // PUBLIC METHODS
-
-    //#ping()
-
-    @Test
-    public void ping_whenLocationNull_broadcastsFailedLocationRequest(){
-
-    }
-
-    @Test
-    public void ping_whenLocationExists_relaysLocation(){
-
-    }
-
-    //#poll
-
-    @Test
-    public void poll_turnsOnPolling(){
-
-    }
-
-    //#stopPolling
-    public void stopPolling_stopsPolling(){
-
-    }
-
-    //#clear
-    public void clear_clearsUserFromServerAllLocsFromPhone(){
-
-    }
 
 
 

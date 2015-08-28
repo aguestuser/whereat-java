@@ -18,18 +18,6 @@ public class LocPubManager {
     private LocationPublisher mLocationPublisher;
     private ServiceConnection mLocationServiceConnection = getLocationServiceConnection();
 
-//    private static LocPubManager mInstance;
-
-    // CONSTRUCTOR
-
-//    public static LocPubManager getInstance(Context ctx){
-//        if (mInstance == null) return new LocPubManager(ctx).start(); //TODO: can two contexts share an instance?
-//        else return mInstance;
-//    }
-
-//    private LocPubManager(Context ctx){
-//        mContext = ctx;
-//    }
 
     public LocPubManager(Context ctx){
         mContext = ctx;
