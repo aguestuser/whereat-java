@@ -1,9 +1,5 @@
 <resources>
-    <!--
-    TODO: map api key for release version of app
-    see: https://developers.google.com/maps/documentation/android/start
-    -->
     <string name="google_maps_key" translatable="false" templateMergeStrategy="preserve">
-        YOUR_KEY_HERE
+        AIzaSyDDHYJNj12xpGG9Sycnu4d_s0kx4aOacp0
     </string>
 </resources>
