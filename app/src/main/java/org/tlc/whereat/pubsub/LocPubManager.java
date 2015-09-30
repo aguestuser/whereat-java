@@ -37,6 +37,7 @@ public class LocPubManager {
         mContext.stopService(i);
     }
 
+
     public boolean bind(){
         Intent i = new Intent(mContext, LocationPublisher.class);
         return mContext.bindService(i, mLocationServiceConnection, Context.BIND_AUTO_CREATE);

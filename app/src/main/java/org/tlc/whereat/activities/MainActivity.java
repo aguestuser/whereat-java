@@ -1,5 +1,9 @@
 package org.tlc.whereat.activities;
 
+import android.app.AlertDialog;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -11,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 
 import org.tlc.whereat.R;
+import org.tlc.whereat.fragments.SecurityAlertFragment;
 import org.tlc.whereat.pubsub.LocPubManager;
 import org.tlc.whereat.pubsub.LocSubMain;
 import org.tlc.whereat.util.PopToast;
@@ -21,7 +26,10 @@ public class MainActivity extends AppCompatActivity {
 
     protected LocPubManager mLocPub;
     protected LocSubMain mLocSub;
-    private boolean mPolling;
+    protected boolean mPolling;
+    protected SecurityAlertFragment mSecAlert;
+
+    protected boolean mSecAlerted;
 
     // LIFE CYCLE METHODS
 
@@ -33,6 +41,10 @@ public class MainActivity extends AppCompatActivity {
 
         mLocPub = new LocPubManager(this).start();
         mLocSub = new LocSubMain(this);
+        mSecAlert = new SecurityAlertFragment();
+
+        mPolling = false;
+        mSecAlerted = false;
 
         final Button shareLocationButton = (Button) findViewById(R.id.go_button);
 
@@ -49,12 +61,13 @@ public class MainActivity extends AppCompatActivity {
                 if (!mLocPub.isPolling()) mLocPub.ping();
             }
         });
-
     }
 
     @Override
     protected void onResume(){
+
         super.onResume();
+        if(!mSecAlerted) { showSecurityAlert(); }
         mLocPub.bind();
         mLocSub.register();
     }
@@ -95,7 +108,6 @@ public class MainActivity extends AppCompatActivity {
         else return getResources().getDrawable(id);
     }
 
-
     // MENU CALLBACKS
 
     @Override
@@ -112,5 +124,12 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    // SECURITY ALERT ROUTINE
+
+    protected void showSecurityAlert(){
+        mSecAlert.show(getFragmentManager(),getString(R.string.security_alert_fragment_tag));
+        mSecAlerted = true;
     }
 }
