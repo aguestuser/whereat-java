@@ -7,14 +7,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.SpannableString;
 
 
 import org.tlc.whereat.R;
-import org.tlc.whereat.util.Text;
-
-import java.net.URI;
-import java.net.URL;
 
 /**
  * Author: @aguestuser
