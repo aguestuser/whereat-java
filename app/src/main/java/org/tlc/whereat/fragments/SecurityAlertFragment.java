@@ -4,11 +4,17 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.text.SpannableString;
 
 
 import org.tlc.whereat.R;
-import org.tlc.whereat.util.PopToast;
+import org.tlc.whereat.util.Text;
+
+import java.net.URI;
+import java.net.URL;
 
 /**
  * Author: @aguestuser
@@ -16,16 +22,29 @@ import org.tlc.whereat.util.PopToast;
  */
 public class SecurityAlertFragment extends DialogFragment {
 
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState){
+
         return new AlertDialog.Builder(getActivity())
             .setIcon(android.R.drawable.stat_notify_error)
-            .setTitle(R.string.security_alert_title)
-            .setMessage(R.string.security_alert_message)
-            .setNeutralButton(R.string.security_alert_neutral_button_text, new DialogInterface.OnClickListener() {
+            .setTitle(R.string.sec_alert_title)
+            .setMessage(R.string.sec_alert_message)
+            .setPositiveButton(R.string.sec_alert_positive_button_text, new DialogInterface.OnClickListener() {
+                @Override
                 public void onClick(DialogInterface dialog, int which) {
+                    dismiss();
+                    startActivity(new Intent( Intent.ACTION_VIEW, Uri.parse(getString(R.string.sec_alert_url))));
                 }
-            }).create();
+            })
+            .setNegativeButton(R.string.sec_alert_negative_button_text, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dismiss();
+                }
+            })
+            .create();
     }
+
 
 }

@@ -7,8 +7,11 @@
     <string name="map_activity_title">Map</string>
     <string name="map_button_text">Map</string>
     <string name="map_clear_button_x">X</string>
-    <string name="security_alert_title">"YOU ARE BEING SPIED ON!!!"</string>
-    <string name="security_alert_message">"We've done everything we can to ensure your privacy while using where@, but there are some forms of surveillance we can't protect you from. Not to fear: you can protect yourself! To learn how, visit our security best practices page."</string>
-    <string name="security_alert_neutral_button_text">"Okay, got it!"</string>
-    <string name="security_alert_fragment_tag">"security_alert"</string>
+    <string name="sec_alert_title">"YOU'RE BEING SPIED ON!!!"</string>
+    <string name="sec_alert_message">"We've done everything we can to ensure your privacy while using where@, but there are some forms of surveillance we can't protect you from. Not to fear: you can protect yourself! To learn how, visit our security best practices page."</string>
+    <string name="sec_alert_link_text">"security best practices page."</string>
+    <string name="sec_alert_positive_button_text">"Get protection"</string>
+    <string name="sec_alert_negative_button_text">"Stay exposed"</string>
+    <string name="sec_alert_url">"https://about.whereat.io/stay-safe"</string>
+    <string name="sec_alert_fragment_tag">"security_alert"</string>
 </resources>

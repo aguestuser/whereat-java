@@ -1,6 +1,5 @@
 package org.tlc.whereat.activities;
 
-import android.app.AlertDialog;
 import android.os.Build;
 import android.widget.Button;
 
@@ -14,12 +13,8 @@ import org.robolectric.fakes.RoboMenuItem;
 
 import static org.mockito.Mockito.*;
 
-import org.robolectric.shadows.ShadowActivity;
-import org.robolectric.shadows.ShadowAlertDialog;
 import static org.robolectric.Shadows.shadowOf;
 
-import org.robolectric.util.ActivityController;
-import org.robolectric.util.FragmentTestUtil;
 import org.tlc.whereat.BuildConfig;
 import org.tlc.whereat.R;
 import org.tlc.whereat.fragments.SecurityAlertFragment;
@@ -141,7 +136,7 @@ public class MainActivityTest {
             a.onPause();
             a.onResume();
 
-            verify(mockSecAlert, times(1)).show(a.getFragmentManager(), a.getString(R.string.security_alert_fragment_tag));
+            verify(mockSecAlert, times(1)).show(a.getFragmentManager(), a.getString(R.string.sec_alert_fragment_tag));
         }
     }
 }
