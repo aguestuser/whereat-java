@@ -64,7 +64,7 @@ public class LocationDaoTest {
     }
 
     @RunWith(RobolectricGradleTestRunner.class)
-    @Config(constants = BuildConfig.class)
+    @Config(constants = BuildConfig.class, sdk = 21)
 
     public static class OneRecord {
 
@@ -138,7 +138,7 @@ public class LocationDaoTest {
     }
 
     @RunWith(RobolectricGradleTestRunner.class)
-    @Config(constants = BuildConfig.class)
+    @Config(constants = BuildConfig.class, sdk = 21)
 
     public static class ManyRecords {
 

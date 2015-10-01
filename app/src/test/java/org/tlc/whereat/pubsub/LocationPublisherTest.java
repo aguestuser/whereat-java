@@ -8,6 +8,7 @@ import android.os.IBinder;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -48,57 +49,58 @@ import static org.assertj.core.api.Assertions.*;
 public class LocationPublisherTest {
 
     @RunWith(RobolectricGradleTestRunner.class)
-    @Config(constants = BuildConfig.class)
+    @Config(constants = BuildConfig.class, sdk = 21)
+    @Ignore
 
     public static class LifeCycleMethods {
 
         //#onStartCommand()
 
         @Test
-        private void onStartCommand_whenPlayServicesEnabled_initalizesLocPub(){
+        public void onStartCommand_whenPlayServicesEnabled_initalizesLocPub(){
 
         }
 
         @Test
-        private void onStartCommand_whenPlayServicesDisabled_broadcastsPlayServicesDisabled() {
+        public void onStartCommand_whenPlayServicesDisabled_broadcastsPlayServicesDisabled() {
 
         }
 
         //#initialize()
 
         @Test
-        private void initialize_should_initializePrivateFields(){
+        public void initialize_should_initializePrivateFields(){
 
         }
 
         //#connect()
         @Test
-        private void connect_whenAlreadyConnected_doesNothing(){
+        public void connect_whenAlreadyConnected_doesNothing(){
 
         }
 
         @Test
-        private void connect_whenNotConnected_connectsGoogleApiClient(){
+        public void connect_whenNotConnected_connectsGoogleApiClient(){
 
         }
 
         //#onBind()
 
         @Test
-        private void onBind_returnsLocationServiceBinderWith_getServiceThatReturnsThis(){
+        public void onBind_returnsLocationServiceBinderWith_getServiceThatReturnsThis(){
 
         }
 
         //#onDestroy()
 
         @Test
-        private void onDestory_cleansUpResources(){
+        public void onDestory_cleansUpResources(){
 
         }
     }
 
     @RunWith(RobolectricGradleTestRunner.class)
-    @Config(constants = BuildConfig.class)
+    @Config(constants = BuildConfig.class, sdk = 21)
 
     public static class PublicMethods {
 
@@ -106,8 +108,6 @@ public class LocationPublisherTest {
 
         @Before
         public void setup(){
-//            LocationPublisher.LocationServiceBinder mockBinder = mock(LocationPublisher.LocationServiceBinder.class);
-//            when(mockBinder.getService()).thenReturn(mock(LocationPublisher.class));
             shadowOf(RuntimeEnvironment.application).setComponentNameAndServiceForBindService(
                 new ComponentName("org.tlc.whereat.pubsub", "LocationPublisher"), mock(IBinder.class));
 

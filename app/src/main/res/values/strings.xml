@@ -1,10 +1,17 @@
 <resources>
-    <string name="app_name">where@</string>
     <string name="action_settings">Settings</string>
+    <string name="app_name">where@</string>
     <string name="location_service_name">Location Service</string>
     <string name="main_activity_title">Home</string>
     <string name="main_button_text">Home</string>
     <string name="map_activity_title">Map</string>
     <string name="map_button_text">Map</string>
-    <string name="clear_map_button_x">X</string>
+    <string name="map_clear_button_x">X</string>
+    <string name="sec_alert_title">"YOU'RE BEING SPIED ON!!!"</string>
+    <string name="sec_alert_message">"We've done everything we can to ensure your privacy while using where@, but there are some forms of surveillance we can't protect you from. Not to fear: you can protect yourself! To learn how, visit our security best practices page."</string>
+    <string name="sec_alert_link_text">"security best practices page."</string>
+    <string name="sec_alert_positive_button_text">"Get protection"</string>
+    <string name="sec_alert_negative_button_text">"Stay exposed"</string>
+    <string name="sec_alert_url">"https://about.whereat.io/stay-safe"</string>
+    <string name="sec_alert_fragment_tag">"security_alert"</string>
 </resources>

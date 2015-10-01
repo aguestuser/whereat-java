@@ -29,7 +29,7 @@ import org.tlc.whereat.R;
  */
 
 @RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class)
+@Config(constants = BuildConfig.class, sdk = 21)
 
 public class MapActivityTest {
 
