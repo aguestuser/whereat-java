@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.*;
  */
 
 @RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class)
+@Config(constants = BuildConfig.class, sdk = 21)
 
 public class SecurityAlertFragmentTest {
 

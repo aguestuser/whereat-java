@@ -33,7 +33,7 @@ import static org.tlc.whereat.support.ActivityHelpers.*;
 public class MainActivityTest {
 
     @RunWith(RobolectricGradleTestRunner.class)
-    @Config(constants = BuildConfig.class)
+    @Config(constants = BuildConfig.class, sdk = 21)
 
     public static class LifeCycleMethods {
 
@@ -76,7 +76,7 @@ public class MainActivityTest {
     }
 
     @RunWith(RobolectricGradleTestRunner.class)
-    @Config(constants = BuildConfig.class)
+    @Config(constants = BuildConfig.class, sdk = 21)
 
     public static class EventHandlers {
 
@@ -121,7 +121,7 @@ public class MainActivityTest {
     }
 
     @RunWith(RobolectricGradleTestRunner.class)
-    @Config(constants = BuildConfig.class, sdk = Build.VERSION_CODES.LOLLIPOP)
+    @Config(constants = BuildConfig.class, sdk = 21)
 
     public static class SecurityAlert {
 
