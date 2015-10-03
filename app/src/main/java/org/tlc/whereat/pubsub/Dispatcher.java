@@ -15,4 +15,9 @@ public class Dispatcher {
     public static void broadcast(Context ctx, Intent i){
         LocalBroadcastManager.getInstance(ctx).sendBroadcast(i);
     }
+
+    public static void broadcast(LocalBroadcastManager bm, Context ctx, Intent i){
+        LocalBroadcastManager bm_ = (bm != null) ? bm : LocalBroadcastManager.getInstance(ctx);
+        bm_.sendBroadcast(i);
+    }
 }

@@ -17,7 +17,6 @@ import org.tlc.whereat.R;
  */
 public class SecurityAlertFragment extends DialogFragment {
 
-
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState){
 
@@ -40,6 +39,4 @@ public class SecurityAlertFragment extends DialogFragment {
             })
             .create();
     }
-
-
 }

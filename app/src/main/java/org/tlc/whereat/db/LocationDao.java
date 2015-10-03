@@ -21,7 +21,7 @@ public class LocationDao {
     protected SQLiteDatabase mDb;
     protected Dao mDao;
     protected Context mCtx;
-    private String[] mAllColumns = {
+    protected String[] mAllColumns = {
         Dao.COLUMN_ID,
         Dao.COLUMN_LAT,
         Dao.COLUMN_LON,
@@ -81,6 +81,10 @@ public class LocationDao {
         return mDb.delete(Dao.TABLE_LOCATIONS, idEquals(id), null);
     }
 
+    public int deleteOlderThan(long t) {
+        return mDb.delete(Dao.TABLE_LOCATIONS, timeLessThan(t), null);
+    }
+
     public int clear(){
         return mDb.delete(Dao.TABLE_LOCATIONS,null,null);
     }
@@ -91,7 +95,7 @@ public class LocationDao {
 
     // HELPERS
 
-    private ContentValues parseRow(UserLocation loc){
+    protected ContentValues parseRow(UserLocation loc){
         ContentValues vals = new ContentValues();
         vals.put(Dao.COLUMN_ID, loc.getId());
         vals.put(Dao.COLUMN_LAT, loc.getLatitude());
@@ -101,7 +105,7 @@ public class LocationDao {
         return vals;
     }
 
-    private UserLocation parseUserLocation(Cursor c){
+    protected UserLocation parseUserLocation(Cursor c){
         c.moveToFirst();
         UserLocation l = doParseUserLocation(c);
         c.close();
@@ -109,7 +113,7 @@ public class LocationDao {
         return l;
     }
 
-    private List<UserLocation> parseUserLocations(Cursor c){
+    protected List<UserLocation> parseUserLocations(Cursor c){
         List<UserLocation> ls = new ArrayList<>();
 
         c.moveToFirst();
@@ -123,7 +127,7 @@ public class LocationDao {
         return ls;
     }
 
-    private UserLocation doParseUserLocation(Cursor c){
+    protected UserLocation doParseUserLocation(Cursor c){
         //TODO use a builder here for greater type safety?
         return UserLocation.create(
             c.getString(0), //id
@@ -133,12 +137,16 @@ public class LocationDao {
         );
     }
 
-    private String idEquals(String id){
+    protected static String idEquals(String id){
         return String.format("%s = '%s'", Dao.COLUMN_ID, id);
     }
 
-    private String timeGreaterThan(long t){
+    protected static String timeGreaterThan(long t){
         return String.format("%s > %s", Dao.COLUMN_TIME, t);
+    }
+
+    protected static String timeLessThan(long t) {
+        return String.format("%s < %s", Dao.COLUMN_TIME, t);
     }
 
 }

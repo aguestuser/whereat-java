@@ -13,6 +13,8 @@ import org.robolectric.annotation.Config;
 import org.tlc.whereat.BuildConfig;
 import org.tlc.whereat.model.UserLocation;
 import org.tlc.whereat.support.FakeLocationDao;
+import org.tlc.whereat.support.SampleTimes;
+
 import java.util.List;
 
 
@@ -187,6 +189,19 @@ public class LocationDaoTest {
             assertThat(mLocDao.count()).isEqualTo(1);
         }
 
+        @Test
+        public void deleteOlderThan_should_deleteRecordsOlderThanAnExpiryDate(){
+            assertThat(mLocDao.count()).isEqualTo(2);
+
+            int deleteCount1 = mLocDao.deleteOlderThan(SampleTimes.S17 + 1L);
+            assertThat(deleteCount1).isEqualTo(1);
+            assertThat(mLocDao.count()).isEqualTo(1);
+
+            int deleteCount2 = mLocDao.deleteOlderThan(SampleTimes.N17);
+            assertThat(deleteCount2).isEqualTo(0);
+            assertThat(mLocDao.count()).isEqualTo(1);
+        }
+
 
         @Test
         public void clear_should_clearTheDb(){
@@ -195,6 +210,27 @@ public class LocationDaoTest {
             assertThat(deleted).isEqualTo(2);
             assertTrue(mLocDao.getAll().isEmpty());
             assertThat(mLocDao.count()).isEqualTo(0);
+        }
+    }
+
+    public static class Helpers {
+
+        @Test
+        public void timeGreaterThan_should_generateCorrectSqlQuery(){
+            assertThat(LocationDao.timeGreaterThan(SampleTimes.S17))
+                .isEqualTo("time > " + SampleTimes.S17_STR);
+        }
+
+        @Test
+        public void timeLessThan_should_generateCorrectSqlQuery(){
+            assertThat(LocationDao.timeLessThan(SampleTimes.S17))
+                .isEqualTo("time < " + SampleTimes.S17_STR);
+        }
+
+        @Test
+        public void idEquals_should_generateCorrectSqlQuery(){
+            assertThat(LocationDao.idEquals("1"))
+                .isEqualTo("_id = '1'");
         }
     }
 

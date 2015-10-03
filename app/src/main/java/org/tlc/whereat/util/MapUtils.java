@@ -22,8 +22,7 @@ public class MapUtils {
     }
 
     private static String parseTime(UserLocation loc){
-        return new SimpleDateFormat("dd/MM hh:mm", Locale.ENGLISH)
-            .format(new Date(loc.getTime()));
+        return TimeUtils.fullDate(loc.getTime());
     }
 
 }

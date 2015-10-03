@@ -12,6 +12,8 @@ import org.tlc.whereat.api.WhereatApiClient;
 import org.tlc.whereat.db.Dao;
 import org.tlc.whereat.db.LocationDao;
 import org.tlc.whereat.pubsub.LocationPublisher;
+import org.tlc.whereat.pubsub.Scheduler;
+
 import static org.mockito.Mockito.*;
 
 
@@ -22,15 +24,19 @@ import static org.mockito.Mockito.*;
  */
 public class FakeLocationPublisher extends LocationPublisher {
 
-    private LocationDao mDao = mock(LocationDao.class);
-    private WhereatApiClient mWhereatApiClient = mock(WhereatApiClient.class);
-
-    public LocationDao getDao(){
-        return mDao;
+    public FakeLocationPublisher setGoogleApiClient(GoogleApiClient cl){
+        mGoogleApiClient = cl;
+        return this;
     }
 
-    public WhereatApiClient getWhereatApiClient(){
-        return mWhereatApiClient;
+    public FakeLocationPublisher setDao(LocationDao dao){
+        mDao = dao;
+        return this;
+    }
+
+    public FakeLocationPublisher setScheduler(Scheduler sch){
+        mScheduler = sch;
+        return this;
     }
 
 }

@@ -24,7 +24,6 @@ import org.tlc.whereat.model.UserLocation;
 import java.util.UUID;
 
 import rx.Observable;
-import rx.Subscription;
 
 public class LocationPublisher extends Service
     implements GoogleApiClient.ConnectionCallbacks,
@@ -34,30 +33,27 @@ public class LocationPublisher extends Service
     // FIELDS
 
     public static final String TAG = LocationPublisher.class.getSimpleName();
-    public static final String ACTION_GOOGLE_API_CLIENT_DISCONNECTED = "org.tlc.whereat.LocationPublisher.GOOGLE_API_CLIENT_DISCONNECTED";
-    public static final String ACTION_LOCATION_PUBLISHED = "org.tlc.whereat.LocationPublisher.LOCATION_PUBLISHED";
-    public static final String ACTION_LOCATION_RECEIVED = "org.tlc.whereat.LocationPublisher.LOCATION_RECEIVED";
-    public static final String ACTION_LOCATION_REQUEST_FAILED = "org.tlc.whereat.LocationPublisher.LOCATION_REQUEST_FAILED";
-    public static final String ACTION_LOCATION_SERVICES_DISABLED = "org.tlc.whereat.LocationPublisher.LOCATION_SERVICES_DISABLED";
-    public static final String ACTION_PLAY_SERVICES_DISABLED = "org.tlc.whereat.LocationPublisher.PLAY_SERVICES_DISABLED";
-    public static final String ACTION_LOCATIONS_CLEARED = "org.tlc.whereat.LocationPublisher.ACTION_LOCATIONS_CLEARED";
+    public static final String ACTION_GOOGLE_API_CLIENT_DISCONNECTED = TAG + ".GOOGLE_API_CLIENT_DISCONNECTED";
+    public static final String ACTION_LOCATION_PUBLISHED = TAG + "LOCATION_PUBLISHED";
+    public static final String ACTION_LOCATION_RECEIVED = TAG + "LOCATION_RECEIVED";
+    public static final String ACTION_LOCATION_REQUEST_FAILED = TAG + "LOCATION_REQUEST_FAILED";
+    public static final String ACTION_LOCATION_SERVICES_DISABLED = TAG + "LOCATION_SERVICES_DISABLED";
+    public static final String ACTION_PLAY_SERVICES_DISABLED = TAG + "PLAY_SERVICES_DISABLED";
+    public static final String ACTION_LOCATIONS_CLEARED = TAG + "ACTION_LOCATIONS_CLEARED";
 
+    public static final int POLLING_INTERVAL = 15 * 1000; // 15 seconds
+    public static final long FORGET_INTERVAL = 60*1000L; // 1 minute
+    public static final long TIME_TO_LIVE = 60*60*1000L; // 1 hr
 
-
-    private static final int POLLING_INTERVAL = 5 * 1000; // 5 seconds
-
-    private static LocationPublisher sInstance;
-
-    private IBinder mBinder = new LocationServiceBinder();
-    private GoogleApiClient mGoogleApiClient;
-    private LocationRequest mLocationRequest;
-    private LocationDao mDao;
-    private WhereatApiClient mWhereatClient;
-
-    private String mUserId;
-    private boolean mPolling = false;
-    private long mLastPing = -1L;
-
+    protected IBinder mBinder = new LocationServiceBinder();
+    protected GoogleApiClient mGoogleApiClient;
+    protected LocationRequest mLocationRequest;
+    protected LocationDao mDao;
+    protected WhereatApiClient mWhereatClient;
+    protected Scheduler mScheduler;
+    protected String mUserId;
+    protected boolean mPolling = false;
+    protected long mLastPing = -1L;
 
     // LIFE CYCLE METHODS
 
@@ -78,30 +74,35 @@ public class LocationPublisher extends Service
         }
     }
 
-    private void initialize(){
+    protected void initialize(){
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
             .addConnectionCallbacks(this)
             .addOnConnectionFailedListener(this)
             .addApi(LocationServices.API)
             .build();
-
         mLocationRequest = LocationRequest.create()
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
             .setInterval(POLLING_INTERVAL)
             .setFastestInterval(POLLING_INTERVAL);
-
-        mDao = new LocationDao(this).connect();
-        mUserId = UUID.randomUUID().toString();
-        mPolling = false;
-
         mWhereatClient = WhereatApiClient.getInstance();
+        mDao = new LocationDao(this);
+        mScheduler = new Scheduler(this, null);
 
-        connect();
+        mPolling = false;
+        mUserId = getRandomId();
+
+        run();
     }
 
-    private void connect(){
-        if (shouldConnect()) mGoogleApiClient.connect();
+    protected String getRandomId(){
+        return UUID.randomUUID().toString();
+    }
+
+    protected void run(){
+        if (!mGoogleApiClient.isConnected()) mGoogleApiClient.connect();
+        mDao.connect();
+        mScheduler.forget(mDao, FORGET_INTERVAL, TIME_TO_LIVE);
     }
 
     @Override
@@ -121,6 +122,7 @@ public class LocationPublisher extends Service
         mGoogleApiClient.disconnect();
         mDao.clear();
         mDao.disconnect();
+        mScheduler.cancelForget();
     }
 
     // PUBLIC METHODS
@@ -249,10 +251,8 @@ public class LocationPublisher extends Service
 
     // HELPERS
 
-    private boolean shouldConnect(){return !mGoogleApiClient.isConnected(); }
     private boolean playServicesDisabled() { return (GooglePlayServicesUtil.isGooglePlayServicesAvailable(this) != ConnectionResult.SUCCESS); }
     private boolean locationServicesDisabled(){ return newerThanKitKat() ? newLsOff() : oldLsOff(); }
-
     private boolean newerThanKitKat(){ return Build.VERSION.SDK_INT > 19; }
 
     private boolean newLsOff(){
@@ -266,7 +266,4 @@ public class LocationPublisher extends Service
         return locProviders == null || locProviders.equals("");
     }
 
-    private boolean hasPinged(){
-        return mLastPing > -1L;
-    }
 }
