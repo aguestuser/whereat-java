@@ -23,44 +23,47 @@ import org.tlc.whereat.util.PopToast;
 public class LocSubMain implements LocationSubscriber {
 
     public static final String TAG = LocSubMain.class.getSimpleName();
-    private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000; //TODO: move to resources
-    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1000; //TODO: move to resources
+    protected final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000; //TODO: move to resources
+    protected final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1000; //TODO: move to resources
 
-    private Context mContext;
+    protected Context mContext;
+    protected LocalBroadcastManager mLbm;
 
-    private BroadcastReceiver mLocationPublicationReceiver = locationPublicationReceiver();
-    private BroadcastReceiver mLocationsClearedReceiver = locationsClearedReceiver();
-    private BroadcastReceiver mFailedLocationRequestReceiver = failedLocationRequestReceiver();
-    private BroadcastReceiver mApiClientDisconnected = apiClientDisconnected();
-    private BroadcastReceiver mLocationServicesDisabledReceiver = locationServicesDisabledReceiver();
-    private BroadcastReceiver mPlayServicesDisabledReceiver = playServicesDisabledReceiver();
+    protected BroadcastReceiver mLocationPublicationReceiver = locationPublicationReceiver();
+    protected BroadcastReceiver mLocationsClearedReceiver = locationsClearedReceiver();
+    protected BroadcastReceiver mFailedLocationRequestReceiver = failedLocationRequestReceiver();
+    protected BroadcastReceiver mApiClientDisconnected = apiClientDisconnected();
+    protected BroadcastReceiver mLocationServicesDisabledReceiver = locationServicesDisabledReceiver();
+    protected BroadcastReceiver mPlayServicesDisabledReceiver = playServicesDisabledReceiver();
+    protected BroadcastReceiver mForgetReceiver = forgetReceiver();
 
     // CONSTRUCTOR
 
     public LocSubMain(Context ctx){
         mContext = ctx;
+        mLbm = LocalBroadcastManager.getInstance(mContext);
     }
 
     // LIFE CYCLE METHODS
 
     public void register(){
-        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(mContext);
-        Dispatcher.register(bm, mLocationPublicationReceiver, LocationPublisher.ACTION_LOCATION_PUBLISHED);
-        Dispatcher.register(bm, mLocationsClearedReceiver, LocationPublisher.ACTION_LOCATIONS_CLEARED);
-        Dispatcher.register(bm, mFailedLocationRequestReceiver, LocationPublisher.ACTION_LOCATION_REQUEST_FAILED);
-        Dispatcher.register(bm, mApiClientDisconnected, LocationPublisher.ACTION_GOOGLE_API_CLIENT_DISCONNECTED);
-        Dispatcher.register(bm, mLocationServicesDisabledReceiver, LocationPublisher.ACTION_LOCATION_SERVICES_DISABLED);
-        Dispatcher.register(bm, mPlayServicesDisabledReceiver, LocationPublisher.ACTION_PLAY_SERVICES_DISABLED);
+        Dispatcher.register(mLbm, mLocationPublicationReceiver, LocationPublisher.ACTION_LOCATION_PUBLISHED);
+        Dispatcher.register(mLbm, mLocationsClearedReceiver, LocationPublisher.ACTION_LOCATIONS_CLEARED);
+        Dispatcher.register(mLbm, mFailedLocationRequestReceiver, LocationPublisher.ACTION_LOCATION_REQUEST_FAILED);
+        Dispatcher.register(mLbm, mApiClientDisconnected, LocationPublisher.ACTION_GOOGLE_API_CLIENT_DISCONNECTED);
+        Dispatcher.register(mLbm, mLocationServicesDisabledReceiver, LocationPublisher.ACTION_LOCATION_SERVICES_DISABLED);
+        Dispatcher.register(mLbm, mPlayServicesDisabledReceiver, LocationPublisher.ACTION_PLAY_SERVICES_DISABLED);
+        Dispatcher.register(mLbm, mForgetReceiver, Scheduler.ACTION_LOCATIONS_FORGOTTEN);
     }
 
     public void unregister(){
-        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(mContext);
-        bm.unregisterReceiver(mLocationPublicationReceiver);
-        bm.unregisterReceiver(mLocationsClearedReceiver);
-        bm.unregisterReceiver(mFailedLocationRequestReceiver);
-        bm.unregisterReceiver(mApiClientDisconnected);
-        bm.unregisterReceiver(mLocationServicesDisabledReceiver);
-        bm.unregisterReceiver(mPlayServicesDisabledReceiver);
+        mLbm.unregisterReceiver(mLocationPublicationReceiver);
+        mLbm.unregisterReceiver(mLocationsClearedReceiver);
+        mLbm.unregisterReceiver(mFailedLocationRequestReceiver);
+        mLbm.unregisterReceiver(mApiClientDisconnected);
+        mLbm.unregisterReceiver(mLocationServicesDisabledReceiver);
+        mLbm.unregisterReceiver(mPlayServicesDisabledReceiver);
+        mLbm.unregisterReceiver(mForgetReceiver);
     }
 
     // BROADCAST RECEIVERS
@@ -68,7 +71,7 @@ public class LocSubMain implements LocationSubscriber {
     //TODO replace BroadcastReceivers with calls to AndroidObservable.fromBroacast()
     // see http://blog.danlew.net/2014/10/08/grokking-rxjava-part-4/
 
-    private BroadcastReceiver locationPublicationReceiver(){
+    protected BroadcastReceiver locationPublicationReceiver(){
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -77,7 +80,7 @@ public class LocSubMain implements LocationSubscriber {
         };
     }
 
-    private BroadcastReceiver locationsClearedReceiver(){
+    protected BroadcastReceiver locationsClearedReceiver(){
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -86,7 +89,7 @@ public class LocSubMain implements LocationSubscriber {
         };
     }
 
-    private BroadcastReceiver locationReceiver(){
+    protected BroadcastReceiver locationReceiver(){
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent i) {
@@ -99,7 +102,7 @@ public class LocSubMain implements LocationSubscriber {
     IntentFilter clearFilter = new IntentFilter(LocationPublisher.ACTION_LOCATIONS_CLEARED);
 
 
-    private BroadcastReceiver failedLocationRequestReceiver(){
+    protected BroadcastReceiver failedLocationRequestReceiver(){
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent i) {
@@ -108,7 +111,7 @@ public class LocSubMain implements LocationSubscriber {
         };
     }
 
-    private BroadcastReceiver apiClientDisconnected(){
+    protected BroadcastReceiver apiClientDisconnected(){
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent i) {
@@ -118,7 +121,7 @@ public class LocSubMain implements LocationSubscriber {
         };
     }
 
-    private BroadcastReceiver locationServicesDisabledReceiver(){
+    protected BroadcastReceiver locationServicesDisabledReceiver(){
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -127,7 +130,7 @@ public class LocSubMain implements LocationSubscriber {
         };
     }
 
-    private BroadcastReceiver playServicesDisabledReceiver(){
+    protected BroadcastReceiver playServicesDisabledReceiver(){
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -136,9 +139,19 @@ public class LocSubMain implements LocationSubscriber {
         };
     }
 
+    protected BroadcastReceiver forgetReceiver(){
+        return new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String msg = intent.getExtras().getString(Scheduler.ACTION_LOCATIONS_FORGOTTEN);
+                PopToast.briefly(mContext, msg);
+            }
+        };
+    }
+
     // FIXERS
 
-    private void fixLocationServices(){
+    protected void fixLocationServices(){
         new AlertDialog.Builder(mContext)
             .setMessage("Location Services not enabled.")
             .setPositiveButton("Enable",
@@ -157,7 +170,7 @@ public class LocSubMain implements LocationSubscriber {
             .show();
     }
 
-    private void fixApiConnection(ConnectionResult cr){
+    protected void fixApiConnection(ConnectionResult cr){
         if (cr.hasResolution() && mContext instanceof Activity) {
             try {
                 cr.startResolutionForResult((Activity) mContext, CONNECTION_FAILURE_RESOLUTION_REQUEST);
@@ -170,7 +183,7 @@ public class LocSubMain implements LocationSubscriber {
         }
     }
 
-    private void fixPlayServices(){
+    protected void fixPlayServices(){
         int code = GooglePlayServicesUtil.isGooglePlayServicesAvailable(mContext);
 
         if (GooglePlayServicesUtil.isUserRecoverableError(code)) {
