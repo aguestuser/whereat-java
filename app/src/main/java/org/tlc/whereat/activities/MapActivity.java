@@ -15,7 +15,7 @@ import com.google.android.gms.maps.model.Marker;
 
 import org.tlc.whereat.R;
 import org.tlc.whereat.pubsub.LocPubManager;
-import org.tlc.whereat.pubsub.LocSubMap;
+import org.tlc.whereat.receivers.MapActivityReceivers;
 import org.tlc.whereat.db.LocationDao;
 import org.tlc.whereat.model.UserLocation;
 import org.tlc.whereat.util.MapUtils;
@@ -30,7 +30,7 @@ public class MapActivity extends AppCompatActivity {
 
     protected GoogleMap mMap;
     protected LocPubManager mLocPub;
-    protected LocSubMap mLocSub;
+    protected MapActivityReceivers mReceivers;
     protected LocationDao mLocDao;
     protected ConcurrentHashMap<String, Marker> mMarkers;
     protected Long mLastPing;
@@ -43,7 +43,7 @@ public class MapActivity extends AppCompatActivity {
         setContentView(R.layout.activity_map);
 
         mLocPub = new LocPubManager(this); // TODO: can this instance be shared w/ MainActivity? TEST!!!
-        mLocSub = new LocSubMap(this);
+        mReceivers = new MapActivityReceivers(this);
         mLocDao = new LocationDao(this).connect();
 
         mMarkers = new ConcurrentHashMap<>();
@@ -59,7 +59,7 @@ public class MapActivity extends AppCompatActivity {
     protected void onResume(){
         super.onResume();
         mLocPub.bind();
-        mLocSub.register();
+        mReceivers.register();
         refresh();
     }
 
@@ -67,7 +67,7 @@ public class MapActivity extends AppCompatActivity {
     protected void onPause(){
         super.onPause();
         mLocPub.unbind();
-        mLocSub.unregister();
+        mReceivers.unregister();
     }
 
     @Override

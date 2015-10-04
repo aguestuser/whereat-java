@@ -5,31 +5,27 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 
 import org.tlc.whereat.R;
 
-public class SecurityAlertFragment extends DialogFragment {
-
+public class LocServicesAlertFragment extends DialogFragment{
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState){
 
         return new AlertDialog.Builder(getActivity())
-            .setIcon(android.R.drawable.stat_notify_error)
-            .setTitle(R.string.sec_alert_title)
-            .setMessage(R.string.sec_alert_message)
-            .setPositiveButton(R.string.sec_alert_yes_btn, new DialogInterface.OnClickListener() {
+            .setMessage(R.string.goog_loc_services_alert_title)
+            .setPositiveButton(R.string.goog_loc_services_alert_yes_btn, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    dismiss();
-                    startActivity(new Intent( Intent.ACTION_VIEW, Uri.parse(getString(R.string.sec_alert_url))));
+                    getActivity().startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
                 }
             })
-            .setNegativeButton(R.string.sec_alert_no_btn, new DialogInterface.OnClickListener() {
+            .setNegativeButton(R.string.goog_loc_services_alert_no_btn, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    dismiss();
+                    dialog.cancel();
                 }
             })
             .create();

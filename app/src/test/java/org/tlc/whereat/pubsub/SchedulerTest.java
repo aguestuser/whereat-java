@@ -16,6 +16,7 @@ import org.robolectric.annotation.Config;
 import static org.robolectric.Shadows.shadowOf;
 
 import org.tlc.whereat.BuildConfig;
+import org.tlc.whereat.R;
 import org.tlc.whereat.db.LocationDao;
 import org.tlc.whereat.support.FakeScheduler;
 import org.tlc.whereat.support.SampleTimes;
@@ -45,7 +46,7 @@ public class SchedulerTest {
         long millis = 50;
         long now = SampleTimes.S17;
         long ttl = 1;
-        long offset = 2;
+        long offset = 5;
 
 
         @Before
@@ -63,7 +64,9 @@ public class SchedulerTest {
 
             Intent expectedIntent = new Intent()
                 .setAction(Scheduler.ACTION_LOCATIONS_FORGOTTEN)
-                .putExtra(Scheduler.ACTION_LOCATIONS_FORGOTTEN,"Deleted records older than " + TimeUtils.fullDate(now - ttl));
+                .putExtra(
+                    Scheduler.ACTION_LOCATIONS_FORGOTTEN,
+                    scheduler.mCtx.getString(R.string.loc_forget_prefix) + TimeUtils.fullDate(now - ttl));
 
             scheduler.forget(dao, millis, ttl, now);
             org.robolectric.Robolectric.getForegroundThreadScheduler().advanceBy(2 * millis + offset);

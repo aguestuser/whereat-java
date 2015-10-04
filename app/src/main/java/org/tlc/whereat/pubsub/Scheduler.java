@@ -6,8 +6,8 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
+import org.tlc.whereat.R;
 import org.tlc.whereat.db.LocationDao;
 import org.tlc.whereat.util.TimeUtils;
 
@@ -54,14 +54,13 @@ public class Scheduler {
                 long threshold = rightNow - ttl;
 
                 dao.deleteOlderThan(threshold);
-                broadcastForget(mLbm, mCtx, "Deleted records older than " + TimeUtils.fullDate(threshold));
+                broadcastForget(mLbm, mCtx, mCtx.getString(R.string.loc_forget_prefix) + TimeUtils.fullDate(threshold));
 
                 mForgetHandler.postDelayed(this, interval);
             }
         };
 
         mForgetHandler.postDelayed(forget, interval);
-        Log.i(TAG, "did the thing");
     }
 
     public void cancelForget(){

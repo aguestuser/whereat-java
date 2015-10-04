@@ -24,6 +24,7 @@ import org.tlc.whereat.model.UserLocation;
 import java.util.UUID;
 
 import rx.Observable;
+import rx.Subscriber;
 
 public class LocationPublisher extends Service
     implements GoogleApiClient.ConnectionCallbacks,
@@ -54,6 +55,7 @@ public class LocationPublisher extends Service
     protected String mUserId;
     protected boolean mPolling = false;
     protected long mLastPing = -1L;
+    protected Subscriber<UserLocation> mLocSub;
 
     // LIFE CYCLE METHODS
 
@@ -81,10 +83,25 @@ public class LocationPublisher extends Service
             .addOnConnectionFailedListener(this)
             .addApi(LocationServices.API)
             .build();
+
         mLocationRequest = LocationRequest.create()
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
             .setInterval(POLLING_INTERVAL)
             .setFastestInterval(POLLING_INTERVAL);
+
+        mLocSub = new Subscriber<UserLocation>() {
+            @Override
+            public void onCompleted() {}
+
+            @Override
+            public void onError(Throwable e) {}
+
+            @Override
+            public void onNext(UserLocation userLocation) {
+                broadcastLocationReceived(userLocation);
+            }
+        };
+
         mWhereatClient = WhereatApiClient.getInstance();
         mDao = new LocationDao(this);
         mScheduler = new Scheduler(this, null);
@@ -170,7 +187,7 @@ public class LocationPublisher extends Service
     protected void update(UserLocation ul){
         mWhereatClient.update(ul.withTimestamp(mLastPing))
             .flatMap(Observable::from)
-            .subscribe(this::broadcastLocationReceived);
+            .subscribe(mLocSub);
     }
 
     protected Location lastApiLocation(){

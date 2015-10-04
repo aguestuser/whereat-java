@@ -1,5 +1,4 @@
-package org.tlc.whereat.pubsub;
-
+package org.tlc.whereat.receivers;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -8,30 +7,30 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import org.tlc.whereat.activities.MapActivity;
 import org.tlc.whereat.model.UserLocation;
+import org.tlc.whereat.pubsub.Dispatcher;
+import org.tlc.whereat.pubsub.LocationPublisher;
 
-public class LocSubMap implements LocationSubscriber {
+public class LocationMappingReceivers extends Receiver {
 
-    public static final String TAG = LocSubMap.class.getSimpleName();
+    public static final String TAG = LocationMappingReceivers.class.getSimpleName();
 
-    private MapActivity mContext;
-    private BroadcastReceiver mLocationReceiver = locationReceiver();
+    protected BroadcastReceiver mLocationReceiver = locationReceiver();
 
     // CONSTRUCTOR
 
-    public LocSubMap(MapActivity ctx){
-        mContext = ctx;
+    public LocationMappingReceivers(Context ctx, LocalBroadcastManager lbm){
+        mCtx = ctx;
+        mLbm = lbm;
     }
 
-    // LIFE CYCLE METHODS
+    // PUBLIC METHODS
 
     public void register(){
-        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(mContext);
-        Dispatcher.register(bm, mLocationReceiver, LocationPublisher.ACTION_LOCATION_RECEIVED);
+        Dispatcher.register(mLbm, mLocationReceiver, LocationPublisher.ACTION_LOCATION_RECEIVED);
     }
 
     public void unregister(){
-        LocalBroadcastManager bm = LocalBroadcastManager.getInstance(mContext);
-        bm.unregisterReceiver(mLocationReceiver);
+        mLbm.unregisterReceiver(mLocationReceiver);
     }
 
     // BROADCAST RECEIVERS
@@ -41,7 +40,7 @@ public class LocSubMap implements LocationSubscriber {
             @Override
             public void onReceive(Context context, Intent i) {
                 UserLocation l = i.getExtras().getParcelable(LocationPublisher.ACTION_LOCATION_RECEIVED);
-                mContext.map(l);
+                ((MapActivity) mCtx).map(l);
             }
         };
     }

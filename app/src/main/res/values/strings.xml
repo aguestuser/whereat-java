@@ -1,17 +1,28 @@
 <resources>
     <string name="action_settings">Settings</string>
     <string name="app_name">where@</string>
+    <string name="goog_loc_api_disconnected_toast">"Location service disconnected."</string>
+    <string name="goog_loc_services_alert_title">"Location Services not enabled."</string>
+    <string name="goog_loc_services_alert_yes_btn">"Enable."</string>
+    <string name="goog_loc_services_alert_no_btn">"Cancel."</string>
+    <string name="goog_loc_services_alert_tag">"loc_services_alert"</string>
+    <string name="goog_play_services_alert_tag">"play_services_alert"</string>
+    <string name="goog_play_services_unavailable_toast">"This device does not support Google Play Services, which is required for location sharing."</string>
     <string name="location_service_name">Location Service</string>
     <string name="main_activity_title">Home</string>
     <string name="main_button_text">Home</string>
     <string name="map_activity_title">Map</string>
     <string name="map_button_text">Map</string>
     <string name="map_clear_button_x">X</string>
+    <string name="loc_shared_toast">"Location shared."</string>
+    <string name="loc_retrieval_failed_toast">"Failed to retrieve user location."</string>
+    <string name="loc_clear_toast">"User data erased from server."</string>
+    <string name="loc_forget_prefix">"Deleted records older than"</string>
     <string name="sec_alert_title">"YOU'RE BEING SPIED ON!!!"</string>
     <string name="sec_alert_message">"We've done everything we can to ensure your privacy while using where@, but there are some forms of surveillance we can't protect you from. Not to fear: you can protect yourself! To learn how, visit our security best practices page."</string>
     <string name="sec_alert_link_text">"security best practices page."</string>
-    <string name="sec_alert_positive_button_text">"Get protection"</string>
-    <string name="sec_alert_negative_button_text">"Stay exposed"</string>
+    <string name="sec_alert_yes_btn">"Get protection"</string>
+    <string name="sec_alert_no_btn">"Stay exposed"</string>
     <string name="sec_alert_url">"https://about.whereat.io/stay-safe"</string>
     <string name="sec_alert_fragment_tag">"security_alert"</string>
 </resources>
