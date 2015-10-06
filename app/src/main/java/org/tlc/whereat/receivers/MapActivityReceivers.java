@@ -19,7 +19,6 @@ public class MapActivityReceivers extends Receiver {
         mReceivers = new ArrayList<>();
         mReceivers.add(new LocationNotificationReceivers(mCtx, mLbm));
         mReceivers.add(new LocationMappingReceivers(mCtx, mLbm));
-        mReceivers.add(new SchedulerReceivers(mCtx, mLbm));
     }
 
     // PUBLIC METHODS

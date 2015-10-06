@@ -43,14 +43,16 @@ public class LocationPublisher extends Service
     public static final String ACTION_PLAY_SERVICES_DISABLED = TAG + "PLAY_SERVICES_DISABLED";
     public static final String ACTION_LOCATIONS_CLEARED = TAG + "ACTION_LOCATIONS_CLEARED";
 
+    // FOR PROD/DEV:
     public static final int POLLING_INTERVAL = 15 * 1000; // 15 seconds
     public static final long FORGET_INTERVAL = 60*1000L; // 1 minute
     public static final long TIME_TO_LIVE = 60*60*1000L; // 1 hr
-        
-    // FOR TESTING:
-    // public static final int POLLING_INTERVAL = 12 * 1000; // 20 sec
-    // public static final long FORGET_INTERVAL = 15*1000L; // 15 sec
-    // public static final long TIME_TO_LIVE = 1000L; // 1 sec
+
+    // FOR DEBUGGING:
+
+//     public static final int POLLING_INTERVAL = 8 * 1000; // 8 sec
+//     public static final long FORGET_INTERVAL = 10 * 1000L; // 10 sec
+//     public static final long TIME_TO_LIVE = 500L; // .5 sec
 
     protected IBinder mBinder = new LocationServiceBinder();
     protected GoogleApiClient mGoogleApiClient;
@@ -110,7 +112,7 @@ public class LocationPublisher extends Service
 
         mWhereatClient = WhereatApiClient.getInstance();
         mDao = new LocationDao(this);
-        mScheduler = new Scheduler(this, LocalBroadcastManager.getInstance(this));
+        mScheduler = Scheduler.getInstance(this);
 
         mPolling = false;
         mUserId = getRandomId();
@@ -125,7 +127,7 @@ public class LocationPublisher extends Service
     protected void run(){
         if (!mGoogleApiClient.isConnected()) mGoogleApiClient.connect();
         mDao.connect();
-        mScheduler.forget(mDao, FORGET_INTERVAL, TIME_TO_LIVE);
+        mScheduler.forget(FORGET_INTERVAL, TIME_TO_LIVE);
     }
 
     @Override

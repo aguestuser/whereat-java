@@ -36,10 +36,9 @@ public class MainActivityReceiversTest extends ReceiversTest {
 
     @Test
     public void constructor_should_addChildReceivers(){
-        assertThat(rcv.mReceivers.size()).isEqualTo(3);
+        assertThat(rcv.mReceivers.size()).isEqualTo(2);
         assertThat(rcv.mReceivers.get(0).getClass()).isEqualTo(LocationNotificationReceivers.class);
         assertThat(rcv.mReceivers.get(1).getClass()).isEqualTo(GoogleApiReceivers.class);
-        assertThat(rcv.mReceivers.get(2).getClass()).isEqualTo(SchedulerReceivers.class);
     }
 
     @Test

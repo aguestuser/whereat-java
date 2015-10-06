@@ -92,7 +92,7 @@ public class LocationPublisherTest {
 
             verify(goog).connect();
             verify(dao).connect();
-            verify(sched).forget(dao, LocationPublisher.FORGET_INTERVAL, LocationPublisher.TIME_TO_LIVE);
+            verify(sched).forget(LocationPublisher.FORGET_INTERVAL, LocationPublisher.TIME_TO_LIVE);
         }
 
         @Test

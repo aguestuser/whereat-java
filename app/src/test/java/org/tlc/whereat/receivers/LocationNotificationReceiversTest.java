@@ -17,6 +17,8 @@ import org.tlc.whereat.BuildConfig;
 import org.tlc.whereat.R;
 import org.tlc.whereat.pubsub.LocationPublisher;
 import org.tlc.whereat.pubsub.Scheduler;
+import org.tlc.whereat.support.SampleTimes;
+import org.tlc.whereat.util.TimeUtils;
 
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.*;
@@ -91,11 +93,11 @@ public class LocationNotificationReceiversTest extends ReceiversTest {
     @Test
     public void forget_should_notifyUserOfForgetting(){
         rcv.register();
-        String msg = ctx.getString(R.string.loc_forget_prefix) + "09/17 12:00AM";
-        Intent i = new Intent(Scheduler.ACTION_LOCATIONS_FORGOTTEN).putExtra(Scheduler.ACTION_LOCATIONS_FORGOTTEN, msg);
-        lbm.sendBroadcast(i);
+        lbm.sendBroadcast(new Intent(Scheduler.ACTION_LOCATIONS_FORGOTTEN)
+                .putExtra(Scheduler.ACTION_LOCATIONS_FORGOTTEN, SampleTimes.S17));
 
-        assertThat(lastToast()).isEqualTo(msg);
+        assertThat(lastToast())
+            .isEqualTo(ctx.getString(R.string.loc_forget_prefix) + TimeUtils.fullDate(SampleTimes.S17));
     }
 
 }

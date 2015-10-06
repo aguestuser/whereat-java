@@ -19,7 +19,6 @@ public class MainActivityReceivers extends Receiver {
         mReceivers = new ArrayList<>();
         mReceivers.add(new LocationNotificationReceivers(mCtx, mLbm));
         mReceivers.add(new GoogleApiReceivers(mCtx, mLbm));
-        mReceivers.add(new SchedulerReceivers(mCtx, mLbm));
     }
 
     // PUBLIC METHODS

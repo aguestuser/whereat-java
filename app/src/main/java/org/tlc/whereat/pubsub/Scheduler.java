@@ -24,9 +24,17 @@ public class Scheduler {
     protected Handler mForgetHandler;
     protected Runnable mForgetRunnable;
 
-    // CONSTRUCTOR
+    // CONSTRUCTORS
 
-    public Scheduler(Context ctx, LocalBroadcastManager lbm){
+    public static Scheduler getInstance(Context ctx){
+        return new Scheduler(ctx, LocalBroadcastManager.getInstance(ctx));
+    }
+
+    public static Scheduler getInstance(Context ctx, LocalBroadcastManager lbm){
+        return new Scheduler(ctx, lbm);
+    }
+
+    protected Scheduler(Context ctx, LocalBroadcastManager lbm){
         mCtx = ctx;
         mLbm = lbm;
     }
@@ -34,13 +42,12 @@ public class Scheduler {
     /**
      * Periodically deletes all records older than a certain time-to-live threshold from DB
      *
-     * @param dao Database accessor object
      * @param interval Interval for running `forget` (in millis)
-     * @param now Current time (in millis)
      * @param ttl Amount of time (in millis) that a loc record should live before being forgotten
+     * @param now Current time in millis since 1970 (paramaterized as optional for mocking in tests)
      */
 
-    public void forget(LocationDao dao, long interval, long ttl, long... now){
+    public void forget(long interval, long ttl, long... now){
 
         HandlerThread thread = new HandlerThread("HandlerThread");
         thread.start();
