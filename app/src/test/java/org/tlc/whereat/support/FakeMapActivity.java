@@ -1,5 +1,7 @@
 package org.tlc.whereat.support;
 
+import android.util.Pair;
+
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
 
@@ -36,7 +38,7 @@ public class FakeMapActivity extends MapActivity {
         return this;
     }
 
-    public FakeMapActivity setMarkers(ConcurrentHashMap<String, Marker> markers){
+    public FakeMapActivity setMarkers(ConcurrentHashMap<String, Pair<Long,Marker>> markers){
         mMarkers = markers;
         return this;
     }

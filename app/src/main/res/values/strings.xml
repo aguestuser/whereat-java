@@ -17,7 +17,7 @@
     <string name="loc_shared_toast">"Location shared."</string>
     <string name="loc_retrieval_failed_toast">"Failed to retrieve user location."</string>
     <string name="loc_clear_toast">"User data erased from server."</string>
-    <string name="loc_forget_prefix">"Deleted records older than"</string>
+    <string name="loc_forget_prefix">"Deleted records older than "</string>
     <string name="sec_alert_title">"YOU'RE BEING SPIED ON!!!"</string>
     <string name="sec_alert_message">"We've done everything we can to ensure your privacy while using where@, but there are some forms of surveillance we can't protect you from. Not to fear: you can protect yourself! To learn how, visit our security best practices page."</string>
     <string name="sec_alert_link_text">"security best practices page."</string>

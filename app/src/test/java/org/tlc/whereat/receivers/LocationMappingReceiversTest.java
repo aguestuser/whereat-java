@@ -1,6 +1,5 @@
 package org.tlc.whereat.receivers;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
@@ -18,9 +17,6 @@ import org.tlc.whereat.activities.MapActivity;
 import org.tlc.whereat.model.UserLocation;
 import org.tlc.whereat.pubsub.LocationPublisher;
 import org.tlc.whereat.pubsub.Scheduler;
-import org.tlc.whereat.support.ActivityHelpers;
-import org.tlc.whereat.support.FakeMapActivity;
-import org.tlc.whereat.support.LocationHelpers;
 
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.*;
@@ -45,15 +41,20 @@ public class LocationMappingReceiversTest extends ReceiversTest {
     public void register_should_registerBroadcastReceivers(){
         rcv.register();
 
-        verify(lbm).registerReceiver(eq(rcv.mLocationReceiver), ifArg.capture());
+        verify(lbm).registerReceiver(eq(rcv.mPub), ifArg.capture());
         assertThat(ifArg.getValue().hasAction(LocationPublisher.ACTION_LOCATION_RECEIVED)).isTrue();
+
+        verify(lbm).registerReceiver(eq(rcv.mForget), ifArg.capture());
+        assertThat(ifArg.getValue().hasAction(Scheduler.ACTION_LOCATIONS_FORGOTTEN)).isTrue();
+
     }
 
     @Test
     public void unregister_should_unRegisterAllReceivers(){
         rcv.unregister();
 
-        verify(lbm).unregisterReceiver(rcv.mLocationReceiver);
+        verify(lbm).unregisterReceiver(rcv.mPub);
+        verify(lbm).unregisterReceiver(rcv.mForget);
     }
 
     @Test

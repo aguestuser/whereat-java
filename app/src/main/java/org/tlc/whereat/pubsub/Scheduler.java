@@ -24,7 +24,7 @@ public class Scheduler {
     protected Handler mForgetHandler;
     protected Runnable mForgetRunnable;
 
-//    // CONSTRUCTOR
+    // CONSTRUCTOR
 
     public Scheduler(Context ctx, LocalBroadcastManager lbm){
         mCtx = ctx;
@@ -49,13 +49,8 @@ public class Scheduler {
         Runnable forget = new Runnable() {
             @Override
             public void run() {
-
                 long rightNow = now.length > 0 ? now[0] : new Date().getTime();
-                long threshold = rightNow - ttl;
-
-                dao.deleteOlderThan(threshold);
-                broadcastForget(mLbm, mCtx, mCtx.getString(R.string.loc_forget_prefix) + TimeUtils.fullDate(threshold));
-
+                broadcastForget(mLbm, mCtx, rightNow - ttl);
                 mForgetHandler.postDelayed(this, interval);
             }
         };
@@ -67,10 +62,10 @@ public class Scheduler {
         if(mForgetHandler != null) mForgetHandler.removeCallbacks(mForgetRunnable);
     }
 
-    protected void broadcastForget(LocalBroadcastManager lbm, Context ctx, String msg){
-        Intent i = new Intent();
-        i.setAction(ACTION_LOCATIONS_FORGOTTEN);
-        i.putExtra(ACTION_LOCATIONS_FORGOTTEN, msg);
+    protected void broadcastForget(LocalBroadcastManager lbm, Context ctx, long expiration){
+        Intent i = new Intent()
+            .setAction(ACTION_LOCATIONS_FORGOTTEN)
+            .putExtra(ACTION_LOCATIONS_FORGOTTEN, expiration);
         Dispatcher.broadcast(lbm, ctx, i);
     }
 }

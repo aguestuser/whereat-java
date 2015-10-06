@@ -3,6 +3,7 @@ package org.tlc.whereat.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,7 +21,12 @@ import org.tlc.whereat.db.LocationDao;
 import org.tlc.whereat.model.UserLocation;
 import org.tlc.whereat.util.MapUtils;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -32,7 +38,8 @@ public class MapActivity extends AppCompatActivity {
     protected LocPubManager mLocPub;
     protected MapActivityReceivers mReceivers;
     protected LocationDao mLocDao;
-    protected ConcurrentHashMap<String, Marker> mMarkers;
+    //protected ConcurrentHashMap<String, Marker> mMarkers;
+    protected ConcurrentHashMap<String, Pair<Long, Marker>> mMarkers;
     protected Long mLastPing;
 
     // LIFE CYCLE METHODS
@@ -112,6 +119,17 @@ public class MapActivity extends AppCompatActivity {
         mLastPing = null;
     }
 
+    public void forgetSince(long time) {
+        for (Map.Entry<String, Pair<Long,Marker>> entry : mMarkers.entrySet()){
+            Pair<Long, Marker> pair = entry.getValue();
+            if(pair.first < time){
+                pair.second.remove();
+                mMarkers.remove(entry.getKey());
+            }
+        }
+        mLocDao.deleteOlderThan(time);
+    }
+
     // PRIVATE MAP MUTATORS
 
 
@@ -150,21 +168,27 @@ public class MapActivity extends AppCompatActivity {
         if (!ls.isEmpty()) for (UserLocation l : ls) plot(l);
     }
 
-    private void plot(UserLocation l){
-        if (plotted(l)) rePlot(l);
-        else addPlot(l);
+    private boolean plot(UserLocation l){
+        return plotted(l) ? rePlot(l) : addPlot(l);
     }
 
     private boolean plotted(UserLocation l){
         return mMarkers.containsKey(l.getId());
     }
 
-    private void rePlot(UserLocation l){
-        mMarkers.get(l.getId()).setPosition(MapUtils.parseLatLon(l));
+    private boolean rePlot(UserLocation l){
+        String id = l.getId();
+        Pair<Long, Marker> pair = mMarkers.get(id);
+
+        pair.second.setPosition(MapUtils.parseLatLon(l));
+        mMarkers.put(id, Pair.create(l.getTime(), pair.second));
+        return true;
     }
 
-    private void addPlot(UserLocation l){
-        mMarkers.put(l.getId(), mMap.addMarker(MapUtils.parseMarker(l)));
+    private boolean addPlot(UserLocation l){
+        mMarkers.put(l.getId(),
+            Pair.create(l.getTime(), mMap.addMarker(MapUtils.parseMarker(l))));
+        return true;
     }
 
     private List<UserLocation> allLocations(){

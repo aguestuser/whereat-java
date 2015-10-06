@@ -1,5 +1,6 @@
 package org.tlc.whereat.activities;
 
+import android.util.Pair;
 import android.widget.Button;
 import android.widget.ImageButton;
 
@@ -40,8 +41,8 @@ public class MapActivityTest {
         LocPubManager mockLocPub = mock(LocPubManager.class);
 
         Marker m = mock(Marker.class);
-        ConcurrentHashMap<String,Marker> stubMarkers = new ConcurrentHashMap<>();
-        stubMarkers.put("fakeId", m);
+        ConcurrentHashMap<String, Pair<Long,Marker>> stubMarkers = new ConcurrentHashMap<>();
+        stubMarkers.put("fakeId", Pair.create(1L,m));
 
         FakeMapActivity a = createActivity(FakeMapActivity.class)
             .setMap(mockMap)

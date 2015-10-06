@@ -16,6 +16,7 @@ import org.robolectric.annotation.Config;
 import org.tlc.whereat.BuildConfig;
 import org.tlc.whereat.R;
 import org.tlc.whereat.pubsub.LocationPublisher;
+import org.tlc.whereat.pubsub.Scheduler;
 
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.*;
@@ -40,27 +41,31 @@ public class LocationNotificationReceiversTest extends ReceiversTest {
     public void register_should_registerBroadcastReceivers(){
         rcv.register();
 
-        verify(lbm).registerReceiver(eq(rcv.mLocationPublicationReceiver), ifArg.capture());
+        verify(lbm).registerReceiver(eq(rcv.mPub), ifArg.capture());
         assertThat(ifArg.getValue().hasAction(LocationPublisher.ACTION_LOCATION_PUBLISHED)).isTrue();
 
-        verify(lbm).registerReceiver(eq(rcv.mLocationsClearedReceiver), ifArg.capture());
+        verify(lbm).registerReceiver(eq(rcv.mClear), ifArg.capture());
         assertThat(ifArg.getValue().hasAction(LocationPublisher.ACTION_LOCATIONS_CLEARED)).isTrue();
 
-        verify(lbm).registerReceiver(eq(rcv.mLocationRetrievalFailureReceiver), ifArg.capture());
+        verify(lbm).registerReceiver(eq(rcv.mFail), ifArg.capture());
         assertThat(ifArg.getValue().hasAction(LocationPublisher.ACTION_LOCATION_REQUEST_FAILED)).isTrue();
+
+        verify(lbm).registerReceiver(eq(rcv.mForget), ifArg.capture());
+        assertThat(ifArg.getValue().hasAction(Scheduler.ACTION_LOCATIONS_FORGOTTEN)).isTrue();
     }
 
     @Test
     public void unregister_should_unRegisterAllReceivers(){
         rcv.unregister();
 
-        verify(lbm).unregisterReceiver(rcv.mLocationPublicationReceiver);
-        verify(lbm).unregisterReceiver(rcv.mLocationsClearedReceiver);
-        verify(lbm).unregisterReceiver(rcv.mLocationRetrievalFailureReceiver);
+        verify(lbm).unregisterReceiver(rcv.mPub);
+        verify(lbm).unregisterReceiver(rcv.mClear);
+        verify(lbm).unregisterReceiver(rcv.mFail);
+        verify(lbm).unregisterReceiver(rcv.mForget);
     }
 
     @Test
-    public void locationPublicationReceiver_should_notifyUserOfLocationPublication(){
+    public void pub_should_notifyUserOfLocationPublication(){
         rcv.register();
         lbm.sendBroadcast(new Intent().setAction(LocationPublisher.ACTION_LOCATION_PUBLISHED));
 
@@ -68,7 +73,7 @@ public class LocationNotificationReceiversTest extends ReceiversTest {
     }
 
     @Test
-    public void locationRetrievalFailureReceiver_should_notifyUserOfFailureToRetrieveLocation(){
+    public void fail_should_notifyUserOfFailureToRetrieveLocation(){
         rcv.register();
         lbm.sendBroadcast(new Intent().setAction(LocationPublisher.ACTION_LOCATION_REQUEST_FAILED));
 
@@ -76,11 +81,21 @@ public class LocationNotificationReceiversTest extends ReceiversTest {
     }
 
     @Test
-    public void locationsClearedReceiver_should_notifyUserOfDeletion(){
+    public void clear_should_notifyUserOfDeletion(){
         rcv.register();
         lbm.sendBroadcast(new Intent().setAction(LocationPublisher.ACTION_LOCATIONS_CLEARED));
 
         assertThat(lastToast()).isEqualTo(ctx.getString(R.string.loc_clear_toast));
+    }
+
+    @Test
+    public void forget_should_notifyUserOfForgetting(){
+        rcv.register();
+        String msg = ctx.getString(R.string.loc_forget_prefix) + "09/17 12:00AM";
+        Intent i = new Intent(Scheduler.ACTION_LOCATIONS_FORGOTTEN).putExtra(Scheduler.ACTION_LOCATIONS_FORGOTTEN, msg);
+        lbm.sendBroadcast(i);
+
+        assertThat(lastToast()).isEqualTo(msg);
     }
 
 }

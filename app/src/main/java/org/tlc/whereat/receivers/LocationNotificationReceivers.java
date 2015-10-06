@@ -9,16 +9,19 @@ import android.support.v4.content.LocalBroadcastManager;
 import org.tlc.whereat.R;
 import org.tlc.whereat.pubsub.Dispatcher;
 import org.tlc.whereat.pubsub.LocationPublisher;
+import org.tlc.whereat.pubsub.Scheduler;
 import org.tlc.whereat.util.PopToast;
+import org.tlc.whereat.util.TimeUtils;
 
 
 public class LocationNotificationReceivers extends Receiver {
 
     public static final String TAG = LocationNotificationReceivers.class.getSimpleName();
 
-    protected BroadcastReceiver mLocationPublicationReceiver = locationPublicationReceiver();
-    protected BroadcastReceiver mLocationsClearedReceiver = locationsClearedReceiver();
-    protected BroadcastReceiver mLocationRetrievalFailureReceiver = locationRetrievalFailureReceiver();
+    protected BroadcastReceiver mPub = pub();
+    protected BroadcastReceiver mClear = clear();
+    protected BroadcastReceiver mFail = fail();
+    protected BroadcastReceiver mForget = forget();
 
 
     // CONSTRUCTOR
@@ -31,15 +34,17 @@ public class LocationNotificationReceivers extends Receiver {
     // LIFE CYCLE METHODS
 
     public void register(){
-        Dispatcher.register(mLbm, mLocationPublicationReceiver, LocationPublisher.ACTION_LOCATION_PUBLISHED);
-        Dispatcher.register(mLbm, mLocationsClearedReceiver, LocationPublisher.ACTION_LOCATIONS_CLEARED);
-        Dispatcher.register(mLbm, mLocationRetrievalFailureReceiver, LocationPublisher.ACTION_LOCATION_REQUEST_FAILED);
+        Dispatcher.register(mLbm, mPub, LocationPublisher.ACTION_LOCATION_PUBLISHED);
+        Dispatcher.register(mLbm, mClear, LocationPublisher.ACTION_LOCATIONS_CLEARED);
+        Dispatcher.register(mLbm, mFail, LocationPublisher.ACTION_LOCATION_REQUEST_FAILED);
+        Dispatcher.register(mLbm, mForget, Scheduler.ACTION_LOCATIONS_FORGOTTEN);
     }
 
     public void unregister(){
-        mLbm.unregisterReceiver(mLocationPublicationReceiver);
-        mLbm.unregisterReceiver(mLocationRetrievalFailureReceiver);
-        mLbm.unregisterReceiver(mLocationsClearedReceiver);
+        mLbm.unregisterReceiver(mPub);
+        mLbm.unregisterReceiver(mFail);
+        mLbm.unregisterReceiver(mClear);
+        mLbm.unregisterReceiver(mForget);
     }
 
     // BROADCAST RECEIVERS
@@ -47,7 +52,7 @@ public class LocationNotificationReceivers extends Receiver {
     //TODO replace BroadcastReceivers with calls to AndroidObservable.fromBroacast()?
     // see http://blog.danlew.net/2014/10/08/grokking-rxjava-part-4/
 
-    protected BroadcastReceiver locationPublicationReceiver(){
+    protected BroadcastReceiver pub(){
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -56,7 +61,7 @@ public class LocationNotificationReceivers extends Receiver {
         };
     }
 
-    protected BroadcastReceiver locationRetrievalFailureReceiver(){
+    protected BroadcastReceiver fail(){
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent i) {
@@ -65,7 +70,7 @@ public class LocationNotificationReceivers extends Receiver {
         };
     }
 
-    protected BroadcastReceiver locationsClearedReceiver(){
+    protected BroadcastReceiver clear(){
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -73,4 +78,17 @@ public class LocationNotificationReceivers extends Receiver {
             }
         };
     }
+
+    protected BroadcastReceiver forget(){
+        return new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                long time = intent.getExtras().getLong(Scheduler.ACTION_LOCATIONS_FORGOTTEN);
+                String msg = mCtx.getString(R.string.loc_forget_prefix) + TimeUtils.fullDate(time);
+                PopToast.briefly(mCtx, msg);
+            }
+        };
+    }
+
+
 }

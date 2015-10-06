@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -45,6 +46,11 @@ public class LocationPublisher extends Service
     public static final int POLLING_INTERVAL = 15 * 1000; // 15 seconds
     public static final long FORGET_INTERVAL = 60*1000L; // 1 minute
     public static final long TIME_TO_LIVE = 60*60*1000L; // 1 hr
+        
+    // FOR TESTING:
+    // public static final int POLLING_INTERVAL = 12 * 1000; // 20 sec
+    // public static final long FORGET_INTERVAL = 15*1000L; // 15 sec
+    // public static final long TIME_TO_LIVE = 1000L; // 1 sec
 
     protected IBinder mBinder = new LocationServiceBinder();
     protected GoogleApiClient mGoogleApiClient;
@@ -104,7 +110,7 @@ public class LocationPublisher extends Service
 
         mWhereatClient = WhereatApiClient.getInstance();
         mDao = new LocationDao(this);
-        mScheduler = new Scheduler(this, null);
+        mScheduler = new Scheduler(this, LocalBroadcastManager.getInstance(this));
 
         mPolling = false;
         mUserId = getRandomId();
