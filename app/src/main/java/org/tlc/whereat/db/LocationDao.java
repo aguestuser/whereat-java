@@ -18,15 +18,15 @@ public class LocationDao {
     // FIELDS
 
     public static final String TAG = LocationDao.class.getSimpleName();
+    protected Context mCtx;
     protected SQLiteDatabase mDb;
     protected Dao mDao;
-    protected Context mCtx;
     protected String[] mAllColumns = {
         Dao.COLUMN_ID,
         Dao.COLUMN_LAT,
         Dao.COLUMN_LON,
-        Dao.COLUMN_TIME
-    };
+        Dao.COLUMN_TIME };
+    protected boolean mConnected;
 
     // CONSTRUCTOR
 
@@ -35,11 +35,18 @@ public class LocationDao {
         mDao = Dao.getInstance(ctx);
     }
 
+    // GETTERS
+
+    public boolean isConnected(){
+        return mConnected;
+    }
+
     // PUBLIC METHODS
 
     public LocationDao connect() {
         try {
             tryConnect();
+            mConnected = true;
         } catch (SQLException e) {
             Log.e(TAG, "Error connecting to DB.");
             e.printStackTrace();
@@ -81,7 +88,7 @@ public class LocationDao {
         return mDb.delete(Dao.TABLE_LOCATIONS, idEquals(id), null);
     }
 
-    public int deleteOlderThan(long t) {
+    public int forgetSince(long t) {
         return mDb.delete(Dao.TABLE_LOCATIONS, timeLessThan(t), null);
     }
 

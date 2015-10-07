@@ -5,6 +5,8 @@ import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
@@ -12,6 +14,7 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import org.tlc.whereat.util.TimeUtils;
 import org.whispersystems.curve25519.JCESecureRandomProvider;
 
 public class UserLocation implements Parcelable {
@@ -96,6 +99,24 @@ public class UserLocation implements Parcelable {
     public long getTime() {
         return mTime;
     }
+
+    // CONVERTERS
+
+    public MarkerOptions asMarkerOptions(){
+        return new MarkerOptions()
+            .position(asLatLng())
+            .title(asDateTime());
+    }
+
+    public LatLng asLatLng(){
+        return new LatLng(getLatitude(), getLongitude());
+    }
+
+    private String asDateTime(){
+        return TimeUtils.fullDate(getTime());
+    }
+
+
 
     // PARCELABLE IMPLEMENTATION
 

@@ -25,7 +25,6 @@ public class MainActivity extends AppCompatActivity {
     protected boolean mPolling;
     protected SecurityAlertFragment mSecAlert;
 
-
     protected boolean mSecAlerted;
 
     // LIFE CYCLE METHODS
@@ -38,7 +37,6 @@ public class MainActivity extends AppCompatActivity {
 
         mLocPub = new LocPubManager(this).start();
         mReceivers = new MainActivityReceivers(this);
-
         mSecAlert = new SecurityAlertFragment();
 
         mPolling = false;

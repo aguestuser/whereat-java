@@ -1,7 +1,7 @@
 package org.tlc.whereat.db;
 
 import android.database.sqlite.SQLiteDatabase;
-import android.location.Location;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,11 +47,22 @@ public class LocationDaoTest {
         }
 
         @Test
+        public void isConnected_should_getConnectedField(){
+            mLocDao.mConnected = false;
+            assertThat(mLocDao.isConnected()).isFalse();
+
+            mLocDao.mConnected = true;
+            assertThat(mLocDao.isConnected()).isTrue();
+        }
+
+        @Test
         public void connect_should_connectToDatabase(){
+            assertThat(mLocDao.mConnected).isFalse();
             mLocDao.connect();
 
             verify(mMockDao, times(1)).getWritableDatabase();
             assertThat(mLocDao.getDb()).isEqualTo(mMockDb);
+            assertThat(mLocDao.mConnected).isTrue();
         }
 
         @Test
@@ -190,14 +201,14 @@ public class LocationDaoTest {
         }
 
         @Test
-        public void deleteOlderThan_should_deleteRecordsOlderThanAnExpiryDate(){
+        public void forgetSince_should_deleteRecordsOlderThanAnExpiryDate(){
             assertThat(mLocDao.count()).isEqualTo(2);
 
-            int deleteCount1 = mLocDao.deleteOlderThan(SampleTimes.S17 + 1L);
+            int deleteCount1 = mLocDao.forgetSince(SampleTimes.S17 + 1L);
             assertThat(deleteCount1).isEqualTo(1);
             assertThat(mLocDao.count()).isEqualTo(1);
 
-            int deleteCount2 = mLocDao.deleteOlderThan(SampleTimes.N17);
+            int deleteCount2 = mLocDao.forgetSince(SampleTimes.N17);
             assertThat(deleteCount2).isEqualTo(0);
             assertThat(mLocDao.count()).isEqualTo(1);
         }

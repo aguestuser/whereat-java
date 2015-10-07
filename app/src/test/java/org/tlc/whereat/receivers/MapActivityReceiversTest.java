@@ -12,8 +12,8 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import org.tlc.whereat.BuildConfig;
+import org.tlc.whereat.activities.MapActivity;
 import org.tlc.whereat.support.ActivityHelpers;
-import org.tlc.whereat.support.FakeMapActivity;
 
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.*;
@@ -28,7 +28,7 @@ public class MapActivityReceiversTest extends ReceiversTest{
 
     @Before
     public void setup(){
-        ctx = ActivityHelpers.createActivity(FakeMapActivity.class);
+        ctx = ActivityHelpers.createActivity(MapActivity.class);
         lbm = spy(LocalBroadcastManager.getInstance(RuntimeEnvironment.application));
         ifArg = ArgumentCaptor.forClass(IntentFilter.class);
         rcv = new MapActivityReceivers(ctx);

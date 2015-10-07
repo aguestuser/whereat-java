@@ -13,16 +13,5 @@ public class MapUtils {
 
     public MapUtils(){}
 
-    public static MarkerOptions parseMarker(UserLocation l){
-        return new MarkerOptions().position(parseLatLon(l)).title(parseTime(l));
-    }
-
-    public static LatLng parseLatLon(UserLocation loc){
-        return new LatLng(loc.getLatitude(), loc.getLongitude());
-    }
-
-    private static String parseTime(UserLocation loc){
-        return TimeUtils.fullDate(loc.getTime());
-    }
 
 }

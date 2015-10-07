@@ -10,23 +10,18 @@ import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.fakes.RoboMenuItem;
 
-import static org.mockito.Mockito.*;
-
-import static org.robolectric.Shadows.shadowOf;
 
 import org.tlc.whereat.BuildConfig;
 import org.tlc.whereat.R;
-import org.tlc.whereat.fragments.LocServicesAlertFragment;
 import org.tlc.whereat.fragments.SecurityAlertFragment;
 import org.tlc.whereat.pubsub.LocPubManager;
 import org.tlc.whereat.receivers.MainActivityReceivers;
 import org.tlc.whereat.pubsub.LocationPublisher;
 import org.tlc.whereat.support.FakeMainActivity;
 
+import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.tlc.whereat.support.ActivityHelpers.*;
-
-
 
 @RunWith(Enclosed.class)
 
