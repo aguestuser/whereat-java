@@ -64,7 +64,7 @@ dependencies {
 
     testCompile 'com.squareup.okhttp:mockwebserver:2.4.0'
     testCompile 'junit:junit:4.12'
-    testCompile "org.assertj:assertj-core:1.7.0"
+    testCompile "org.assertj:assertj-core:3.2.0"
     testCompile 'org.robolectric:robolectric:3.0-rc3'
     testCompile 'org.robolectric:shadows-play-services:3.0-rc3'
     testCompile 'org.robolectric:shadows-maps:3.0-rc3'
