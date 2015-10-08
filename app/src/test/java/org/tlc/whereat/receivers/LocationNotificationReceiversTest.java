@@ -15,6 +15,7 @@ import org.robolectric.annotation.Config;
 
 import org.tlc.whereat.BuildConfig;
 import org.tlc.whereat.R;
+import org.tlc.whereat.broadcasters.LocPubBroadcasters;
 import org.tlc.whereat.pubsub.LocationPublisher;
 import org.tlc.whereat.pubsub.Scheduler;
 import org.tlc.whereat.support.SampleTimes;
@@ -44,13 +45,13 @@ public class LocationNotificationReceiversTest extends ReceiversTest {
         rcv.register();
 
         verify(lbm).registerReceiver(eq(rcv.mPub), ifArg.capture());
-        assertThat(ifArg.getValue().hasAction(LocationPublisher.ACTION_LOCATION_PUBLISHED)).isTrue();
+        assertThat(ifArg.getValue().hasAction(LocPubBroadcasters.ACTION_LOCATION_PUBLISHED)).isTrue();
 
         verify(lbm).registerReceiver(eq(rcv.mClear), ifArg.capture());
-        assertThat(ifArg.getValue().hasAction(LocationPublisher.ACTION_LOCATIONS_CLEARED)).isTrue();
+        assertThat(ifArg.getValue().hasAction(LocPubBroadcasters.ACTION_LOCATIONS_CLEARED)).isTrue();
 
         verify(lbm).registerReceiver(eq(rcv.mFail), ifArg.capture());
-        assertThat(ifArg.getValue().hasAction(LocationPublisher.ACTION_LOCATION_REQUEST_FAILED)).isTrue();
+        assertThat(ifArg.getValue().hasAction(LocPubBroadcasters.ACTION_LOCATION_REQUEST_FAILED)).isTrue();
 
         verify(lbm).registerReceiver(eq(rcv.mForget), ifArg.capture());
         assertThat(ifArg.getValue().hasAction(Scheduler.ACTION_LOCATIONS_FORGOTTEN)).isTrue();
@@ -69,7 +70,7 @@ public class LocationNotificationReceiversTest extends ReceiversTest {
     @Test
     public void pub_should_notifyUserOfLocationPublication(){
         rcv.register();
-        lbm.sendBroadcast(new Intent().setAction(LocationPublisher.ACTION_LOCATION_PUBLISHED));
+        lbm.sendBroadcast(new Intent().setAction(LocPubBroadcasters.ACTION_LOCATION_PUBLISHED));
 
         assertThat(lastToast()).isEqualTo(ctx.getString(R.string.loc_shared_toast));
     }
@@ -77,7 +78,7 @@ public class LocationNotificationReceiversTest extends ReceiversTest {
     @Test
     public void fail_should_notifyUserOfFailureToRetrieveLocation(){
         rcv.register();
-        lbm.sendBroadcast(new Intent().setAction(LocationPublisher.ACTION_LOCATION_REQUEST_FAILED));
+        lbm.sendBroadcast(new Intent().setAction(LocPubBroadcasters.ACTION_LOCATION_REQUEST_FAILED));
 
         assertThat(lastToast()).isEqualTo(ctx.getString(R.string.loc_retrieval_failed_toast));
     }
@@ -85,7 +86,7 @@ public class LocationNotificationReceiversTest extends ReceiversTest {
     @Test
     public void clear_should_notifyUserOfDeletion(){
         rcv.register();
-        lbm.sendBroadcast(new Intent().setAction(LocationPublisher.ACTION_LOCATIONS_CLEARED));
+        lbm.sendBroadcast(new Intent().setAction(LocPubBroadcasters.ACTION_LOCATIONS_CLEARED));
 
         assertThat(lastToast()).isEqualTo(ctx.getString(R.string.loc_clear_toast));
     }

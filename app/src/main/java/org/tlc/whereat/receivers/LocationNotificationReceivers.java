@@ -7,8 +7,8 @@ import android.content.Context;
 import android.support.v4.content.LocalBroadcastManager;
 
 import org.tlc.whereat.R;
+import org.tlc.whereat.broadcasters.LocPubBroadcasters;
 import org.tlc.whereat.pubsub.Dispatcher;
-import org.tlc.whereat.pubsub.LocationPublisher;
 import org.tlc.whereat.pubsub.Scheduler;
 import org.tlc.whereat.util.PopToast;
 import org.tlc.whereat.util.TimeUtils;
@@ -34,9 +34,9 @@ public class LocationNotificationReceivers extends Receiver {
     // LIFE CYCLE METHODS
 
     public void register(){
-        Dispatcher.register(mLbm, mPub, LocationPublisher.ACTION_LOCATION_PUBLISHED);
-        Dispatcher.register(mLbm, mClear, LocationPublisher.ACTION_LOCATIONS_CLEARED);
-        Dispatcher.register(mLbm, mFail, LocationPublisher.ACTION_LOCATION_REQUEST_FAILED);
+        Dispatcher.register(mLbm, mPub, LocPubBroadcasters.ACTION_LOCATION_PUBLISHED);
+        Dispatcher.register(mLbm, mClear, LocPubBroadcasters.ACTION_LOCATIONS_CLEARED);
+        Dispatcher.register(mLbm, mFail, LocPubBroadcasters.ACTION_LOCATION_REQUEST_FAILED);
         Dispatcher.register(mLbm, mForget, Scheduler.ACTION_LOCATIONS_FORGOTTEN);
     }
 

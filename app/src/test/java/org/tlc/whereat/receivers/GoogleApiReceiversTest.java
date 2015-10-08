@@ -19,6 +19,7 @@ import org.robolectric.annotation.Config;
 import org.tlc.whereat.BuildConfig;
 import org.tlc.whereat.R;
 import org.tlc.whereat.activities.MainActivity;
+import org.tlc.whereat.broadcasters.LocPubBroadcasters;
 import org.tlc.whereat.fragments.LocServicesAlertFragment;
 import org.tlc.whereat.fragments.PlayServicesAlertFragment;
 import org.tlc.whereat.pubsub.LocationPublisher;
@@ -53,13 +54,13 @@ public class GoogleApiReceiversTest extends ReceiversTest {
         rcv.register();
 
         verify(lbm).registerReceiver(eq(rcv.mApiClientDisconnected), ifArg.capture());
-        assertThat(ifArg.getValue().hasAction(LocationPublisher.ACTION_GOOGLE_API_CLIENT_DISCONNECTED)).isTrue();
+        assertThat(ifArg.getValue().hasAction(LocPubBroadcasters.ACTION_GOOGLE_API_CLIENT_DISCONNECTED)).isTrue();
 
         verify(lbm).registerReceiver(eq(rcv.mLocationServicesDisabledReceiver), ifArg.capture());
-        assertThat(ifArg.getValue().hasAction(LocationPublisher.ACTION_LOCATION_SERVICES_DISABLED)).isTrue();
+        assertThat(ifArg.getValue().hasAction(LocPubBroadcasters.ACTION_LOCATION_SERVICES_DISABLED)).isTrue();
 
         verify(lbm).registerReceiver(eq(rcv.mPlayServicesDisabledReceiver), ifArg.capture());
-        assertThat(ifArg.getValue().hasAction(LocationPublisher.ACTION_PLAY_SERVICES_DISABLED)).isTrue();
+        assertThat(ifArg.getValue().hasAction(LocPubBroadcasters.ACTION_PLAY_SERVICES_DISABLED)).isTrue();
     }
 
     @Test
@@ -95,15 +96,15 @@ public class GoogleApiReceiversTest extends ReceiversTest {
 
     protected void broadcastApiFailure(LocalBroadcastManager lbm, ConnectionResult cr){
         lbm.sendBroadcast(new Intent()
-            .setAction(LocationPublisher.ACTION_GOOGLE_API_CLIENT_DISCONNECTED)
-            .putExtra(LocationPublisher.ACTION_GOOGLE_API_CLIENT_DISCONNECTED, cr));
+            .setAction(LocPubBroadcasters.ACTION_GOOGLE_API_CLIENT_DISCONNECTED)
+            .putExtra(LocPubBroadcasters.ACTION_GOOGLE_API_CLIENT_DISCONNECTED, cr));
     }
 
     @Test
     public void locationServicesDisabledReceiver_should_tryToFixLocationServices(){
         rcv.mLocServicesAlert = mock(LocServicesAlertFragment.class);
         rcv.register();
-        lbm.sendBroadcast(new Intent().setAction(LocationPublisher.ACTION_LOCATION_SERVICES_DISABLED));
+        lbm.sendBroadcast(new Intent().setAction(LocPubBroadcasters.ACTION_LOCATION_SERVICES_DISABLED));
 
         verify(rcv.mLocServicesAlert)
             .show(ctx.getFragmentManager(),ctx.getString(R.string.goog_loc_services_alert_tag));
@@ -130,7 +131,7 @@ public class GoogleApiReceiversTest extends ReceiversTest {
     }
 
     private void broadcastPlayServicesDisabled(LocalBroadcastManager lbm){
-        lbm.sendBroadcast(new Intent().setAction(LocationPublisher.ACTION_PLAY_SERVICES_DISABLED));
+        lbm.sendBroadcast(new Intent().setAction(LocPubBroadcasters.ACTION_PLAY_SERVICES_DISABLED));
     }
 
     private class ReceiverWithPlay extends GoogleApiReceivers {

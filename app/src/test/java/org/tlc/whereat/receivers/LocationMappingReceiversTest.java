@@ -14,8 +14,8 @@ import org.robolectric.annotation.Config;
 
 import org.tlc.whereat.BuildConfig;
 import org.tlc.whereat.activities.MapActivity;
+import org.tlc.whereat.broadcasters.LocPubBroadcasters;
 import org.tlc.whereat.model.UserLocation;
-import org.tlc.whereat.pubsub.LocationPublisher;
 import org.tlc.whereat.pubsub.Scheduler;
 
 import static org.mockito.Mockito.*;
@@ -41,8 +41,8 @@ public class LocationMappingReceiversTest extends ReceiversTest {
     public void register_should_registerBroadcastReceivers(){
         rcv.register();
 
-        verify(lbm).registerReceiver(eq(rcv.mPub), ifArg.capture());
-        assertThat(ifArg.getValue().hasAction(LocationPublisher.ACTION_LOCATION_RECEIVED)).isTrue();
+        verify(lbm).registerReceiver(eq(rcv.mMap), ifArg.capture());
+        assertThat(ifArg.getValue().hasAction(LocPubBroadcasters.ACTION_LOCATION_RECEIVED)).isTrue();
 
         verify(lbm).registerReceiver(eq(rcv.mForget), ifArg.capture());
         assertThat(ifArg.getValue().hasAction(Scheduler.ACTION_LOCATIONS_FORGOTTEN)).isTrue();
@@ -53,7 +53,7 @@ public class LocationMappingReceiversTest extends ReceiversTest {
     public void unregister_should_unRegisterAllReceivers(){
         rcv.unregister();
 
-        verify(lbm).unregisterReceiver(rcv.mPub);
+        verify(lbm).unregisterReceiver(rcv.mMap);
         verify(lbm).unregisterReceiver(rcv.mForget);
     }
 
@@ -64,8 +64,8 @@ public class LocationMappingReceiversTest extends ReceiversTest {
         UserLocation loc = s17UserLocationStub();
 
         lbm.sendBroadcast(new Intent()
-            .setAction(LocationPublisher.ACTION_LOCATION_RECEIVED)
-            .putExtra(LocationPublisher.ACTION_LOCATION_RECEIVED, loc));
+            .setAction(LocPubBroadcasters.ACTION_LOCATION_RECEIVED)
+            .putExtra(LocPubBroadcasters.ACTION_LOCATION_RECEIVED, loc));
 
         verify((MapActivity)rcv.mCtx).map(loc);
     }

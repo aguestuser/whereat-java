@@ -12,6 +12,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
 import org.tlc.whereat.R;
+import org.tlc.whereat.broadcasters.LocPubBroadcasters;
 import org.tlc.whereat.fragments.LocServicesAlertFragment;
 import org.tlc.whereat.fragments.PlayServicesAlertFragment;
 import org.tlc.whereat.pubsub.Dispatcher;
@@ -46,9 +47,9 @@ public class GoogleApiReceivers extends Receiver {
     // PUBLIC METHODS
 
     public void register(){
-        Dispatcher.register(mLbm, mApiClientDisconnected, LocationPublisher.ACTION_GOOGLE_API_CLIENT_DISCONNECTED);
-        Dispatcher.register(mLbm, mLocationServicesDisabledReceiver, LocationPublisher.ACTION_LOCATION_SERVICES_DISABLED);
-        Dispatcher.register(mLbm, mPlayServicesDisabledReceiver, LocationPublisher.ACTION_PLAY_SERVICES_DISABLED);
+        Dispatcher.register(mLbm, mApiClientDisconnected, LocPubBroadcasters.ACTION_GOOGLE_API_CLIENT_DISCONNECTED);
+        Dispatcher.register(mLbm, mLocationServicesDisabledReceiver, LocPubBroadcasters.ACTION_LOCATION_SERVICES_DISABLED);
+        Dispatcher.register(mLbm, mPlayServicesDisabledReceiver, LocPubBroadcasters.ACTION_PLAY_SERVICES_DISABLED);
     }
 
     public void unregister(){
@@ -63,7 +64,7 @@ public class GoogleApiReceivers extends Receiver {
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent i) {
-                ConnectionResult cr = i.getExtras().getParcelable(LocationPublisher.ACTION_GOOGLE_API_CLIENT_DISCONNECTED);
+                ConnectionResult cr = i.getExtras().getParcelable(LocPubBroadcasters.ACTION_GOOGLE_API_CLIENT_DISCONNECTED);
                 fixApiConnection(cr);
             }
         };
