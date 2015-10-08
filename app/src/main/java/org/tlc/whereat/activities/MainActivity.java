@@ -5,17 +5,15 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.method.LinkMovementMethod;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 
 import org.tlc.whereat.R;
 import org.tlc.whereat.fragments.SecurityAlertFragment;
 import org.tlc.whereat.pubsub.LocPubManager;
-import org.tlc.whereat.pubsub.LocSubMain;
+import org.tlc.whereat.receivers.MainActivityReceivers;
 import org.tlc.whereat.util.PopToast;
 
 public class MainActivity extends AppCompatActivity {
@@ -23,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG = MainActivity.class.getSimpleName();
 
     protected LocPubManager mLocPub;
-    protected LocSubMain mLocSub;
+    protected MainActivityReceivers mReceivers;
     protected boolean mPolling;
     protected SecurityAlertFragment mSecAlert;
 
@@ -38,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mLocPub = new LocPubManager(this).start();
-        mLocSub = new LocSubMain(this);
+        mReceivers = new MainActivityReceivers(this);
         mSecAlert = new SecurityAlertFragment();
 
         mPolling = false;
@@ -67,14 +65,14 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         if(!mSecAlerted) { showSecurityAlert(); }
         mLocPub.bind();
-        mLocSub.register();
+        mReceivers.register();
     }
 
     @Override
     protected void onPause(){
         super.onPause();
         mLocPub.unbind();
-        mLocSub.unregister();
+        mReceivers.unregister();
     }
 
     @Override
@@ -130,4 +128,5 @@ public class MainActivity extends AppCompatActivity {
         mSecAlert.show(getFragmentManager(),getString(R.string.sec_alert_fragment_tag));
         mSecAlerted = true;
     }
+
 }

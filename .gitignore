@@ -15,6 +15,7 @@ gen/
 proguard/
 .signing/
 *.log
+app/src/test/coverage/*
 
 # OS-specific files
 .DS_Store

@@ -1,14 +1,14 @@
 package org.tlc.whereat.pubsub;
 
-import android.app.Activity;
-import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.location.Location;
 import android.os.IBinder;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderApi;
+
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -21,20 +21,20 @@ import org.tlc.whereat.BuildConfig;
 
 import static org.mockito.Mockito.*;
 import static org.tlc.whereat.support.LocationHelpers.*;
-import static org.tlc.whereat.support.ReflectionHelpers.*;
 
 import org.tlc.whereat.api.WhereatApiClient;
+import org.tlc.whereat.broadcasters.LocPubBroadcasters;
 import org.tlc.whereat.db.LocationDao;
 import org.tlc.whereat.model.UserLocation;
 import org.tlc.whereat.model.UserLocationTimestamped;
+import org.tlc.whereat.support.FakeLocationPublisher;
 
-import java.lang.reflect.Field;
+import rx.observers.TestSubscriber;
+
 import java.util.Arrays;
 import java.util.List;
 
 import rx.Observable;
-import rx.Subscription;
-import rx.observers.TestSubscriber;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -48,53 +48,63 @@ import static org.assertj.core.api.Assertions.*;
 
 public class LocationPublisherTest {
 
+    static Location s17raw = s17AndroidLocationMock();
+    static UserLocation s17ul = s17UserLocationStub();
+    static UserLocation s17 = s17UserLocationStub();
+    static UserLocation n17 = n17UserLocationStub();
+    static List<UserLocation> locs = Arrays.asList(s17, n17);
+
+
     @RunWith(RobolectricGradleTestRunner.class)
     @Config(constants = BuildConfig.class, sdk = 21)
-    @Ignore
 
     public static class LifeCycleMethods {
 
         //#onStartCommand()
 
         @Test
-        public void onStartCommand_whenPlayServicesEnabled_initalizesLocPub(){
+        public void initialize_should_initializePrivateFields() {
+
+            LocationPublisher lp = spy(new FakeLocationPublisher());
+            when(lp.getRandomId()).thenReturn("123");
+            doNothing().when(lp).run();
+
+            lp.initialize();
+
+            assertThat(lp.mGoogClient).isNotNull();
+            assertThat(lp.mLocReq).isNotNull();
+            assertThat(lp.mWhereatClient).isNotNull();
+            assertThat(lp.mDao).isNotNull();
+            assertThat(lp.mScheduler).isNotNull();
+            assertThat(lp.mLocSub).isNotNull();
+            assertThat(lp.mBroadcast).isNotNull();
+
+            assertThat(lp.mPolling).isFalse();
+            assertThat(lp.mUserId).isEqualTo("123");
+        }
+
+        @Test
+        public void run_should_connectToApisAndScheduleRunnables() {
+            LocationPublisher lp = spy(LocationPublisher.class);
+            lp.mGoogClient = mock(GoogleApiClient.class);
+            lp.mDao = mock(LocationDao.class);
+            lp.mScheduler = mock(Scheduler.class);
+            doReturn(false).when(lp.mGoogClient).isConnected();
+
+            lp.run();
+
+            verify(lp.mGoogClient).connect();
+            verify(lp.mDao).connect();
+            verify(lp.mScheduler).forget(LocationPublisher.FORGET_INTERVAL, LocationPublisher.TIME_TO_LIVE);
+        }
+
+        @Test
+        public void onBind_returnsLocationServiceBinderWith_getServiceThatReturnsThis() {
 
         }
 
         @Test
-        public void onStartCommand_whenPlayServicesDisabled_broadcastsPlayServicesDisabled() {
-
-        }
-
-        //#initialize()
-
-        @Test
-        public void initialize_should_initializePrivateFields(){
-
-        }
-
-        //#connect()
-        @Test
-        public void connect_whenAlreadyConnected_doesNothing(){
-
-        }
-
-        @Test
-        public void connect_whenNotConnected_connectsGoogleApiClient(){
-
-        }
-
-        //#onBind()
-
-        @Test
-        public void onBind_returnsLocationServiceBinderWith_getServiceThatReturnsThis(){
-
-        }
-
-        //#onDestroy()
-
-        @Test
-        public void onDestory_cleansUpResources(){
+        public void onDestroy_cleansUpResources() {
 
         }
     }
@@ -104,125 +114,97 @@ public class LocationPublisherTest {
 
     public static class PublicMethods {
 
-
+        LocationPublisher lp;
 
         @Before
-        public void setup(){
-            shadowOf(RuntimeEnvironment.application).setComponentNameAndServiceForBindService(
-                new ComponentName("org.tlc.whereat.pubsub", "LocationPublisher"), mock(IBinder.class));
-
-
+        public void setup() {
+            lp = spy(LocationPublisher.class);
+            lp.mGoogClient = mock(GoogleApiClient.class);
+            lp.mLocProvider = mock(FusedLocationProviderApi.class);
+            shadowOf(RuntimeEnvironment.application)
+                .setComponentNameAndServiceForBindService(
+                    new ComponentName("org.tlc.whereat.pubsub", "LocationPublisher"),
+                    mock(IBinder.class));
         }
 
         @After
-        public void teardown(){
-
-        }
-
-        //#ping()
-
-        @Test
-        public void ping_whenLocationNull_broadcastsFailedLocationRequest(){
-            // mock LocationServices.FusedLocationApi.getLastLocation for call to lastApiLocation()
-            // test broadcasts (maybe just mock Dispatcher, but in Dispatcher, then:)
-            // https://github.com/upsight/playhaven-robolectric/blob/master/src/test/java/com/xtremelabs/robolectric/shadows/LocalBroadcastManagerTest.java
-            // https://searchcode.com/codesearch/view/25270441/
+        public void teardown() {
 
         }
 
         @Test
-        public void ping_whenLocationExists_relaysLocation(){
-            Location s17 = s17AndroidLocationMock();
-            LocationPublisher lp = spy(LocationPublisher.class);
-            doReturn(s17).when(lp).lastApiLocation();
-            doNothing().when(lp).relay(s17);
+        public void ping_whenLocationNull_broadcastsFailedLocationRequest() {
+
+        }
+
+        @Test
+        public void ping_whenLocationExists_relaysLocation() {
+            doReturn(s17raw).when(lp.mLocProvider).getLastLocation(lp.mGoogClient);
+            doNothing().when(lp).relay(s17raw);
 
             lp.ping();
-            verify(lp).relay(s17);
+
+            verify(lp).relay(s17raw);
         }
 
         //#ping helpers
 
         @Test
-        public void relay_broadcastsPostsAndSavesLocThenSetsLastPing(){
-            Location s17 = s17AndroidLocationMock();
-            UserLocation s17ul = s17UserLocationStub();
-            LocationDao mockDao = mock(LocationDao.class);
-            doReturn(1L).when(mockDao).save(s17ul);
-
-            LocationPublisher lp = spy(LocationPublisher.class);
-            Field lastPing = publicify(LocationPublisher.class, "mLastPing");
-            try { lastPing.set(lp, -1L); } catch (Exception e) { return; }
-            Field userId = publicify(LocationPublisher.class, "mUserId");
-            try { userId.set(lp, S17_UUID); } catch (Exception e) { return; }
-            Field dao = publicify(LocationPublisher.class, "mLocDao");
-            try { dao.set(lp, mockDao); } catch (Exception e) { return; }
+        public void relay_broadcastsPostsAndSavesLocThenSetsLastPing() throws IllegalAccessException {
+            lp.mLastPing = -1L;
+            lp.mUserId = S17_UUID;
+            lp.mDao = mock(LocationDao.class);
+            lp.mBroadcast = mock(LocPubBroadcasters.class);
+            doReturn(1L).when(lp.mDao).save(s17ul);
             doNothing().when(lp).update(s17ul);
 
-            lp.relay(s17);
+            lp.relay(s17raw);
 
-            verify(lp).broadcastLocationPublished(s17ul);
+            verify(lp.mBroadcast).pub();
             verify(lp).update(s17ul);
-            verify(mockDao).save(s17ul);
-            try { assertThat(lastPing.getLong(lp)).isEqualTo(s17ul.getTime()); } catch (Exception e) { return; }
+            verify(lp.mDao).save(s17ul);
+            assertThat(lp.mLastPing).isEqualTo(s17ul.getTime());
         }
 
-        // #update
-
         @Test
-        public void update_returnsAnObservableThatResultsInManyBroadcasts(){
-            List<UserLocation> locs = Arrays.asList(s17UserLocationStub(), n17UserLocationStub());
-            UserLocation s17ul = s17UserLocationStub();
-            UserLocationTimestamped s17ult = s17ul.withTimestamp(-1L);
-            WhereatApiClient mockClient = mock(WhereatApiClient.class);
-            doReturn(Observable.from(locs)).when(mockClient).update(s17ult);
+        public void update_relaysAnObservableApiResponseToASubscriber() {
+            lp.mWhereatClient = mock(WhereatApiClient.class);
+            doReturn(Observable.just(locs)).when(lp.mWhereatClient).update(any(UserLocationTimestamped.class));
+            TestSubscriber<UserLocation> sub = new TestSubscriber<>();
+            lp.mLocSub = sub::onNext;
 
-            LocationPublisher lp = spy(LocationPublisher.class);
-            Field client = publicify(LocationPublisher.class, "mWhereatClient");
-            try { client.set(LocationPublisher.class, mockClient); } catch (Exception e) { return; }
-            Field lastPing = publicify(LocationPublisher.class, "mLastPing");
-            try { lastPing.set(lp, -1L); } catch (Exception e) { return; }
+            lp.update(s17);
 
-            lp.update(s17ul);
-            try { Thread.sleep(30L); } catch (Exception e) { return ; }
-
-            verify(lp, times(1)).broadcastLocationPublished(s17UserLocationStub());
-            verify(lp, times(1)).broadcastLocationPublished(n17UserLocationStub());
+            sub.assertNoErrors();
+            sub.assertReceivedOnNext(locs);
         }
 
-        // #broadcastLocationPublished
 
         @Test
-
-            public void broadcastLocationPublished_broadcastsIntentContainingLocation(){
+        public void broadcastLocationPublished_broadcastsIntentContainingLocation() {
 
         }
 
         //#poll
 
         @Test
-        public void poll_turnsOnPolling(){
+        public void poll_turnsOnPolling() {
             // calls LocationServices.FusedLocationApi.requestLocationUpdates
             // sets mPolling true
         }
 
         //#stopPolling
-        public void stopPolling_stopsPolling(){
+        public void stopPolling_stopsPolling() {
             // calls LocationServices.FusedLocationApi.removeLocationUpdates
             // sets mPolling false
         }
 
         //#clear
-        public void clear_clearsUserFromServerAllLocsFromPhone(){
+        public void clear_clearsUserFromServerAllLocsFromPhone() {
             // requires mock DAO, API (dao has to mock getting (mUserId)
             // calls clien.remove()
             // calls dao.clear()
         }
     }
-
-
-
-
-
 
 }

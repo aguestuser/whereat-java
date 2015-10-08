@@ -1,6 +1,5 @@
 package org.tlc.whereat.activities;
 
-import android.os.Build;
 import android.widget.Button;
 
 import org.junit.Test;
@@ -11,22 +10,18 @@ import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.fakes.RoboMenuItem;
 
-import static org.mockito.Mockito.*;
-
-import static org.robolectric.Shadows.shadowOf;
 
 import org.tlc.whereat.BuildConfig;
 import org.tlc.whereat.R;
 import org.tlc.whereat.fragments.SecurityAlertFragment;
 import org.tlc.whereat.pubsub.LocPubManager;
-import org.tlc.whereat.pubsub.LocSubMain;
+import org.tlc.whereat.receivers.MainActivityReceivers;
 import org.tlc.whereat.pubsub.LocationPublisher;
 import org.tlc.whereat.support.FakeMainActivity;
 
+import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.tlc.whereat.support.ActivityHelpers.*;
-
-
 
 @RunWith(Enclosed.class)
 
@@ -48,7 +43,7 @@ public class MainActivityTest {
         @Test
         public void resumingActivity_should_bindToLocPubAndRegisterToLocSub(){
             LocPubManager mockLocPub = mock(LocPubManager.class);
-            LocSubMain mockLocSub = mock(LocSubMain.class);
+            MainActivityReceivers mockLocSub = mock(MainActivityReceivers.class);
             FakeMainActivity a = createActivity(FakeMainActivity.class)
                 .setLocPub(mockLocPub)
                 .setLocSub(mockLocSub);
@@ -63,7 +58,7 @@ public class MainActivityTest {
         @Test
         public void pausingActivity_should_unbindFromLocPubAndUnregisterFromLocSub(){
             LocPubManager mockLocPub = mock(LocPubManager.class);
-            LocSubMain mockLocSub = mock(LocSubMain.class);
+            MainActivityReceivers mockLocSub = mock(MainActivityReceivers.class);
             FakeMainActivity a = createActivity(FakeMainActivity.class)
                 .setLocPub(mockLocPub)
                 .setLocSub(mockLocSub);
@@ -139,4 +134,5 @@ public class MainActivityTest {
             verify(mockSecAlert, times(1)).show(a.getFragmentManager(), a.getString(R.string.sec_alert_fragment_tag));
         }
     }
+
 }

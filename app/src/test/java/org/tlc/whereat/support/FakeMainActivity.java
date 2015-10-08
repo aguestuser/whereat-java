@@ -2,9 +2,8 @@ package org.tlc.whereat.support;
 
 import org.tlc.whereat.activities.MainActivity;
 import org.tlc.whereat.fragments.SecurityAlertFragment;
-import org.tlc.whereat.pubsub.LocSubMain;
+import org.tlc.whereat.receivers.MainActivityReceivers;
 import org.tlc.whereat.pubsub.LocPubManager;
-import static org.mockito.Mockito.*;
 
 
 public class FakeMainActivity extends MainActivity {
@@ -13,8 +12,8 @@ public class FakeMainActivity extends MainActivity {
         mLocPub = locPub;
         return this;
     }
-    public FakeMainActivity setLocSub(LocSubMain locSub){
-        mLocSub = locSub;
+    public FakeMainActivity setLocSub(MainActivityReceivers locSub){
+        mReceivers = locSub;
         return this;
     }
 

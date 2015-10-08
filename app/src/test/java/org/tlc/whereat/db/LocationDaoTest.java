@@ -1,7 +1,7 @@
 package org.tlc.whereat.db;
 
 import android.database.sqlite.SQLiteDatabase;
-import android.location.Location;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +13,8 @@ import org.robolectric.annotation.Config;
 import org.tlc.whereat.BuildConfig;
 import org.tlc.whereat.model.UserLocation;
 import org.tlc.whereat.support.FakeLocationDao;
+import org.tlc.whereat.support.SampleTimes;
+
 import java.util.List;
 
 
@@ -45,11 +47,22 @@ public class LocationDaoTest {
         }
 
         @Test
+        public void isConnected_should_getConnectedField(){
+            mLocDao.mConnected = false;
+            assertThat(mLocDao.isConnected()).isFalse();
+
+            mLocDao.mConnected = true;
+            assertThat(mLocDao.isConnected()).isTrue();
+        }
+
+        @Test
         public void connect_should_connectToDatabase(){
+            assertThat(mLocDao.mConnected).isFalse();
             mLocDao.connect();
 
             verify(mMockDao, times(1)).getWritableDatabase();
             assertThat(mLocDao.getDb()).isEqualTo(mMockDb);
+            assertThat(mLocDao.mConnected).isTrue();
         }
 
         @Test
@@ -187,6 +200,19 @@ public class LocationDaoTest {
             assertThat(mLocDao.count()).isEqualTo(1);
         }
 
+        @Test
+        public void forgetSince_should_deleteRecordsOlderThanAnExpiryDate(){
+            assertThat(mLocDao.count()).isEqualTo(2);
+
+            int deleteCount1 = mLocDao.forgetSince(SampleTimes.S17 + 1L);
+            assertThat(deleteCount1).isEqualTo(1);
+            assertThat(mLocDao.count()).isEqualTo(1);
+
+            int deleteCount2 = mLocDao.forgetSince(SampleTimes.N17);
+            assertThat(deleteCount2).isEqualTo(0);
+            assertThat(mLocDao.count()).isEqualTo(1);
+        }
+
 
         @Test
         public void clear_should_clearTheDb(){
@@ -195,6 +221,27 @@ public class LocationDaoTest {
             assertThat(deleted).isEqualTo(2);
             assertTrue(mLocDao.getAll().isEmpty());
             assertThat(mLocDao.count()).isEqualTo(0);
+        }
+    }
+
+    public static class Helpers {
+
+        @Test
+        public void timeGreaterThan_should_generateCorrectSqlQuery(){
+            assertThat(LocationDao.timeGreaterThan(SampleTimes.S17))
+                .isEqualTo("time > " + SampleTimes.S17_STR);
+        }
+
+        @Test
+        public void timeLessThan_should_generateCorrectSqlQuery(){
+            assertThat(LocationDao.timeLessThan(SampleTimes.S17))
+                .isEqualTo("time < " + SampleTimes.S17_STR);
+        }
+
+        @Test
+        public void idEquals_should_generateCorrectSqlQuery(){
+            assertThat(LocationDao.idEquals("1"))
+                .isEqualTo("_id = '1'");
         }
     }
 

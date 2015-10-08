@@ -7,33 +7,21 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-
 import org.tlc.whereat.R;
+import org.tlc.whereat.modules.Mapper;
 import org.tlc.whereat.pubsub.LocPubManager;
-import org.tlc.whereat.pubsub.LocSubMap;
+import org.tlc.whereat.receivers.MapActivityReceivers;
 import org.tlc.whereat.db.LocationDao;
 import org.tlc.whereat.model.UserLocation;
-import org.tlc.whereat.util.MapUtils;
-
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 
 public class MapActivity extends AppCompatActivity {
 
-    private static final LatLng LIBERTY = new LatLng(40.7092529,-74.0112551);
-
-    protected GoogleMap mMap;
     protected LocPubManager mLocPub;
-    protected LocSubMap mLocSub;
+    protected MapActivityReceivers mReceivers;
     protected LocationDao mLocDao;
-    protected ConcurrentHashMap<String, Marker> mMarkers;
-    protected Long mLastPing;
+    protected Mapper mMapper;
+
 
     // LIFE CYCLE METHODS
 
@@ -42,38 +30,37 @@ public class MapActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        mLocPub = new LocPubManager(this); // TODO: can this instance be shared w/ MainActivity? TEST!!!
-        mLocSub = new LocSubMap(this);
-        mLocDao = new LocationDao(this).connect();
-
-        mMarkers = new ConcurrentHashMap<>();
-        mLastPing = -1L;
+        mLocPub = new LocPubManager(this);
+        mReceivers = new MapActivityReceivers(this);
+        mLocDao = new LocationDao(this);
+        mMapper = new Mapper(this);
 
         findViewById(R.id.clear_map_button).setOnClickListener((View v) -> clear());
-
-        initialize(); // TODO make DB calls async?
-
     }
 
     @Override
     protected void onResume(){
         super.onResume();
+
         mLocPub.bind();
-        mLocSub.register();
-        refresh();
+        mReceivers.register();
+
+        if(!mLocDao.isConnected()) mLocDao.connect();
+        if(!mMapper.hasInitialized()) mMapper.initialize(mLocDao.getAll());
+        if(mMapper.hasPinged()) mMapper.refresh(mLocDao.getAllSince(mMapper.lastPing()));
     }
 
     @Override
     protected void onPause(){
         super.onPause();
         mLocPub.unbind();
-        mLocSub.unregister();
+        mReceivers.unregister();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mMap.clear();
+        mMapper.clear();
         mLocDao.disconnect();
     }
 
@@ -98,105 +85,21 @@ public class MapActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    // PUBLIC MAP MUTATORS
+    // PUBLIC METHODS
 
-    public void map(UserLocation l){
-        plot(l);
-        recordPing(l);
+    public void map(UserLocation ul){
+        mMapper.map(ul);
     }
 
     public void clear(){
-        mMap.clear();
-        mMarkers.clear();
+        mMapper.clear();
         mLocPub.clear();
-        mLastPing = null;
+        mLocDao.clear();
     }
 
-    // PRIVATE MAP MUTATORS
-
-
-    protected void initialize(){
-        List<UserLocation> ls = allLocations();
-        createMap(ls);
-        recordPing(ls);
-    }
-
-    private void createMap(List<UserLocation> ls) {
-        mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map_fragment)).getMap();
-        mMap.setMyLocationEnabled(true);
-        createMarkers(ls);
-    }
-
-    private void createMarkers(List<UserLocation> ls){
-        if(!ls.isEmpty()){
-            mapMany(ls);
-            centerZoom(last(ls));
-        }
-        else centerZoom(LIBERTY);
-    }
-
-    private void refresh(){
-        if (hasBeenViewed()) {
-            List<UserLocation> ls = mLocDao.getAllSince(mLastPing);
-            mapMany(ls);
-            recordPing(ls);
-        }
-    }
-
-
-    // HELPERS
-
-    private void mapMany(List<UserLocation> ls){
-        if (!ls.isEmpty()) for (UserLocation l : ls) plot(l);
-    }
-
-    private void plot(UserLocation l){
-        if (plotted(l)) rePlot(l);
-        else addPlot(l);
-    }
-
-    private boolean plotted(UserLocation l){
-        return mMarkers.containsKey(l.getId());
-    }
-
-    private void rePlot(UserLocation l){
-        mMarkers.get(l.getId()).setPosition(MapUtils.parseLatLon(l));
-    }
-
-    private void addPlot(UserLocation l){
-        mMarkers.put(l.getId(), mMap.addMarker(MapUtils.parseMarker(l)));
-    }
-
-    private List<UserLocation> allLocations(){
-        return mLocDao.getAll();
-    }
-
-    private void centerZoom(UserLocation l){
-        centerZoom(MapUtils.parseLatLon(l));
-    }
-
-    private void centerZoom(LatLng ctr){
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ctr, 15));
-    }
-
-    private void center(UserLocation l){
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(MapUtils.parseLatLon(l)));
-    }
-
-    private void recordPing(List<UserLocation> ls){
-        if (!ls.isEmpty()) recordPing(last(ls));
-    }
-
-    private void recordPing(UserLocation l){
-        mLastPing =  l.getTime();
-    }
-
-    private boolean hasBeenViewed(){
-        return mLastPing != null;
-    }
-
-    private UserLocation last(List<UserLocation> ls){
-        return ls.get(ls.size() - 1);
+    public void forgetSince(long time) {
+        mMapper.forgetSince(time);
+        mLocDao.forgetSince(time);
     }
 
 }

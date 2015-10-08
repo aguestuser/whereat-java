@@ -10,5 +10,7 @@
     <item name="home_button" type="id" />
     <item name="map_fragment" type="id" />
     <item name="map_button" type="id" />
+    <item name="map_activity" type="id" />
+    <item name="menu_bar" type="id" />
     <item name="security_alert" type="id" />
 </resources>
