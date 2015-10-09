@@ -42,7 +42,7 @@
 
         <service
             android:name=".pubsub.LocationPublisher"
-            android:label="@string/location_service_name" >
+            android:label="@string/loc_service_name" >
         </service>
 
     </application>

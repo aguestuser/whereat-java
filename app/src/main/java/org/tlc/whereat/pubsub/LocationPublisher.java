@@ -43,8 +43,8 @@ public class LocationPublisher extends Service
     // FOR PROD/DEV:
 
     public static final int POLLING_INTERVAL = 15 * 1000; // 15 seconds
-    public static final long FORGET_INTERVAL = 60*1000L; // 1 minute
-    public static final long TIME_TO_LIVE = 60*60*1000L; // 1 hr
+    public static final long FORGET_INTERVAL = 60 * 1000L; // 1 minute
+    public static final long TIME_TO_LIVE = 60 * 60 * 1000L; // 1 hr
 
     // FOR DEBUGGING:
 

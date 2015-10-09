@@ -35,4 +35,9 @@ public class FakeMainActivity extends MainActivity {
     public boolean hasSecAlerted(){
         return mSecAlerted;
     }
+
+    public FakeMainActivity setReceivers(MainActivityReceivers rs){
+        mReceivers = rs;
+        return this;
+    }
 }

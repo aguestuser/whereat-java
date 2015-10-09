@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <integer-array name="pref_loc_share_interval_ints">
+        <item>@integer/pref_loc_share_interval_integer_0</item>
+        <item>@integer/pref_loc_share_interval_integer_1</item>
+        <item>@integer/pref_loc_share_interval_integer_2</item>
+        <item>@integer/pref_loc_share_interval_integer_3</item>
+        <item>@integer/pref_loc_share_interval_integer_4</item>
+        <item>@integer/pref_loc_share_interval_integer_5</item>
+    </integer-array>
+
+    <string-array name="pref_loc_share_interval_strings">
+        <item>@string/pref_loc_share_interval_string_0</item>
+        <item>@string/pref_loc_share_interval_string_1</item>
+        <item>@string/pref_loc_share_interval_string_2</item>
+        <item>@string/pref_loc_share_interval_string_3</item>
+        <item>@string/pref_loc_share_interval_string_4</item>
+        <item>@string/pref_loc_share_interval_string_5</item>
+    </string-array>
+
+</resources>
