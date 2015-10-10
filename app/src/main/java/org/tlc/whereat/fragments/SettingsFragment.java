@@ -2,6 +2,7 @@ package org.tlc.whereat.fragments;
 
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
 
 import org.tlc.whereat.R;
 

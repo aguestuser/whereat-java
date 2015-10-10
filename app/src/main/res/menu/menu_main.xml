@@ -11,4 +11,8 @@
         android:id="@id/action_map"
         android:title="@string/map_activity_title" />
 
+    <item
+        android:id="@id/action_prefs"
+        android:title="@string/pref_activity_title" />
+
 </menu>

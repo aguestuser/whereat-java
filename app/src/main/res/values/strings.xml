@@ -19,15 +19,25 @@
     <string name="map_button_text">Map</string>
     <string name="map_clear_button_x">X</string>
 
+    <string name="pref_activity_title">"Settings"</string>
     <string name="pref_category_intervals_title">"Location Update Frequency"</string>
-    <string name="pref_loc_share_interval_title">"Location Sharing Frequency"</string>
 
-    <string name="pref_loc_share_interval_string_0">"10 sec (most accurate)"</string>
-    <string name="pref_loc_share_interval_string_1">"30 sec"</string>
-    <string name="pref_loc_share_interval_string_2">"1 min"</string>
-    <string name="pref_loc_share_interval_string_3">"5 min"</string>
-    <string name="pref_loc_share_interval_string_4">"10 min"</string>
-    <string name="pref_loc_share_interval_string_5">"15 min (best for battery)"</string>
+    <string name="pref_loc_share_interval_title">"Location Sharing Frequency"</string>
+    <string name="pref_loc_share_interval_summary">"Share frequently for more accuracy, infrequently for greater battery life."</string>
+
+    <string name="pref_loc_share_interval_value_0">"10"</string> <!-- 10 sec -->
+    <string name="pref_loc_share_interval_value_1">"30"</string> <!-- 30 sec -->
+    <string name="pref_loc_share_interval_value_2">"60"</string> <!-- 1 min -->
+    <string name="pref_loc_share_interval_value_3">"300"</string> <!-- 5 min -->
+    <string name="pref_loc_share_interval_value_4">"600"</string> <!-- 10 min -->
+    <string name="pref_loc_share_interval_value_5">"900"</string> <!-- 15 min -->
+    
+    <string name="pref_loc_share_interval_label_0">"10 sec (most accurate)"</string>
+    <string name="pref_loc_share_interval_label_1">"30 sec"</string>
+    <string name="pref_loc_share_interval_label_2">"1 min"</string>
+    <string name="pref_loc_share_interval_label_3">"5 min"</string>
+    <string name="pref_loc_share_interval_label_4">"10 min"</string>
+    <string name="pref_loc_share_interval_label_5">"15 min (best for battery)"</string>
 
     <string name="pref_loc_forget_interval_title">"Location Deletion Frequency"</string>
     <string name="pref_loc_ttl_title">"Location Expiration Threshold"</string>

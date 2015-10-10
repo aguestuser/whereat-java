@@ -3,6 +3,7 @@ package org.tlc.whereat.activities;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -12,6 +13,7 @@ import android.widget.Button;
 
 import org.tlc.whereat.R;
 import org.tlc.whereat.fragments.SecurityAlertFragment;
+import org.tlc.whereat.fragments.SettingsFragment;
 import org.tlc.whereat.pubsub.LocPubManager;
 import org.tlc.whereat.receivers.MainActivityReceivers;
 import org.tlc.whereat.util.PopToast;
@@ -41,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
 
         mPolling = false;
         mSecAlerted = false;
+
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
         final Button shareLocationButton = (Button) findViewById(R.id.go_button);
 
@@ -117,6 +121,9 @@ public class MainActivity extends AppCompatActivity {
         switch(item.getItemId()){
             case R.id.action_map:
                 startActivity(new Intent(this, MapActivity.class));
+                break;
+            case R.id.action_prefs:
+                startActivity(new Intent(this, SettingsActivity.class));
                 break;
         }
         return super.onOptionsItemSelected(item);

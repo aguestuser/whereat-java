@@ -40,6 +40,12 @@
             android:label="@string/app_name" >
         </activity>
 
+        <activity
+            android:name=".activities.SettingsActivity"
+            android:label="@string/app_name" >
+        </activity>
+
+
         <service
             android:name=".pubsub.LocationPublisher"
             android:label="@string/loc_service_name" >
