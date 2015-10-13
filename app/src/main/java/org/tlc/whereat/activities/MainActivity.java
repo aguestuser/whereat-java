@@ -1,6 +1,5 @@
 package org.tlc.whereat.activities;
 
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.preference.PreferenceManager;
@@ -13,10 +12,10 @@ import android.widget.Button;
 
 import org.tlc.whereat.R;
 import org.tlc.whereat.fragments.SecurityAlertFragment;
-import org.tlc.whereat.fragments.SettingsFragment;
-import org.tlc.whereat.pubsub.LocPubManager;
-import org.tlc.whereat.receivers.MainActivityReceivers;
-import org.tlc.whereat.util.PopToast;
+import org.tlc.whereat.modules.ui.MenuHandler;
+import org.tlc.whereat.services.LocPubManager;
+import org.tlc.whereat.modules.pubsub.receivers.MainActivityReceivers;
+import org.tlc.whereat.modules.ui.Toaster;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     protected MainActivityReceivers mReceivers;
     protected boolean mPolling;
     protected SecurityAlertFragment mSecAlert;
+    protected MenuHandler mMenu;
 
     protected boolean mSecAlerted;
 
@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
         mLocPub = new LocPubManager(this).start();
         mReceivers = new MainActivityReceivers(this);
         mSecAlert = new SecurityAlertFragment();
+        mMenu = new MenuHandler(this);
 
         mPolling = false;
         mSecAlerted = false;
@@ -91,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
         v.setBackground(getDrawn(R.drawable.go_button_on));
         mLocPub.poll();
         mPolling = true;
-        PopToast.briefly(this, "Location sharing on.");
+        Toaster.briefly(this, "Location sharing on.");
         return true;
     }
 
@@ -99,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
         v.setBackground(getDrawn(R.drawable.go_button_off));
         mLocPub.stopPolling();
         mPolling = false;
-        PopToast.briefly(this, "Location sharing off.");
+        Toaster.briefly(this, "Location sharing off.");
         return true;
     }
 
@@ -112,21 +113,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+        return mMenu.create(menu);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) { // The action bar will automatically handle clicks on the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
-        switch(item.getItemId()){
-            case R.id.action_map:
-                startActivity(new Intent(this, MapActivity.class));
-                break;
-            case R.id.action_prefs:
-                startActivity(new Intent(this, SettingsActivity.class));
-                break;
-        }
-        return super.onOptionsItemSelected(item);
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return mMenu.select(item, super::onOptionsItemSelected);
     }
 
     // SECURITY ALERT ROUTINE

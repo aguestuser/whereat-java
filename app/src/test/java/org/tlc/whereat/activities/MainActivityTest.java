@@ -2,22 +2,30 @@ package org.tlc.whereat.activities;
 
 import android.widget.Button;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+import org.robolectric.fakes.RoboMenu;
 import org.robolectric.fakes.RoboMenuItem;
 
 
+import org.robolectric.shadows.ShadowPreferenceManager;
 import org.tlc.whereat.BuildConfig;
 import org.tlc.whereat.R;
 import org.tlc.whereat.fragments.SecurityAlertFragment;
-import org.tlc.whereat.pubsub.LocPubManager;
-import org.tlc.whereat.receivers.MainActivityReceivers;
-import org.tlc.whereat.pubsub.LocationPublisher;
+import org.tlc.whereat.modules.ui.MenuHandler;
+import org.tlc.whereat.services.LocPubManager;
+import org.tlc.whereat.modules.pubsub.receivers.MainActivityReceivers;
+import org.tlc.whereat.services.LocationPublisher;
+import org.tlc.whereat.support.ActivityWithMenuHandlersTest;
 import org.tlc.whereat.support.FakeMainActivity;
+
+import rx.functions.Func1;
 
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.*;
@@ -27,10 +35,45 @@ import static org.tlc.whereat.support.ActivityHelpers.*;
 
 public class MainActivityTest {
 
+
+    @RunWith(Enclosed.class)
+
+    public static class LifeCycleMethods{
+
+        @RunWith(RobolectricGradleTestRunner.class)
+        @Config(constants = BuildConfig.class, sdk = 21)
+
+        public static class OnCreate {
+
+            @Test
+            public void onCreate_should_initializeActivityAndApplicationCorrectly(){
+
+                MainActivity a = createActivity(MainActivity.class);
+
+                assertThat(a.mLocPub).isNotNull();
+                assertThat(a.mReceivers).isNotNull();
+                assertThat(a.mSecAlert).isNotNull();
+                assertThat(a.mMenu).isNotNull();
+
+                assertThat(a.mPolling).isFalse();
+                assertThat(a.mSecAlerted).isFalse();
+
+                assertThat(
+                    ShadowPreferenceManager.getDefaultSharedPreferences(RuntimeEnvironment.application)).
+                    isNotNull();
+
+                assertThat(a.findViewById(R.id.go_button)).isNotNull();
+            }
+        }
+
+
+    }
+
+
     @RunWith(RobolectricGradleTestRunner.class)
     @Config(constants = BuildConfig.class, sdk = 21)
 
-    public static class LifeCycleMethods {
+    public static class PostCreate {
 
         @Test
         public void creatingActivity_should_startLocationPublisher(){
@@ -132,6 +175,40 @@ public class MainActivityTest {
             a.onResume();
 
             verify(mockSecAlert, times(1)).show(a.getFragmentManager(), a.getString(R.string.sec_alert_fragment_tag));
+        }
+    }
+
+    @RunWith(RobolectricGradleTestRunner.class)
+    @Config(constants = BuildConfig.class, sdk = 21)
+
+    public static class MenuHandlers extends ActivityWithMenuHandlersTest {
+
+        MainActivity a;
+
+        @Before
+        public void setup() {
+            a = createActivity(MainActivity.class);
+            a.mMenu = mock(MenuHandler.class);
+            menu = new RoboMenu(a);
+        }
+
+        @Test
+        public void menu_should_delegateToMenuHandler(){
+            a.onCreateOptionsMenu(menu);
+            verify(a.mMenu).create(menu);
+        }
+
+        @Test
+        public void selectingActivityFromMenu_should_delegateToMenuHandler() {
+
+            a.onOptionsItemSelected(main);
+            verify(a.mMenu).select(eq(main), any(Func1.class));
+
+            a.onOptionsItemSelected(map);
+            verify(a.mMenu).select(eq(map), any(Func1.class));
+
+            a.onOptionsItemSelected(prefs);
+            verify(a.mMenu).select(eq(prefs), any(Func1.class));
         }
     }
 
