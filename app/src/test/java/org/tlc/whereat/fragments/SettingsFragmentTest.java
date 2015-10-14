@@ -1,37 +1,32 @@
 package org.tlc.whereat.fragments;
 
-import android.app.Activity;
-import android.app.FragmentManager;
 import android.content.Context;
-import android.os.Bundle;
+import android.content.SharedPreferences;
 import android.preference.ListPreference;
-import android.preference.Preference;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowPreferenceManager;
 import org.tlc.whereat.BuildConfig;
 import org.tlc.whereat.R;
 
-import java.util.Arrays;
-
-import static org.robolectric.Shadows.shadowOf;
 import static org.robolectric.util.FragmentTestUtil.startFragment;
 import static org.assertj.core.api.Assertions.*;
-import static org.robolectric.util.FragmentTestUtil.startVisibleFragment;
+
 
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)
-
 
 public class SettingsFragmentTest {
 
     static SettingsFragment frag;
     static Context ctx = RuntimeEnvironment.application;
+    static SharedPreferences prefs;
+    static ListPreference lp;
 
     static CharSequence[] locShareVals = {
         ctx.getString(R.string.pref_loc_share_interval_value_0),
@@ -56,6 +51,7 @@ public class SettingsFragmentTest {
     public void setup() {
         frag = new SettingsFragment();
         startFragment(frag);
+        prefs = ShadowPreferenceManager.getDefaultSharedPreferences(RuntimeEnvironment.application);
     }
 
     @Test
@@ -64,17 +60,49 @@ public class SettingsFragmentTest {
     }
 
     @Test
-    public void locationSharingIntervalSetting_should_haveCorrectContents(){
-        ListPreference lp = (ListPreference) frag.findPreference("pref_key_loc_share_interval");
+    public void locShareIntervalPref_should_haveCorrectDefaultContents(){
+        lp = findListPref(R.string.pref_loc_share_interval_key);
 
         assertThat(lp).isNotNull();
         assertThat(lp.isPersistent()).isTrue();
 
         assertThat(lp.getTitle()).isEqualTo(frag.getString(R.string.pref_loc_share_interval_title));
-        assertThat(lp.getSummary()).isEqualTo(frag.getString(R.string.pref_loc_share_interval_summary));
+        assertThat(lp.getSummary()).isEqualTo(frag.getString(R.string.pref_loc_share_interval_label_2));
 
         assertThat(lp.getEntries()).isEqualTo(locShareLabels);
         assertThat(lp.getEntryValues()).isEqualTo(locShareVals);
         assertThat(lp.getValue()).isEqualTo(frag.getString(R.string.pref_loc_share_interval_value_2));
     }
+
+    @Test
+    public void locShareIntervalPref_should_updateSummaryWhenPrefChanges(){
+        lp = findListPref(R.string.pref_loc_share_interval_key);
+
+        setListPref(R.string.pref_loc_share_interval_value_0);
+        assertThat(lp.getSummary()).isEqualTo(frag.getString(R.string.pref_loc_share_interval_label_0));
+
+        setListPref(R.string.pref_loc_share_interval_value_1);
+        assertThat(lp.getSummary()).isEqualTo(frag.getString(R.string.pref_loc_share_interval_label_1));
+
+        setListPref(R.string.pref_loc_share_interval_value_2);
+        assertThat(lp.getSummary()).isEqualTo(frag.getString(R.string.pref_loc_share_interval_label_2));
+
+        setListPref(R.string.pref_loc_share_interval_value_3);
+        assertThat(lp.getSummary()).isEqualTo(frag.getString(R.string.pref_loc_share_interval_label_3));
+
+        setListPref(R.string.pref_loc_share_interval_value_4);
+        assertThat(lp.getSummary()).isEqualTo(frag.getString(R.string.pref_loc_share_interval_label_4));
+
+        setListPref(R.string.pref_loc_share_interval_value_5);
+        assertThat(lp.getSummary()).isEqualTo(frag.getString(R.string.pref_loc_share_interval_label_5));
+    }
+
+    protected ListPreference findListPref(int id){
+        return (ListPreference) frag.findPreference(frag.getString(id));
+    }
+
+    protected void setListPref(int valId){
+        lp.setValue(frag.getString(valId));
+    }
+
 }

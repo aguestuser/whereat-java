@@ -11,7 +11,7 @@
         <ListPreference
             android:key="@string/pref_loc_share_interval_key"
             android:title="@string/pref_loc_share_interval_title"
-            android:summary="@string/pref_loc_share_interval_summary"
+            android:summary="%s"
             android:dialogTitle="@string/pref_loc_share_interval_title"
             android:entries="@array/pref_loc_share_interval_labels"
             android:entryValues="@array/pref_loc_share_interval_values"
