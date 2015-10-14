@@ -33,8 +33,7 @@ public class SettingsFragmentTest {
         ctx.getString(R.string.pref_loc_share_interval_value_1),
         ctx.getString(R.string.pref_loc_share_interval_value_2),
         ctx.getString(R.string.pref_loc_share_interval_value_3),
-        ctx.getString(R.string.pref_loc_share_interval_value_4),
-        ctx.getString(R.string.pref_loc_share_interval_value_5)
+        ctx.getString(R.string.pref_loc_share_interval_value_4)
     };
 
     static CharSequence[] locShareLabels = {
@@ -42,8 +41,7 @@ public class SettingsFragmentTest {
         ctx.getString(R.string.pref_loc_share_interval_label_1),
         ctx.getString(R.string.pref_loc_share_interval_label_2),
         ctx.getString(R.string.pref_loc_share_interval_label_3),
-        ctx.getString(R.string.pref_loc_share_interval_label_4),
-        ctx.getString(R.string.pref_loc_share_interval_label_5)
+        ctx.getString(R.string.pref_loc_share_interval_label_4)
     };
 
 
@@ -92,9 +90,6 @@ public class SettingsFragmentTest {
 
         setListPref(R.string.pref_loc_share_interval_value_4);
         assertThat(lp.getSummary()).isEqualTo(frag.getString(R.string.pref_loc_share_interval_label_4));
-
-        setListPref(R.string.pref_loc_share_interval_value_5);
-        assertThat(lp.getSummary()).isEqualTo(frag.getString(R.string.pref_loc_share_interval_label_5));
     }
 
     protected ListPreference findListPref(int id){

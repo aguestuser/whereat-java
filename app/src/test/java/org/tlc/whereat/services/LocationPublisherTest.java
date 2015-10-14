@@ -145,32 +145,28 @@ public class LocationPublisherTest {
         public void onSharedPreferenceChanged_should_respondToPollIntervalChangeCorrectly(){
 
             setPollInterval(lp.getString(R.string.pref_loc_share_interval_value_0));
-            assertThat(lp.mPollInterval).isEqualTo(10000);
-            assertThat(lp.mLocReq.getInterval()).isEqualTo(10000);
+            assertThat(lp.mPollInterval).isEqualTo(5000);
+            assertThat(lp.mLocReq.getInterval()).isEqualTo(5000);
 
             setPollInterval(lp.getString(R.string.pref_loc_share_interval_value_1));
+            assertThat(lp.mPollInterval).isEqualTo(15000);
+            assertThat(lp.mLocReq.getInterval()).isEqualTo(15000);
+
+            setPollInterval(lp.getString(R.string.pref_loc_share_interval_value_2));
             assertThat(lp.mPollInterval).isEqualTo(30000);
             assertThat(lp.mLocReq.getInterval()).isEqualTo(30000);
 
-            setPollInterval(lp.getString(R.string.pref_loc_share_interval_value_2));
+            setPollInterval(lp.getString(R.string.pref_loc_share_interval_value_3));
             assertThat(lp.mPollInterval).isEqualTo(60000);
             assertThat(lp.mLocReq.getInterval()).isEqualTo(60000);
 
-            setPollInterval(lp.getString(R.string.pref_loc_share_interval_value_3));
+            setPollInterval(lp.getString(R.string.pref_loc_share_interval_value_4));
             assertThat(lp.mPollInterval).isEqualTo(300000);
             assertThat(lp.mLocReq.getInterval()).isEqualTo(300000);
 
-            setPollInterval(lp.getString(R.string.pref_loc_share_interval_value_4));
-            assertThat(lp.mPollInterval).isEqualTo(600000);
-            assertThat(lp.mLocReq.getInterval()).isEqualTo(600000);
-
-            setPollInterval(lp.getString(R.string.pref_loc_share_interval_value_5));
-            assertThat(lp.mPollInterval).isEqualTo(900000);
-            assertThat(lp.mLocReq.getInterval()).isEqualTo(900000);
-
-            verify(lp, times(6)).onSharedPreferenceChanged(eq(prefs), eq("pref_loc_share_interval_key"));
-            verify(lp, times(6)).resetPollInterval();
-            verify(lp, times(6)).restartPolling();
+            verify(lp, times(5)).onSharedPreferenceChanged(eq(prefs), eq("pref_loc_share_interval_key"));
+            verify(lp, times(5)).resetPollInterval();
+            verify(lp, times(5)).restartPolling();
         }
 
         @Test
