@@ -36,6 +36,7 @@ import rx.Observable;
 import rx.functions.Action1;
 
 import static java.lang.Integer.parseInt;
+import static java.lang.Long.parseLong;
 
 public class LocationPublisher extends Service
     implements GoogleApiClient.ConnectionCallbacks,
@@ -43,22 +44,11 @@ public class LocationPublisher extends Service
     LocationListener,
     SharedPreferences.OnSharedPreferenceChangeListener {
 
-
     // FIELDS
 
     public static final String TAG = LocationPublisher.class.getSimpleName();
-
-    // FOR PROD/DEV:
-
-    protected int mPollInterval;// = 15 * 1000; // 15 seconds
-    protected long mForgetInterval = 60 * 1000L; // 1 minute
-    protected long mTimeToLive = 60 * 60 * 1000L; // 1 hr
-
-    // FOR DEBUGGING:
-
-//    public static final int mPollInterval = 14 * 1000; // 14 sec
-//    public static final long mForgetInterval = 30 * 1000L; // 30 sec
-//    public static final long mTimeToLive = 5 * 1000L; // 5 sec
+    public static final long sForgetInterval = 60 * 1000L; // 1 minute
+//    public static final long sForgetInterval = 5 * 1000L; // 5 sec --> FOR DEBUGGING
 
     protected IBinder mBinder = new LocationServiceBinder();
     protected GoogleApiClient mGoogClient;
@@ -69,7 +59,11 @@ public class LocationPublisher extends Service
     protected Scheduler mScheduler;
     protected LocPubBroadcasters mBroadcast;
     protected Action1<UserLocation> mLocSub;
+    protected SharedPreferences mPrefs;
+
     protected String mUserId;
+    protected int mPollInterval;
+    protected long mTtl;
     protected boolean mPolling = false;
     protected long mLastPing = -1L;
 
@@ -101,6 +95,7 @@ public class LocationPublisher extends Service
             .addApi(LocationServices.API)
             .build();
 
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         mPollInterval = getPollIntervalPref();
         mLocReq = buildLocReq();
 
@@ -119,8 +114,8 @@ public class LocationPublisher extends Service
     protected void run(){
         if (!mGoogClient.isConnected()) mGoogClient.connect();
         mDao.connect();
-        registerPrefListener();
-        mScheduler.forget(mForgetInterval, mTimeToLive);
+        mPrefs.registerOnSharedPreferenceChangeListener(this);
+        mScheduler.forget(sForgetInterval, mTtl);
     }
 
     @Override
@@ -148,6 +143,7 @@ public class LocationPublisher extends Service
     @Override
     public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
         if (key.equals(getString(R.string.pref_loc_share_interval_key))) resetPollInterval();
+        if (key.equals(getString(R.string.pref_loc_ttl_key))) resetTtl();
     }
 
     @Override
@@ -186,12 +182,6 @@ public class LocationPublisher extends Service
         mPolling = false;
     }
 
-    public void restartPolling(){
-        if (mPolling) {
-            stopPolling();
-            poll();
-        }
-    }
 
     public boolean isPolling(){
         return mPolling;
@@ -205,10 +195,11 @@ public class LocationPublisher extends Service
 
     // HELPERS
 
-    protected void registerPrefListener(){
-        PreferenceManager
-            .getDefaultSharedPreferences(this)
-            .registerOnSharedPreferenceChangeListener(this);
+    protected LocationRequest buildLocReq(){
+        return LocationRequest.create()
+            .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+            .setInterval(mPollInterval)
+            .setFastestInterval(mPollInterval);
     }
 
     protected void resetPollInterval(){
@@ -219,17 +210,29 @@ public class LocationPublisher extends Service
 
     protected int getPollIntervalPref(){
         return parseInt(
-            PreferenceManager.getDefaultSharedPreferences(this)
-                .getString(
-                    getString(R.string.pref_loc_share_interval_key),
-                    getString(R.string.pref_loc_share_interval_value_2)));
+            mPrefs.getString(
+                getString(R.string.pref_loc_share_interval_key),
+                getString(R.string.pref_loc_share_interval_value_2)));
     }
 
-    protected LocationRequest buildLocReq(){
-        return LocationRequest.create()
-            .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-            .setInterval(mPollInterval)
-            .setFastestInterval(mPollInterval);
+    protected void restartPolling(){
+        if (mPolling) {
+            stopPolling();
+            poll();
+        }
+    }
+
+    protected void resetTtl(){
+        mTtl = getTtlPref();
+        mScheduler.cancelForget();
+        mScheduler.forget(sForgetInterval, mTtl);
+    }
+
+    protected long getTtlPref(){
+        return parseLong(
+            mPrefs.getString(
+                getString(R.string.pref_loc_ttl_key),
+                getString(R.string.pref_loc_ttl_value_1)));
     }
 
     protected String getRandomId(){

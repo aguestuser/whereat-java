@@ -55,7 +55,7 @@ public class SettingsFragmentTest {
         ctx.getString(R.string.pref_loc_ttl_label_1),
         ctx.getString(R.string.pref_loc_ttl_label_2),
     };
-    
+
 
     @Before
     public void setup() {
