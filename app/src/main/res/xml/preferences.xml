@@ -9,7 +9,7 @@
         >
 
         <ListPreference
-            android:key="pref_key_loc_share_interval"
+            android:key="@string/pref_loc_share_interval_key"
             android:title="@string/pref_loc_share_interval_title"
             android:summary="@string/pref_loc_share_interval_summary"
             android:dialogTitle="@string/pref_loc_share_interval_title"

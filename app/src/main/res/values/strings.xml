@@ -22,15 +22,16 @@
     <string name="pref_activity_title">"Settings"</string>
     <string name="pref_category_intervals_title">"Location Update Frequency"</string>
 
+    <string name="pref_loc_share_interval_key">"pref_loc_share_interval_key"</string>
     <string name="pref_loc_share_interval_title">"Location Sharing Frequency"</string>
     <string name="pref_loc_share_interval_summary">"Share frequently for more accuracy, infrequently for greater battery life."</string>
 
-    <string name="pref_loc_share_interval_value_0">"10"</string> <!-- 10 sec -->
-    <string name="pref_loc_share_interval_value_1">"30"</string> <!-- 30 sec -->
-    <string name="pref_loc_share_interval_value_2">"60"</string> <!-- 1 min -->
-    <string name="pref_loc_share_interval_value_3">"300"</string> <!-- 5 min -->
-    <string name="pref_loc_share_interval_value_4">"600"</string> <!-- 10 min -->
-    <string name="pref_loc_share_interval_value_5">"900"</string> <!-- 15 min -->
+    <string name="pref_loc_share_interval_value_0">"10000"</string> <!-- 10 sec -->
+    <string name="pref_loc_share_interval_value_1">"30000"</string> <!-- 30 sec -->
+    <string name="pref_loc_share_interval_value_2">"60000"</string> <!-- 1 min -->
+    <string name="pref_loc_share_interval_value_3">"300000"</string> <!-- 5 min -->
+    <string name="pref_loc_share_interval_value_4">"600000"</string> <!-- 10 min -->
+    <string name="pref_loc_share_interval_value_5">"900000"</string> <!-- 15 min -->
     
     <string name="pref_loc_share_interval_label_0">"10 sec (most accurate)"</string>
     <string name="pref_loc_share_interval_label_1">"30 sec"</string>
