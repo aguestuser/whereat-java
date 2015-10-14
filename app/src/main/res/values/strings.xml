@@ -23,19 +23,25 @@
 
     <string name="pref_loc_share_interval_key">"pref_loc_share_interval_key"</string>
     <string name="pref_loc_share_interval_title">"Share my location every:"</string>
-
     <string name="pref_loc_share_interval_value_0">"5000"</string> <!-- 5 sec -->
     <string name="pref_loc_share_interval_value_1">"15000"</string> <!-- 15 sec -->
     <string name="pref_loc_share_interval_value_2">"30000"</string> <!-- 30 sec -->
     <string name="pref_loc_share_interval_value_3">"60000"</string> <!-- 1 min -->
     <string name="pref_loc_share_interval_value_4">"300000"</string> <!-- 5 min -->
-
     <string name="pref_loc_share_interval_label_0">"5 sec (most accurate)"</string>
     <string name="pref_loc_share_interval_label_1">"15 sec"</string>
     <string name="pref_loc_share_interval_label_2">"30 sec"</string>
     <string name="pref_loc_share_interval_label_3">"1 min"</string>
     <string name="pref_loc_share_interval_label_4">"5 min (most battery life)"</string>
 
+    <string name="pref_loc_ttl_key">"pref_loc_ttl_key"</string>
+    <string name="pref_loc_ttl_title">"Delete locations after:"</string>
+    <string name="pref_loc_ttl_value_0">"1800000"</string> <!-- 30 min -->
+    <string name="pref_loc_ttl_value_1">"3600000"</string> <!-- 1 hr -->
+    <string name="pref_loc_ttl_value_2">"7200000"</string> <!-- 2 hr -->
+    <string name="pref_loc_ttl_label_0">"30 min (most secure)"</string>
+    <string name="pref_loc_ttl_label_1">"1 hr"</string>
+    <string name="pref_loc_ttl_label_2">"2 hr (most information)"</string>
 
     <string name="loc_clear_toast">"User data erased from server."</string>
     <string name="loc_forget_prefix">"Deleted records older than "</string>
