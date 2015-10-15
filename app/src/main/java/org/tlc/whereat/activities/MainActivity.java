@@ -17,6 +17,8 @@ import org.tlc.whereat.services.LocPubManager;
 import org.tlc.whereat.modules.pubsub.receivers.MainActivityReceivers;
 import org.tlc.whereat.modules.ui.Toaster;
 
+import static org.tlc.whereat.modules.ui.Toaster.shortToast;
+
 public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = MainActivity.class.getSimpleName();
@@ -47,21 +49,9 @@ public class MainActivity extends AppCompatActivity {
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
-        final Button shareLocationButton = (Button) findViewById(R.id.go_button);
-
-        shareLocationButton.setOnLongClickListener(new View.OnLongClickListener(){
-            @Override
-            public boolean onLongClick(View v){
-                return mPolling ? stop(v) : go(v);
-            }
-        });
-
-        shareLocationButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!mLocPub.isPolling()) mLocPub.ping();
-            }
-        });
+        final Button goBtn = (Button) findViewById(R.id.go_button);
+        goBtn.setOnLongClickListener(v -> mPolling ? stop(v) : go(v));
+        goBtn.setOnClickListener(v -> { if (!mLocPub.isPolling()) mLocPub.ping(); });
     }
 
     @Override
@@ -92,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
         v.setBackground(getDrawn(R.drawable.go_button_on));
         mLocPub.poll();
         mPolling = true;
-        Toaster.briefly(this, "Location sharing on.");
+        shortToast(this, "Location sharing on.");
         return true;
     }
 
@@ -100,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         v.setBackground(getDrawn(R.drawable.go_button_off));
         mLocPub.stopPolling();
         mPolling = false;
-        Toaster.briefly(this, "Location sharing off.");
+        shortToast(this, "Location sharing off.");
         return true;
     }
 

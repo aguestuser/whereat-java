@@ -19,7 +19,7 @@ public class ReceiversTest {
     LocalBroadcastManager lbm;
     ArgumentCaptor<IntentFilter> ifArg;
 
-    protected void addSpies(List<Receiver> rs){
+    protected void addSpies(List<Receivers> rs){
         for (int i=0; i < rs.size(); i++) rs.set(i, spy(rs.get(i)));
     }
 

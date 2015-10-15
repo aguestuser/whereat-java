@@ -18,14 +18,14 @@ import org.tlc.whereat.fragments.PlayServicesAlertFragment;
 import org.tlc.whereat.modules.pubsub.Dispatcher;
 import org.tlc.whereat.modules.ui.Toaster;
 
-public class GoogleApiReceivers extends Receiver {
+import static org.tlc.whereat.modules.ui.Toaster.shortToast;
+
+public class GoogleApiReceivers extends Receivers {
 
     //FIELDS
 
     public static final String TAG = GoogleApiReceivers.class.getSimpleName();
-
-    protected final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000; //TODO: move to resources
-    protected final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1000; //TODO: move to resources
+    protected final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 
     protected BroadcastReceiver mApiClientDisconnected = apiClientDisconnectedReceiver();
     protected BroadcastReceiver mLocationServicesDisabledReceiver = locationServicesDisabledReceiver();
@@ -37,20 +37,22 @@ public class GoogleApiReceivers extends Receiver {
     // CONSTRUCTOR
 
     public GoogleApiReceivers(Context ctx, LocalBroadcastManager lbm){
-        mCtx = ctx;
-        mLbm = lbm;
+        super(ctx, lbm);
+
         mLocServicesAlert = new LocServicesAlertFragment();
         mPlayServicesAlert = new PlayServicesAlertFragment();
     }
 
     // PUBLIC METHODS
 
+    @Override
     public void register(){
         Dispatcher.register(mLbm, mApiClientDisconnected, LocPubBroadcasters.ACTION_GOOGLE_API_CLIENT_DISCONNECTED);
         Dispatcher.register(mLbm, mLocationServicesDisabledReceiver, LocPubBroadcasters.ACTION_LOCATION_SERVICES_DISABLED);
         Dispatcher.register(mLbm, mPlayServicesDisabledReceiver, LocPubBroadcasters.ACTION_PLAY_SERVICES_DISABLED);
     }
 
+    @Override
     public void unregister(){
         mLbm.unregisterReceiver(mApiClientDisconnected);
         mLbm.unregisterReceiver(mLocationServicesDisabledReceiver);
@@ -97,7 +99,7 @@ public class GoogleApiReceivers extends Receiver {
                 e.printStackTrace();
             }
         } else {
-            Toaster.briefly(mCtx, mCtx.getString(R.string.goog_loc_api_disconnected_toast));
+            shortToast(mCtx, mCtx.getString(R.string.goog_loc_api_disconnected_toast));
             Log.i(TAG, "Google location API connection failed with code " + cr.getErrorCode());
         }
     }
@@ -119,7 +121,7 @@ public class GoogleApiReceivers extends Receiver {
             //GooglePlayServicesUtil.getErrorDialog(code, (Activity) mCtx, PLAY_SERVICES_RESOLUTION_REQUEST).show();
         }
         else {
-            Toaster.briefly(mCtx, mCtx.getString(R.string.goog_play_services_unavailable_toast));
+            shortToast(mCtx, mCtx.getString(R.string.goog_play_services_unavailable_toast));
         }
     }
 

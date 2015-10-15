@@ -111,7 +111,7 @@ public class GoogleApiReceiversTest extends ReceiversTest {
 
     @Test
     public void playServicesDisabledReceiver_should_tryToFixPlayServices(){
-        rcv = new ReceiverWithPlay(ctx, lbm);
+        rcv = new ReceiversWithPlay(ctx, lbm);
         rcv.mPlayServicesAlert = mock(PlayServicesAlertFragment.class);
         rcv.register();
         broadcastPlayServicesDisabled(lbm);
@@ -122,7 +122,7 @@ public class GoogleApiReceiversTest extends ReceiversTest {
 
     @Test
     public void playServicesDisabledReceiver_should_notifyUserIfPlayServicesUnfixable(){
-        rcv = new ReceiverWithNoPlay(ctx, lbm);
+        rcv = new ReceiversWithNoPlay(ctx, lbm);
         rcv.register();
         broadcastPlayServicesDisabled(lbm);
 
@@ -133,9 +133,9 @@ public class GoogleApiReceiversTest extends ReceiversTest {
         lbm.sendBroadcast(new Intent().setAction(LocPubBroadcasters.ACTION_PLAY_SERVICES_DISABLED));
     }
 
-    private class ReceiverWithPlay extends GoogleApiReceivers {
+    private class ReceiversWithPlay extends GoogleApiReceivers {
 
-        public ReceiverWithPlay(Context ctx, LocalBroadcastManager lbm){
+        public ReceiversWithPlay(Context ctx, LocalBroadcastManager lbm){
             super(ctx, lbm);
         }
 
@@ -145,9 +145,9 @@ public class GoogleApiReceiversTest extends ReceiversTest {
         }
     }
 
-    private class ReceiverWithNoPlay extends GoogleApiReceivers {
+    private class ReceiversWithNoPlay extends GoogleApiReceivers {
 
-        public ReceiverWithNoPlay(Context ctx, LocalBroadcastManager lbm){
+        public ReceiversWithNoPlay(Context ctx, LocalBroadcastManager lbm){
             super(ctx, lbm);
         }
 

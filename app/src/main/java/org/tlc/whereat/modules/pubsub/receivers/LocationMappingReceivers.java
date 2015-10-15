@@ -11,7 +11,7 @@ import org.tlc.whereat.model.UserLocation;
 import org.tlc.whereat.modules.pubsub.Dispatcher;
 import org.tlc.whereat.modules.schedule.Scheduler;
 
-public class LocationMappingReceivers extends Receiver {
+public class LocationMappingReceivers extends Receivers {
 
     //FIELDS
 
@@ -22,8 +22,7 @@ public class LocationMappingReceivers extends Receiver {
     // CONSTRUCTOR
 
     public LocationMappingReceivers(Context ctx, LocalBroadcastManager lbm){
-        mCtx = ctx;
-        mLbm = lbm;
+        super(ctx, lbm);
     }
 
     // PUBLIC METHODS

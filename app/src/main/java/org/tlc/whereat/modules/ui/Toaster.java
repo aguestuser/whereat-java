@@ -6,10 +6,10 @@ import android.widget.Toast;
 import org.tlc.whereat.model.UserLocation;
 
 public class Toaster {
-    public static void briefly(Context ctx, String msg){
+    public static void shortToast(Context ctx, String msg){
         Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show();
     }
-    public static void location(Context ctx, UserLocation loc) {
-        briefly(ctx, "Location shared: " + loc.toString());
+    public static void locToast(Context ctx, UserLocation loc) {
+        shortToast(ctx, "Location shared: " + loc.toString());
     }
 }
