@@ -8,14 +8,12 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 
 import org.tlc.whereat.R;
 import org.tlc.whereat.fragments.SecurityAlertFragment;
 import org.tlc.whereat.modules.ui.MenuHandler;
 import org.tlc.whereat.services.LocPubManager;
 import org.tlc.whereat.modules.pubsub.receivers.MainActivityReceivers;
-import org.tlc.whereat.modules.ui.Toaster;
 
 import static org.tlc.whereat.modules.ui.Toaster.shortToast;
 
@@ -49,9 +47,7 @@ public class MainActivity extends AppCompatActivity {
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
-        final Button goBtn = (Button) findViewById(R.id.go_button);
-        goBtn.setOnLongClickListener(v -> mPolling ? stop(v) : go(v));
-        goBtn.setOnClickListener(v -> { if (!mLocPub.isPolling()) mLocPub.ping(); });
+        findViewById(R.id.go_button).setOnClickListener(this::togglePolling);
     }
 
     @Override
@@ -78,20 +74,23 @@ public class MainActivity extends AppCompatActivity {
 
     // GO BUTTON HELPERS
 
-    private boolean go(View v){
+    protected void togglePolling(View v){
+        if (mPolling) stopPolling(v);
+        else poll(v);
+    }
+
+    protected void poll(View v){
         v.setBackground(getDrawn(R.drawable.go_button_on));
         mLocPub.poll();
         mPolling = true;
         shortToast(this, "Location sharing on.");
-        return true;
     }
 
-    private boolean stop(View v){
+    protected void stopPolling(View v){
         v.setBackground(getDrawn(R.drawable.go_button_off));
         mLocPub.stopPolling();
         mPolling = false;
         shortToast(this, "Location sharing off.");
-        return true;
     }
 
     private Drawable getDrawn(int id){

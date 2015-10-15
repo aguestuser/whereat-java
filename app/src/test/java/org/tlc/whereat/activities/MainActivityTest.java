@@ -128,30 +128,16 @@ public class MainActivityTest {
         }
 
         @Test
-        public void clickingGoButton_shouldPingLocation(){
-            FakeMainActivity a = Robolectric.buildActivity(FakeMainActivity.class).create().get();
-            LocPubManager mockLocPub = mock(LocPubManager.class);
-            a.setLocPub(mockLocPub);
-            Button go = (Button) a.findViewById(R.id.go_button);
-
-            go.performClick();
-            verify(mockLocPub, times(1)).ping();
-
-            go.performClick();
-            verify(mockLocPub, times(2)).ping();
-        }
-
-        @Test
-        public void longClickingGoButton_shouldToggleLocationPolling(){
+        public void clickingGoButton_shouldToggleLocationPolling(){
             LocPubManager mockLocPub = mock(LocPubManager.class);
             FakeMainActivity a = createActivity(FakeMainActivity.class).setLocPub(mockLocPub);
             Button go = (Button) a.findViewById(R.id.go_button);
 
-            go.performLongClick();
+            go.performClick();
             verify(mockLocPub).poll();
             assertThat(lastToast()).isEqualTo("Location sharing on.");
 
-            go.performLongClick();
+            go.performClick();
             verify(mockLocPub).stopPolling();
             assertThat(lastToast()).isEqualTo("Location sharing off.");
         }
