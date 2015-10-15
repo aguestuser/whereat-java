@@ -48,7 +48,7 @@ public class LocationPublisher extends Service
 
     public static final String TAG = LocationPublisher.class.getSimpleName();
     public static final long sForgetInterval = 60 * 1000L; // 1 minute
-//    public static final long sForgetInterval = 5 * 1000L; // 5 sec --> FOR DEBUGGING
+//    public static final long sForgetInterval = 5 * 1000L; // 5 sec --> FOR DEBUGGING & DEMOS
 
     protected IBinder mBinder = new LocationServiceBinder();
     protected GoogleApiClient mGoogClient;
@@ -97,6 +97,7 @@ public class LocationPublisher extends Service
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         mPollInterval = getPollIntervalPref();
+        mTtl = getTtlPref();
         mLocReq = buildLocReq();
 
         mWhereatClient = WhereatApiClient.getInstance();

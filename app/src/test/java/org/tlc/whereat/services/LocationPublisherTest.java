@@ -81,6 +81,7 @@ public class LocationPublisherTest {
 
             assertThat(lp.mPrefs).isNotNull();
             assertThat(lp.mPollInterval).isEqualTo(30000);
+            assertThat(lp.mTtl).isEqualTo(3600000L);
             assertThat(lp.mLocReq).isNotNull();
             assertThat(lp.mLocReq.getInterval()).isEqualTo(30000L);
 

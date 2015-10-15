@@ -94,14 +94,11 @@ public class SchedulerTest {
         @Test
         public void cancelForget_should_removeForgetCallbacksFromHandler(){
 
-            Handler handler = mock(Handler.class);
-            Runnable runnable = mock(Runnable.class);
-
-            sked.mForgetHandler = handler;
-            sked.mForgetRunnable = runnable;
+            sked.mForgetHandler = mock(Handler.class);
+            sked.mForgetRunnable = mock(Runnable.class);
 
             sked.cancelForget();
-            verify(handler, times(1)).removeCallbacks(runnable);
+            verify(sked.mForgetHandler).removeCallbacks(sked.mForgetRunnable);
         }
     }
 }

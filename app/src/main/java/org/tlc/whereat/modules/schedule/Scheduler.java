@@ -51,7 +51,7 @@ public class Scheduler {
         thread.start();
         mForgetHandler = new Handler(Looper.getMainLooper());
 
-        Runnable forget = new Runnable() {
+        mForgetRunnable = new Runnable() {
             @Override
             public void run() {
                 long rightNow = now.length > 0 ? now[0] : new Date().getTime();
@@ -60,7 +60,7 @@ public class Scheduler {
             }
         };
 
-        mForgetHandler.postDelayed(forget, interval);
+        mForgetHandler.postDelayed(mForgetRunnable, interval);
     }
 
     public void cancelForget(){
