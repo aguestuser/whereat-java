@@ -37,12 +37,12 @@ import rx.functions.Action1;
 
 import static java.lang.Integer.parseInt;
 import static java.lang.Long.parseLong;
+import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 
 public class LocationPublisher extends Service
     implements GoogleApiClient.ConnectionCallbacks,
     GoogleApiClient.OnConnectionFailedListener,
-    LocationListener,
-    SharedPreferences.OnSharedPreferenceChangeListener {
+    LocationListener {
 
     // FIELDS
 
@@ -60,6 +60,7 @@ public class LocationPublisher extends Service
     protected LocPubBroadcasters mBroadcast;
     protected Action1<UserLocation> mLocSub;
     protected SharedPreferences mPrefs;
+    protected OnSharedPreferenceChangeListener mPrefListener;
 
     protected String mUserId;
     protected int mPollInterval;
@@ -96,6 +97,7 @@ public class LocationPublisher extends Service
             .build();
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        mPrefListener = buildPrefListener();
         mPollInterval = getPollIntervalPref();
         mTtl = getTtlPref();
         mLocReq = buildLocReq();
@@ -115,7 +117,7 @@ public class LocationPublisher extends Service
     protected void run(){
         if (!mGoogClient.isConnected()) mGoogClient.connect();
         mDao.connect();
-        mPrefs.registerOnSharedPreferenceChangeListener(this);
+        mPrefs.registerOnSharedPreferenceChangeListener(mPrefListener);
         mScheduler.forget(sForgetInterval, mTtl);
     }
 
@@ -141,10 +143,11 @@ public class LocationPublisher extends Service
 
     // CALLBACKS
 
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-        if (key.equals(getString(R.string.pref_loc_share_interval_key))) resetPollInterval();
-        if (key.equals(getString(R.string.pref_loc_ttl_key))) resetTtl();
+    protected OnSharedPreferenceChangeListener buildPrefListener(){
+        return ((SharedPreferences sp, String key) -> {
+            if (key.equals(getString(R.string.pref_loc_share_interval_key))) resetPollInterval();
+            if (key.equals(getString(R.string.pref_loc_ttl_key))) resetTtl();
+        });
     }
 
     @Override

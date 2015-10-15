@@ -44,31 +44,6 @@ public class Dao extends SQLiteOpenHelper {
         super(ctx, dbName, null, DB_VERSION);
     }
 
-    // INTERFACE IMPLEMENTATION
-
-//    @Override
-//    public void onCreate(SQLiteDatabase db) {
-//        for(Patch p : PATCHES){
-//            p.apply(db);
-//        }
-//    }
-//
-//    @Override
-//    public void onUpgrade(SQLiteDatabase db, int oldV, int newV) {
-//        log("Upgrading DB from version " + oldV + " to version " + newV);
-//        for(int i = oldV; i < newV; i++){
-//            PATCHES[i].apply(db);
-//        }
-//    }
-//
-//    @Override
-//    public void onDowngrade(SQLiteDatabase db, int oldV, int newV) {
-//        log("Downgrading DB from version " + oldV + " to version " + newV);
-//        for(int i = oldV; i > newV; i++){
-//            PATCHES[i-1].revert(db);
-//        }
-//    }
-
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(DB_CREATE);

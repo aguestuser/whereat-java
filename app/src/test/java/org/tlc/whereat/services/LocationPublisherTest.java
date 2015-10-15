@@ -13,43 +13,30 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
-
-import org.mockito.InOrder;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-import static org.robolectric.Shadows.shadowOf;
-
 import org.robolectric.shadows.ShadowPreferenceManager;
 import org.tlc.whereat.BuildConfig;
-
-import static org.mockito.Mockito.*;
-import static org.tlc.whereat.support.LocationHelpers.*;
-
 import org.tlc.whereat.R;
-import org.tlc.whereat.modules.api.WhereatApiClient;
-import org.tlc.whereat.modules.schedule.Scheduler;
-import org.tlc.whereat.modules.pubsub.broadcasters.LocPubBroadcasters;
-import org.tlc.whereat.modules.db.LocationDao;
 import org.tlc.whereat.model.UserLocation;
 import org.tlc.whereat.model.UserLocationTimestamped;
+import org.tlc.whereat.modules.api.WhereatApiClient;
+import org.tlc.whereat.modules.db.LocationDao;
+import org.tlc.whereat.modules.pubsub.broadcasters.LocPubBroadcasters;
+import org.tlc.whereat.modules.schedule.Scheduler;
 import org.tlc.whereat.support.FakeLocationPublisher;
-
-import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.observers.TestSubscriber;
 
 import java.util.Arrays;
 import java.util.List;
 
 import rx.Observable;
+import rx.observers.TestSubscriber;
 
 import static org.assertj.core.api.Assertions.*;
-
-/**
- * Author: @aguestuser
- * License: GPLv3 (https://www.gnu.org/licenses/gpl-3.0.html)
- */
+import static org.mockito.Mockito.*;
+import static org.robolectric.Shadows.shadowOf;
+import static org.tlc.whereat.support.LocationHelpers.*;
 
 
 @RunWith(Enclosed.class)
@@ -80,6 +67,7 @@ public class LocationPublisherTest {
             assertThat(lp.mGoogClient).isNotNull();
 
             assertThat(lp.mPrefs).isNotNull();
+            assertThat(lp.mPrefListener).isNotNull();
             assertThat(lp.mPollInterval).isEqualTo(30000);
             assertThat(lp.mTtl).isEqualTo(3600000L);
             assertThat(lp.mLocReq).isNotNull();
@@ -110,7 +98,7 @@ public class LocationPublisherTest {
 
             verify(lp.mGoogClient).connect();
             verify(lp.mDao).connect();
-            verify(lp.mPrefs).registerOnSharedPreferenceChangeListener(lp);
+            verify(lp.mPrefs).registerOnSharedPreferenceChangeListener(lp.mPrefListener);
             verify(lp.mScheduler).forget(LocationPublisher.sForgetInterval, lp.mTtl);
         }
 
@@ -132,7 +120,6 @@ public class LocationPublisherTest {
     public static class PreferenceListeners {
 
         LocationPublisher lp;
-        SharedPreferences prefs;
 
         @Before
         public void setup() {
@@ -146,7 +133,8 @@ public class LocationPublisherTest {
                     mock(IBinder.class));
 
             lp.mPrefs = ShadowPreferenceManager.getDefaultSharedPreferences(RuntimeEnvironment.application);
-            lp.mPrefs.registerOnSharedPreferenceChangeListener(lp);
+            lp.mPrefListener = lp.buildPrefListener();
+            lp.mPrefs.registerOnSharedPreferenceChangeListener(lp.mPrefListener);
         }
 
         @Test
@@ -154,7 +142,6 @@ public class LocationPublisherTest {
 
             setPollInterval(lp.getString(R.string.pref_loc_share_interval_value_0));
 
-            verify(lp, times(1)).onSharedPreferenceChanged(eq(lp.mPrefs), eq("pref_loc_share_interval_key"));
             verify(lp, times(1)).resetPollInterval();
             assertThat(lp.mPollInterval).isEqualTo(5000);
             assertThat(lp.mLocReq.getInterval()).isEqualTo(5000);
@@ -162,7 +149,6 @@ public class LocationPublisherTest {
 
             setPollInterval(lp.getString(R.string.pref_loc_share_interval_value_1));
 
-            verify(lp, times(2)).onSharedPreferenceChanged(eq(lp.mPrefs), eq("pref_loc_share_interval_key"));
             verify(lp, times(2)).resetPollInterval();
             assertThat(lp.mPollInterval).isEqualTo(15000);
             assertThat(lp.mLocReq.getInterval()).isEqualTo(15000);
@@ -170,7 +156,6 @@ public class LocationPublisherTest {
 
             setPollInterval(lp.getString(R.string.pref_loc_share_interval_value_2));
 
-            verify(lp, times(3)).onSharedPreferenceChanged(eq(lp.mPrefs), eq("pref_loc_share_interval_key"));
             verify(lp, times(3)).resetPollInterval();
             assertThat(lp.mPollInterval).isEqualTo(30000);
             assertThat(lp.mLocReq.getInterval()).isEqualTo(30000);
@@ -178,7 +163,6 @@ public class LocationPublisherTest {
 
             setPollInterval(lp.getString(R.string.pref_loc_share_interval_value_3));
 
-            verify(lp, times(4)).onSharedPreferenceChanged(eq(lp.mPrefs), eq("pref_loc_share_interval_key"));
             verify(lp, times(4)).resetPollInterval();
             assertThat(lp.mPollInterval).isEqualTo(60000);
             assertThat(lp.mLocReq.getInterval()).isEqualTo(60000);
@@ -186,7 +170,6 @@ public class LocationPublisherTest {
 
             setPollInterval(lp.getString(R.string.pref_loc_share_interval_value_4));
 
-            verify(lp, times(5)).onSharedPreferenceChanged(eq(lp.mPrefs), eq("pref_loc_share_interval_key"));
             verify(lp, times(5)).resetPollInterval();
             assertThat(lp.mPollInterval).isEqualTo(300000);
             assertThat(lp.mLocReq.getInterval()).isEqualTo(300000);
@@ -221,21 +204,18 @@ public class LocationPublisherTest {
 
             setTtl(lp.getString(R.string.pref_loc_ttl_value_0));
 
-            verify(lp, times(1)).onSharedPreferenceChanged(eq(lp.mPrefs), eq("pref_loc_ttl_key"));
             verify(lp, times(1)).resetTtl();
             assertThat(lp.mTtl).isEqualTo(1800000L);
             verify(lp.mScheduler).forget(fi, 1800000L);
 
             setTtl(lp.getString(R.string.pref_loc_ttl_value_1));
 
-            verify(lp, times(2)).onSharedPreferenceChanged(eq(lp.mPrefs), eq("pref_loc_ttl_key"));
             verify(lp, times(2)).resetTtl();
             assertThat(lp.mTtl).isEqualTo(3600000L);
             verify(lp.mScheduler).forget(fi, 3600000L);
 
             setTtl(lp.getString(R.string.pref_loc_ttl_value_2));
 
-            verify(lp, times(3)).onSharedPreferenceChanged(eq(lp.mPrefs), eq("pref_loc_ttl_key"));
             verify(lp, times(3)).resetTtl();
             assertThat(lp.mTtl).isEqualTo(7200000L);
             verify(lp.mScheduler).forget(fi, 7200000L);

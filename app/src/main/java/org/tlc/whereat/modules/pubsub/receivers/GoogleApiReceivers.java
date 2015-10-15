@@ -118,7 +118,6 @@ public class GoogleApiReceivers extends Receivers {
             mPlayServicesAlert.show(
                 ((Activity) mCtx).getFragmentManager(),
                 mCtx.getString(R.string.goog_play_services_alert_tag));
-            //GooglePlayServicesUtil.getErrorDialog(code, (Activity) mCtx, PLAY_SERVICES_RESOLUTION_REQUEST).show();
         }
         else {
             shortToast(mCtx, mCtx.getString(R.string.goog_play_services_unavailable_toast));
