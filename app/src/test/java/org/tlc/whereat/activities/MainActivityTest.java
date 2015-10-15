@@ -45,10 +45,15 @@ public class MainActivityTest {
 
         public static class OnCreate {
 
+            MainActivity a;
+
+            @Before
+            public void setup(){
+                a = createActivity(MainActivity.class);
+            }
+
             @Test
             public void onCreate_should_initializeActivityAndApplicationCorrectly(){
-
-                MainActivity a = createActivity(MainActivity.class);
 
                 assertThat(a.mLocPub).isNotNull();
                 assertThat(a.mReceivers).isNotNull();
@@ -64,52 +69,50 @@ public class MainActivityTest {
 
                 assertThat(a.findViewById(R.id.go_button)).isNotNull();
             }
+
+            @Test
+            public void onCreate_should_startLocationPublisher(){
+                assertThat(nextService(a)).isEqualTo(LocationPublisher.class.getName());
+            }
         }
-
-
     }
-
 
     @RunWith(RobolectricGradleTestRunner.class)
     @Config(constants = BuildConfig.class, sdk = 21)
 
     public static class PostCreate {
 
-        @Test
-        public void creatingActivity_should_startLocationPublisher(){
-            MainActivity a = createActivity(FakeMainActivity.class);
+        MainActivity a;
 
-            assertThat(nextService(a))
-                .isEqualTo(LocationPublisher.class.getName());
+        @Before
+        public void setup(){
+            a = createActivity(MainActivity.class);
+            a.mLocPub = mock(LocPubManager.class);
+            a.mReceivers = mock(MainActivityReceivers.class);
         }
 
         @Test
-        public void resumingActivity_should_bindToLocPubAndRegisterToLocSub(){
-            LocPubManager mockLocPub = mock(LocPubManager.class);
-            MainActivityReceivers mockLocSub = mock(MainActivityReceivers.class);
-            FakeMainActivity a = createActivity(FakeMainActivity.class)
-                .setLocPub(mockLocPub)
-                .setLocSub(mockLocSub);
-
+        public void onResume_should_bindToLocPubAndRegisterReceivers(){
             a.onResume();
 
-            verify(mockLocPub, times(1)).bind();
-            verify(mockLocSub, times(1)).register();
+            verify(a.mLocPub).bind();
+            verify(a.mReceivers).register();
         }
 
 
         @Test
-        public void pausingActivity_should_unbindFromLocPubAndUnregisterFromLocSub(){
-            LocPubManager mockLocPub = mock(LocPubManager.class);
-            MainActivityReceivers mockLocSub = mock(MainActivityReceivers.class);
-            FakeMainActivity a = createActivity(FakeMainActivity.class)
-                .setLocPub(mockLocPub)
-                .setLocSub(mockLocSub);
-
+        public void onPause_should_unbindFromLocPubAndUnregisterReceivers(){
             a.onPause();
 
-            verify(mockLocPub, times(1)).unbind();
-            verify(mockLocSub, times(1)).unregister();
+            verify(a.mLocPub).unbind();
+            verify(a.mReceivers).unregister();
+        }
+
+        @Test
+        public void onDestroy_should_stopLocPub(){
+            a.onDestroy();
+
+            verify(a.mLocPub).stop();
         }
     }
 

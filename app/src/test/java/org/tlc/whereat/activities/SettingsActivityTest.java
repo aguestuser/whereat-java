@@ -8,6 +8,7 @@ import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.fakes.RoboMenu;
 import org.tlc.whereat.BuildConfig;
+import org.tlc.whereat.modules.pubsub.receivers.SettingsActivityReceivers;
 import org.tlc.whereat.modules.ui.MenuHandler;
 import org.tlc.whereat.support.ActivityWithMenuHandlersTest;
 
@@ -23,20 +24,49 @@ public class SettingsActivityTest {
 
 
     @RunWith(RobolectricGradleTestRunner.class)
-        @Config(constants = BuildConfig.class, sdk = 21)
+    @Config(constants = BuildConfig.class, sdk = 21)
 
-        public static class OnCreate {
+    public static class OnCreate {
 
-            @Test
-            public void onCreate_should_initializeActivityCorrectly(){
-                SettingsActivity a = createActivity(SettingsActivity.class);
+        @Test
+        public void onCreate_should_initializeActivityCorrectly(){
+            SettingsActivity a = createActivity(SettingsActivity.class);
 
-                assertThat(a.mMenu).isNotNull();
-                assertThat(
-                    a.getFragmentManager().findFragmentByTag("settings_fragment"))
-                    .isNotNull();
-            }
+            assertThat(a.mMenu).isNotNull();
+            assertThat(
+                a.getFragmentManager().findFragmentByTag("settings_fragment"))
+                .isNotNull();
         }
+    }
+
+
+    @RunWith(RobolectricGradleTestRunner.class)
+    @Config(constants = BuildConfig.class, sdk = 21)
+
+    public static class PostCreate {
+
+        SettingsActivity a;
+
+        @Before
+        public void setup(){
+            a = createActivity(SettingsActivity.class);
+            a.mReceivers = mock(SettingsActivityReceivers.class);
+        }
+
+        @Test
+        public void onResume_should_registerReceivers(){
+            a.onResume();
+            verify(a.mReceivers).register();
+        }
+
+
+        @Test
+        public void onPause_should_unregisterReceivers(){
+            a.onPause();
+            verify(a.mReceivers).unregister();
+        }
+    }
+
 
 
     @RunWith(RobolectricGradleTestRunner.class)
