@@ -1,6 +1,5 @@
 package org.tlc.whereat.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -8,10 +7,11 @@ import android.view.MenuItem;
 import android.view.View;
 
 import org.tlc.whereat.R;
-import org.tlc.whereat.modules.Mapper;
-import org.tlc.whereat.pubsub.LocPubManager;
-import org.tlc.whereat.receivers.MapActivityReceivers;
-import org.tlc.whereat.db.LocationDao;
+import org.tlc.whereat.modules.map.Mapper;
+import org.tlc.whereat.modules.ui.MenuHandler;
+import org.tlc.whereat.services.LocPubManager;
+import org.tlc.whereat.modules.pubsub.receivers.MapActivityReceivers;
+import org.tlc.whereat.modules.db.LocationDao;
 import org.tlc.whereat.model.UserLocation;
 
 
@@ -21,6 +21,7 @@ public class MapActivity extends AppCompatActivity {
     protected MapActivityReceivers mReceivers;
     protected LocationDao mLocDao;
     protected Mapper mMapper;
+    protected MenuHandler mMenu;
 
 
     // LIFE CYCLE METHODS
@@ -34,6 +35,7 @@ public class MapActivity extends AppCompatActivity {
         mReceivers = new MapActivityReceivers(this);
         mLocDao = new LocationDao(this);
         mMapper = new Mapper(this);
+        mMenu = new MenuHandler(this);
 
         findViewById(R.id.clear_map_button).setOnClickListener((View v) -> clear());
     }
@@ -68,21 +70,12 @@ public class MapActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+        return mMenu.create(menu);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) { // The action bar will automatically handle clicks on the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
-        switch(item.getItemId()){
-            case R.id.action_main:
-                Intent i = new Intent(this, MainActivity.class);
-                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(i);
-                break;
-        }
-        return super.onOptionsItemSelected(item);
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return mMenu.select(item, super::onOptionsItemSelected);
     }
 
     // PUBLIC METHODS

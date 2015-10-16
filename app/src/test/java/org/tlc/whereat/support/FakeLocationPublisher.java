@@ -2,9 +2,9 @@ package org.tlc.whereat.support;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import org.tlc.whereat.db.LocationDao;
-import org.tlc.whereat.pubsub.LocationPublisher;
-import org.tlc.whereat.pubsub.Scheduler;
+import org.tlc.whereat.modules.db.LocationDao;
+import org.tlc.whereat.services.LocationPublisher;
+import org.tlc.whereat.modules.schedule.Scheduler;
 
 
 /**

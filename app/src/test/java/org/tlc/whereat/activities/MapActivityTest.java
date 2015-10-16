@@ -1,9 +1,15 @@
 package org.tlc.whereat.activities;
 
+import android.app.Activity;
+import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuItem;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.fakes.RoboMenu;
@@ -11,19 +17,18 @@ import org.robolectric.fakes.RoboMenuItem;
 import org.robolectric.shadows.ShadowLog;
 import org.tlc.whereat.BuildConfig;
 import org.tlc.whereat.R;
-import org.tlc.whereat.db.LocationDao;
+import org.tlc.whereat.modules.db.LocationDao;
 import org.tlc.whereat.model.UserLocation;
-import org.tlc.whereat.modules.Mapper;
-import org.tlc.whereat.pubsub.LocPubManager;
-import org.tlc.whereat.receivers.MapActivityReceivers;
+import org.tlc.whereat.modules.map.Mapper;
+import org.tlc.whereat.modules.ui.MenuHandler;
+import org.tlc.whereat.services.LocPubManager;
+import org.tlc.whereat.modules.pubsub.receivers.MapActivityReceivers;
+import org.tlc.whereat.support.ActivityWithMenuHandlersTest;
+
+import rx.functions.Func1;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.anyListOf;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.robolectric.Shadows.shadowOf;
 import static org.tlc.whereat.support.ActivityHelpers.createActivity;
 import static org.tlc.whereat.support.ActivityHelpers.nextActivity;
@@ -54,6 +59,7 @@ public class MapActivityTest {
                 assertThat(a.mReceivers).isNotNull();
                 assertThat(a.mLocDao).isNotNull();
                 assertThat(a.mMapper).isNotNull();
+                assertThat(a.mMenu).isNotNull();
 
                 assertThat(shadowOf(a).getContentView().getId()).isEqualTo(R.id.map_activity);
                 assertThat(a.findViewById(R.id.clear_map_button)).isNotNull();
@@ -200,24 +206,6 @@ public class MapActivityTest {
             doReturn(a.mMapper).when(a.mMapper).initialize(anyListOf(UserLocation.class));
         }
 
-        @Test
-        public void menu_should_displayCorrectContents(){
-            RoboMenu menu = new RoboMenu(a);
-            a.onCreateOptionsMenu(menu);
-
-            assertThat(menu.getItem(0).getItemId()).isEqualTo(R.id.action_main);
-            assertThat(menu.getItem(0).getTitle()).isEqualTo(a.getString(R.string.main_activity_title));
-
-            assertThat(menu.getItem(1).getItemId()).isEqualTo(R.id.action_map);
-            assertThat(menu.getItem(1).getTitle()).isEqualTo(a.getString(R.string.map_activity_title));
-        }
-
-        @Test
-        public void selectingHomeFromMenu_should_startMainActivity() {
-            a.onOptionsItemSelected(new RoboMenuItem(R.id.action_main));
-            assertThat(nextActivity(a)).isEqualTo(MainActivity.class.getName());
-
-        }
 
         @Test
         public void clickingClearButton_should_clearMap(){
@@ -226,6 +214,40 @@ public class MapActivityTest {
             verify(a.mMapper).clear();
             verify(a.mLocPub).clear();
             verify(a.mLocDao).clear();
+        }
+    }
+
+    @RunWith(RobolectricGradleTestRunner.class)
+    @Config(constants = BuildConfig.class, sdk = 21)
+
+    public static class MenuHandlers extends ActivityWithMenuHandlersTest {
+
+        MapActivity a;
+
+        @Before
+        public void setup() {
+            a = createActivity(MapActivity.class);
+            a.mMenu = mock(MenuHandler.class);
+            menu = new RoboMenu(a);
+        }
+
+        @Test
+        public void menu_should_delegateToMenuHandler(){
+            a.onCreateOptionsMenu(menu);
+            verify(a.mMenu).create(menu);
+        }
+
+        @Test
+        public void selectingActivityFromMenu_should_delegateToMenuHandler() {
+
+            a.onOptionsItemSelected(main);
+            verify(a.mMenu).select(eq(main), any(Func1.class));
+
+            a.onOptionsItemSelected(map);
+            verify(a.mMenu).select(eq(map), any(Func1.class));
+
+            a.onOptionsItemSelected(prefs);
+            verify(a.mMenu).select(eq(prefs), any(Func1.class));
         }
     }
 }

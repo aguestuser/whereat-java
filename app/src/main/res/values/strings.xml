@@ -1,6 +1,7 @@
 <resources>
     <string name="action_settings">Settings</string>
     <string name="app_name">where@</string>
+
     <string name="goog_loc_api_disconnected_toast">"Location service disconnected."</string>
     <string name="goog_loc_services_alert_title">"Location Services not enabled."</string>
     <string name="goog_loc_services_alert_yes_btn">"Enable."</string>
@@ -8,16 +9,46 @@
     <string name="goog_loc_services_alert_tag">"loc_services_alert"</string>
     <string name="goog_play_services_alert_tag">"play_services_alert"</string>
     <string name="goog_play_services_unavailable_toast">"This device does not support Google Play Services, which is required for location sharing."</string>
-    <string name="location_service_name">Location Service</string>
+
+
     <string name="main_activity_title">Home</string>
     <string name="main_button_text">Home</string>
+
     <string name="map_activity_title">Map</string>
     <string name="map_button_text">Map</string>
     <string name="map_clear_button_x">X</string>
-    <string name="loc_shared_toast">"Location shared."</string>
-    <string name="loc_retrieval_failed_toast">"Failed to retrieve user location."</string>
+
+    <string name="pref_activity_title">"Settings"</string>
+    <string name="pref_category_intervals_title">"Location Updates"</string>
+
+    <string name="pref_loc_share_interval_key">"pref_loc_share_interval_key"</string>
+    <string name="pref_loc_share_interval_title">"Share my location every:"</string>
+    <string name="pref_loc_share_interval_value_0">"5000"</string> <!-- 5 sec -->
+    <string name="pref_loc_share_interval_value_1">"15000"</string> <!-- 15 sec -->
+    <string name="pref_loc_share_interval_value_2">"30000"</string> <!-- 30 sec -->
+    <string name="pref_loc_share_interval_value_3">"60000"</string> <!-- 1 min -->
+    <string name="pref_loc_share_interval_value_4">"300000"</string> <!-- 5 min -->
+    <string name="pref_loc_share_interval_label_0">"5 sec (most accurate)"</string>
+    <string name="pref_loc_share_interval_label_1">"15 sec"</string>
+    <string name="pref_loc_share_interval_label_2">"30 sec"</string>
+    <string name="pref_loc_share_interval_label_3">"1 min"</string>
+    <string name="pref_loc_share_interval_label_4">"5 min (most battery life)"</string>
+
+    <string name="pref_loc_ttl_key">"pref_loc_ttl_key"</string>
+    <string name="pref_loc_ttl_title">"Delete locations after:"</string>
+    <string name="pref_loc_ttl_value_0">"1800000"</string> <!-- 30 min -->
+    <string name="pref_loc_ttl_value_1">"3600000"</string> <!-- 1 hr -->
+    <string name="pref_loc_ttl_value_2">"7200000"</string> <!-- 2 hr -->
+    <string name="pref_loc_ttl_label_0">"30 min (most secure)"</string>
+    <string name="pref_loc_ttl_label_1">"1 hr"</string>
+    <string name="pref_loc_ttl_label_2">"2 hr (most information)"</string>
+
     <string name="loc_clear_toast">"User data erased from server."</string>
     <string name="loc_forget_prefix">"Deleted records older than "</string>
+    <string name="loc_retrieval_failed_toast">"Failed to retrieve user location."</string>
+    <string name="loc_service_name">Location Service</string>
+    <string name="loc_shared_toast">"Location shared."</string>
+
     <string name="sec_alert_title">"YOU'RE BEING SPIED ON!!!"</string>
     <string name="sec_alert_message">"We've done everything we can to ensure your privacy while using where@, but there are some forms of surveillance we can't protect you from. Not to fear: you can protect yourself! To learn how, visit our security best practices page."</string>
     <string name="sec_alert_link_text">"security best practices page."</string>

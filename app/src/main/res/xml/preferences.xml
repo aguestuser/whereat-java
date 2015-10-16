@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:persistent="true"
+    >
+    <PreferenceCategory
+        android:title="@string/pref_category_intervals_title"
+        android:key="pref_category_key_interval"
+        >
+
+        <ListPreference
+            android:key="@string/pref_loc_share_interval_key"
+            android:title="@string/pref_loc_share_interval_title"
+            android:summary="%s"
+            android:dialogTitle="@string/pref_loc_share_interval_title"
+            android:entries="@array/pref_loc_share_interval_labels"
+            android:entryValues="@array/pref_loc_share_interval_values"
+            android:defaultValue="@string/pref_loc_share_interval_value_2"
+            />
+        
+        <ListPreference
+            android:key="@string/pref_loc_ttl_key"
+            android:title="@string/pref_loc_ttl_title"
+            android:summary="%s"
+            android:dialogTitle="@string/pref_loc_ttl_title"
+            android:entries="@array/pref_loc_ttl_labels"
+            android:entryValues="@array/pref_loc_ttl_values"
+            android:defaultValue="@string/pref_loc_ttl_value_1"
+            />
+
+    </PreferenceCategory>
+</PreferenceScreen>

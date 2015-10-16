@@ -4,8 +4,8 @@ package org.tlc.whereat.support;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
-import org.tlc.whereat.db.Dao;
-import org.tlc.whereat.db.LocationDao;
+import org.tlc.whereat.modules.db.Dao;
+import org.tlc.whereat.modules.db.LocationDao;
 
 public class FakeLocationDao extends LocationDao {
 

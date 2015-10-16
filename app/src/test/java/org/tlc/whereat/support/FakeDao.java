@@ -2,7 +2,7 @@ package org.tlc.whereat.support;
 
 import android.content.Context;
 
-import org.tlc.whereat.db.Dao;
+import org.tlc.whereat.modules.db.Dao;
 
 public class FakeDao extends Dao {
 

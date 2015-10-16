@@ -2,6 +2,7 @@
 <resources>
     <item name="action_main" type="id" />
     <item name="action_map" type="id" />
+    <item name="action_prefs" type="id" />
     <item name="clear_map_button" type="id" />
     <item name="clear_map_button_x" type="id" />
     <item name="go_button" type="id" />

@@ -2,8 +2,8 @@ package org.tlc.whereat.support;
 
 import org.tlc.whereat.activities.MainActivity;
 import org.tlc.whereat.fragments.SecurityAlertFragment;
-import org.tlc.whereat.receivers.MainActivityReceivers;
-import org.tlc.whereat.pubsub.LocPubManager;
+import org.tlc.whereat.modules.pubsub.receivers.MainActivityReceivers;
+import org.tlc.whereat.services.LocPubManager;
 
 
 public class FakeMainActivity extends MainActivity {
@@ -34,5 +34,10 @@ public class FakeMainActivity extends MainActivity {
 
     public boolean hasSecAlerted(){
         return mSecAlerted;
+    }
+
+    public FakeMainActivity setReceivers(MainActivityReceivers rs){
+        mReceivers = rs;
+        return this;
     }
 }
