@@ -17,6 +17,7 @@ import rx.Observable;
 public class WhereatApiClient implements WhereatApi {
 
     private static String mRoot = "https://api.whereat.io";
+    //private static String mRoot = "https: //api-dev.whereat.io"; // for testing
     private static WhereatApiClient mInstance;
     private WhereatApi mApi;
 
