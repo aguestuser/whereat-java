@@ -6,7 +6,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -55,7 +54,7 @@ public class MainActivityTest {
             @Test
             public void onCreate_should_initializeActivityAndApplicationCorrectly(){
 
-                assertThat(a.mLocPub).isNotNull();
+                assertThat(a.mLocPubMgr).isNotNull();
                 assertThat(a.mReceivers).isNotNull();
                 assertThat(a.mSecAlert).isNotNull();
                 assertThat(a.mMenu).isNotNull();
@@ -87,7 +86,7 @@ public class MainActivityTest {
         @Before
         public void setup(){
             a = createActivity(MainActivity.class);
-            a.mLocPub = mock(LocPubManager.class);
+            a.mLocPubMgr = mock(LocPubManager.class);
             a.mReceivers = mock(MainActivityReceivers.class);
         }
 
@@ -95,7 +94,7 @@ public class MainActivityTest {
         public void onResume_should_bindToLocPubAndRegisterReceivers(){
             a.onResume();
 
-            verify(a.mLocPub).bind();
+            verify(a.mLocPubMgr).bind();
             verify(a.mReceivers).register();
         }
 
@@ -104,7 +103,7 @@ public class MainActivityTest {
         public void onPause_should_unbindFromLocPubAndUnregisterReceivers(){
             a.onPause();
 
-            verify(a.mLocPub).unbind();
+            verify(a.mLocPubMgr).unbind();
             verify(a.mReceivers).unregister();
         }
 
@@ -112,7 +111,7 @@ public class MainActivityTest {
         public void onDestroy_should_stopLocPub(){
             a.onDestroy();
 
-            verify(a.mLocPub).stop();
+            verify(a.mLocPubMgr).stop();
         }
     }
 

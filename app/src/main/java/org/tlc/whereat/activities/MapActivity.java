@@ -17,7 +17,7 @@ import org.tlc.whereat.model.UserLocation;
 
 public class MapActivity extends AppCompatActivity {
 
-    protected LocPubManager mLocPub;
+    protected LocPubManager mLocPubMgr;
     protected MapActivityReceivers mReceivers;
     protected LocationDao mLocDao;
     protected Mapper mMapper;
@@ -31,20 +31,20 @@ public class MapActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        mLocPub = new LocPubManager(this);
+        mLocPubMgr = new LocPubManager(this);
         mReceivers = new MapActivityReceivers(this);
         mLocDao = new LocationDao(this);
         mMapper = new Mapper(this);
         mMenu = new MenuHandler(this);
 
-        findViewById(R.id.clear_map_button).setOnClickListener((View v) -> clear());
+        findViewById(R.id.clear_map_button).setOnClickListener((View v) -> refresh());
     }
 
     @Override
     protected void onResume(){
         super.onResume();
 
-        mLocPub.bind();
+        mLocPubMgr.bind();
         mReceivers.register();
 
         if(!mLocDao.isConnected()) mLocDao.connect();
@@ -55,7 +55,7 @@ public class MapActivity extends AppCompatActivity {
     @Override
     protected void onPause(){
         super.onPause();
-        mLocPub.unbind();
+        mLocPubMgr.unbind();
         mReceivers.unregister();
     }
 
@@ -84,15 +84,17 @@ public class MapActivity extends AppCompatActivity {
         mMapper.map(ul);
     }
 
-    public void clear(){
-        mMapper.clear();
-        mLocPub.clear();
-        mLocDao.clear();
-    }
-
     public void forgetSince(long time) {
         mMapper.forgetSince(time);
         mLocDao.forgetSince(time);
+    }
+
+    // HELPER METHODS
+
+    protected void refresh(){
+        mLocDao.clear();
+        mMapper.clear();
+        mLocPubMgr.ping();
     }
 
 }

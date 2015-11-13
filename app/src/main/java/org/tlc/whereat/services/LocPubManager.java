@@ -18,7 +18,6 @@ public class LocPubManager {
     private LocationPublisher mLocationPublisher;
     private ServiceConnection mLocationServiceConnection = getLocationServiceConnection();
 
-
     public LocPubManager(Context ctx){
         mContext = ctx;
     }

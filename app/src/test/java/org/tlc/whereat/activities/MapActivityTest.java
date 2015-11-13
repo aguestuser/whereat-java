@@ -1,19 +1,13 @@
 package org.tlc.whereat.activities;
 
-import android.app.Activity;
-import android.support.v7.app.AppCompatActivity;
-import android.view.Menu;
-import android.view.MenuItem;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.fakes.RoboMenu;
-import org.robolectric.fakes.RoboMenuItem;
 import org.robolectric.shadows.ShadowLog;
 import org.tlc.whereat.BuildConfig;
 import org.tlc.whereat.R;
@@ -31,7 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.robolectric.Shadows.shadowOf;
 import static org.tlc.whereat.support.ActivityHelpers.createActivity;
-import static org.tlc.whereat.support.ActivityHelpers.nextActivity;
 import static org.tlc.whereat.support.LocationHelpers.s17UserLocationStub;
 
 @RunWith(Enclosed.class)
@@ -55,7 +48,7 @@ public class MapActivityTest {
 
                 MapActivity a = createActivity(MapActivity.class);
 
-                assertThat(a.mLocPub).isNotNull();
+                assertThat(a.mLocPubMgr).isNotNull();
                 assertThat(a.mReceivers).isNotNull();
                 assertThat(a.mLocDao).isNotNull();
                 assertThat(a.mMapper).isNotNull();
@@ -76,7 +69,7 @@ public class MapActivityTest {
             @Before
             public void setup(){
                 a = createActivity(MapActivity.class);
-                a.mLocPub = mock(LocPubManager.class);
+                a.mLocPubMgr = mock(LocPubManager.class);
                 a.mReceivers = mock(MapActivityReceivers.class);
                 a.mLocDao = mock(LocationDao.class);
                 a.mMapper = mock(Mapper.class);
@@ -88,7 +81,7 @@ public class MapActivityTest {
             public void onResume_should_bindToServiceAndRegisterReceivers(){
                 a.onResume();
 
-                verify(a.mLocPub).bind();
+                verify(a.mLocPubMgr).bind();
                 verify(a.mReceivers).register();
             }
 
@@ -131,7 +124,7 @@ public class MapActivityTest {
             public void onPause_should_unbindServicesAndUnregisterReceivers(){
                 a.onPause();
 
-                verify(a.mLocPub).unbind();
+                verify(a.mLocPubMgr).unbind();
                 verify(a.mReceivers).unregister();
             }
 
@@ -155,7 +148,7 @@ public class MapActivityTest {
         @Before
         public void setup() {
             a = createActivity(MapActivity.class);
-            a.mLocPub = mock(LocPubManager.class);
+            a.mLocPubMgr = mock(LocPubManager.class);
             a.mReceivers = mock(MapActivityReceivers.class);
             a.mLocDao = mock(LocationDao.class);
             a.mMapper = mock(Mapper.class);
@@ -167,15 +160,6 @@ public class MapActivityTest {
         public void map_should_delegateToChildren(){
             a.map(s17);
             verify(a.mMapper).map(s17);
-        }
-
-        @Test
-        public void clear_should_delegateToChildren(){
-            a.clear();
-
-            verify(a.mMapper).clear();
-            verify(a.mLocPub).clear();
-            verify(a.mLocDao).clear();
         }
 
         @Test
@@ -198,7 +182,7 @@ public class MapActivityTest {
         @Before
         public void setup(){
             a = createActivity(MapActivity.class);
-            a.mLocPub = mock(LocPubManager.class);
+            a.mLocPubMgr = mock(LocPubManager.class);
             a.mReceivers = mock(MapActivityReceivers.class);
             a.mLocDao = mock(LocationDao.class);
             a.mMapper = mock(Mapper.class);
@@ -206,15 +190,17 @@ public class MapActivityTest {
             doReturn(a.mMapper).when(a.mMapper).initialize(anyListOf(UserLocation.class));
         }
 
-
         @Test
-        public void clickingClearButton_should_clearMap(){
+        public void clickingRefreshButton_should_clearMap_thenClearDao_thenPingLocPubMgr(){
+
             a.findViewById(R.id.clear_map_button).performClick();
 
-            verify(a.mMapper).clear();
-            verify(a.mLocPub).clear();
-            verify(a.mLocDao).clear();
+            InOrder inOrder = inOrder(a.mMapper, a.mLocDao, a.mLocPubMgr);
+            inOrder.verify(a.mLocDao).clear();
+            inOrder.verify(a.mMapper).clear();
+            inOrder.verify(a.mLocPubMgr).ping();
         }
+
     }
 
     @RunWith(RobolectricGradleTestRunner.class)
