@@ -3,8 +3,6 @@
     <item name="action_main" type="id" />
     <item name="action_map" type="id" />
     <item name="action_prefs" type="id" />
-    <item name="clear_map_button" type="id" />
-    <item name="clear_map_button_x" type="id" />
     <item name="go_button" type="id" />
     <item name="go_button_selector" type="id" />
     <item name="go_button_on" type="id" />
@@ -13,5 +11,8 @@
     <item name="map_button" type="id" />
     <item name="map_activity" type="id" />
     <item name="menu_bar" type="id" />
+    <item name="refresh_map_button" type="id" />
+    <item name="refresh_map_button_background" type="id" />
+    <item name="refresh_map_button_stroke" type="id" />
     <item name="security_alert" type="id" />
 </resources>

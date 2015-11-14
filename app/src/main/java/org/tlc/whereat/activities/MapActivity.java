@@ -37,7 +37,7 @@ public class MapActivity extends AppCompatActivity {
         mMapper = new Mapper(this);
         mMenu = new MenuHandler(this);
 
-        findViewById(R.id.clear_map_button).setOnClickListener((View v) -> refresh());
+        findViewById(R.id.refresh_map_button).setOnClickListener((View v) -> refresh());
     }
 
     @Override

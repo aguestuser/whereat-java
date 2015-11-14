@@ -55,7 +55,7 @@ public class MapActivityTest {
                 assertThat(a.mMenu).isNotNull();
 
                 assertThat(shadowOf(a).getContentView().getId()).isEqualTo(R.id.map_activity);
-                assertThat(a.findViewById(R.id.clear_map_button)).isNotNull();
+                assertThat(a.findViewById(R.id.refresh_map_button)).isNotNull();
             }
         }
 
@@ -193,7 +193,7 @@ public class MapActivityTest {
         @Test
         public void clickingRefreshButton_should_clearMap_thenClearDao_thenPingLocPubMgr(){
 
-            a.findViewById(R.id.clear_map_button).performClick();
+            a.findViewById(R.id.refresh_map_button).performClick();
 
             InOrder inOrder = inOrder(a.mMapper, a.mLocDao, a.mLocPubMgr);
             inOrder.verify(a.mLocDao).clear();
