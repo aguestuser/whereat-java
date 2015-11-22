@@ -67,6 +67,7 @@ public class LocationPublisher extends Service
     protected long mTtl;
     protected boolean mPolling = false;
     protected long mLastPing = -1L;
+    protected boolean mStarted = false;
 
     // LIFE CYCLE METHODS
 
@@ -81,9 +82,13 @@ public class LocationPublisher extends Service
             mBroadcast.playServicesDisable();
             return Service.START_REDELIVER_INTENT;
         }
-        else {
+        else if (!mStarted) {
             initialize();
             run();
+            mStarted = true;
+            return Service.START_STICKY;
+        }
+        else {
             return Service.START_STICKY;
         }
     }

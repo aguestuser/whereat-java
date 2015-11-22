@@ -31,7 +31,7 @@ public class MapActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        mLocPub = new LocPubManager(this);
+        mLocPub = new LocPubManager(this).start();
         mReceivers = new MapActivityReceivers(this);
         mLocDao = new LocationDao(this);
         mMapper = new Mapper(this);
@@ -64,6 +64,7 @@ public class MapActivity extends AppCompatActivity {
         super.onDestroy();
         mMapper.clear();
         mLocDao.disconnect();
+        mLocPub.stop();
     }
 
     // EVENT HANDLERS
