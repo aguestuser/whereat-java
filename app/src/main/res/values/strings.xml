@@ -11,11 +11,9 @@
     <string name="goog_play_services_unavailable_toast">"This device does not support Google Play Services, which is required for location sharing."</string>
 
 
-    <string name="main_activity_title">Home</string>
-    <string name="main_button_text">Home</string>
+    <string name="main_activity_title">Sharing On/Off</string>
 
     <string name="map_activity_title">Map</string>
-    <string name="map_button_text">Map</string>
     <string name="map_clear_button_x">X</string>
 
     <string name="pref_activity_title">"Settings"</string>
