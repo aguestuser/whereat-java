@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="clear_map_button">#ccffffff</color>
-    <color name="clear_map_button_pressed">#cca4a4a4</color>
-    <color name="clear_map_x">#5b5b5b</color>
+    <color name="glyphicon_background_not_pressed">#ccffffff</color>
+    <color name="glyphicon_background_pressed">#cca4a4a4</color>
+    <color name="glyphicon_stroke_gray">#5b5b5b</color>
     <color name="go_button_on">#30ff40</color>
     <color name="go_button_off">#dd3b47</color>
 </resources>

@@ -9,7 +9,7 @@ import org.tlc.whereat.services.LocPubManager;
 public class FakeMainActivity extends MainActivity {
 
     public FakeMainActivity setLocPub(LocPubManager locPub){
-        mLocPub = locPub;
+        mLocPubMgr = locPub;
         return this;
     }
     public FakeMainActivity setLocSub(MainActivityReceivers locSub){
