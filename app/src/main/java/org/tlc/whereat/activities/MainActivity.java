@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = MainActivity.class.getSimpleName();
 
-    protected LocPubManager mLocPub;
+    protected LocPubManager mLocPubMgr;
     protected MainActivityReceivers mReceivers;
     protected boolean mPolling;
     protected SecurityAlertFragment mSecAlert;
@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mLocPub = new LocPubManager(this).start();
+        mLocPubMgr = new LocPubManager(this).start();
         mReceivers = new MainActivityReceivers(this);
         mSecAlert = new SecurityAlertFragment();
         mMenu = new MenuHandler(this);
@@ -54,21 +54,21 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume(){
         super.onResume();
         if(!mSecAlerted) { showSecurityAlert(); }
-        mLocPub.bind();
+        mLocPubMgr.bind();
         mReceivers.register();
     }
 
     @Override
     protected void onPause(){
         super.onPause();
-        mLocPub.unbind();
+        mLocPubMgr.unbind();
         mReceivers.unregister();
     }
 
     @Override
     protected void onDestroy(){
         super.onDestroy();
-        mLocPub.stop();
+        mLocPubMgr.stop();
     }
 
     // GO BUTTON HELPERS
@@ -80,14 +80,14 @@ public class MainActivity extends AppCompatActivity {
 
     protected void poll(View v){
         v.setBackground(getDrawn(R.drawable.go_button_on));
-        mLocPub.poll();
+        mLocPubMgr.poll();
         mPolling = true;
         shortToast(this, "Location sharing on.");
     }
 
     protected void stopPolling(View v){
         v.setBackground(getDrawn(R.drawable.go_button_off));
-        mLocPub.stopPolling();
+        mLocPubMgr.stopPolling();
         mPolling = false;
         shortToast(this, "Location sharing off.");
     }
