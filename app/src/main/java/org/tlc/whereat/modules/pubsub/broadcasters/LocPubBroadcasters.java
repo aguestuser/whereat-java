@@ -79,7 +79,7 @@ public class LocPubBroadcasters {
         Dispatcher.broadcast(mLbm, mCtx, i);
     }
 
-    public void playServicesDisable(){
+    public void playServicesDisabled(){
         Intent i = new Intent().setAction(ACTION_PLAY_SERVICES_DISABLED);
         Dispatcher.broadcast(mLbm, mCtx, i);
     }
