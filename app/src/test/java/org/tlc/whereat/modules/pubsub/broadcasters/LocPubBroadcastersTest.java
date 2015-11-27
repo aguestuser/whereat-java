@@ -103,7 +103,7 @@ public class LocPubBroadcastersTest {
 
     @Test
     public void playServicesDisabled_should_broadcast_ACTION_PLAY_SERVICES_DISABLED(){
-        bc.playServicesDisable();
+        bc.playServicesDisabled();
 
         verify(bc.mLbm).sendBroadcast(intentArg.capture());
         assertThat(intentArg.getValue().getAction())

@@ -8,6 +8,7 @@
 /build
 /*/build/
 app-release.apk
+*.apk
 
 # Generated files
 bin/
