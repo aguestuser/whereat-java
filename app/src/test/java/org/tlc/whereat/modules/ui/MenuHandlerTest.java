@@ -65,11 +65,11 @@ public class MenuHandlerTest {
     public void create_should_createMenuWithCorrectContents(){
         a.onCreateOptionsMenu(menu);
 
-        assertThat(menu.getItem(0).getItemId()).isEqualTo(R.id.action_main);
-        assertThat(menu.getItem(0).getTitle()).isEqualTo(a.getString(R.string.main_activity_title));
+        assertThat(menu.getItem(0).getItemId()).isEqualTo(R.id.action_map);
+        assertThat(menu.getItem(0).getTitle()).isEqualTo(a.getString(R.string.map_activity_title));
 
-        assertThat(menu.getItem(1).getItemId()).isEqualTo(R.id.action_map);
-        assertThat(menu.getItem(1).getTitle()).isEqualTo(a.getString(R.string.map_activity_title));
+        assertThat(menu.getItem(1).getItemId()).isEqualTo(R.id.action_main);
+        assertThat(menu.getItem(1).getTitle()).isEqualTo(a.getString(R.string.main_activity_title));
 
         assertThat(menu.getItem(2).getItemId()).isEqualTo(R.id.action_prefs);
         assertThat(menu.getItem(2).getTitle()).isEqualTo(a.getString(R.string.pref_activity_title));
