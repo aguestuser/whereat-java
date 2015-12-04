@@ -1,9 +1,11 @@
 package org.tlc.whereat.services;
 
+import android.app.Service;
 import android.content.ComponentName;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.IBinder;
+import android.content.Intent;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderApi;
@@ -55,11 +57,40 @@ public class LocationPublisherTest {
 
     public static class LifeCycleMethods {
 
-        //#onStartCommand()
+        Intent i = mock(Intent.class);
+
+        @Test
+        public void onCreate_should_initializeBroadcaster(){
+            LocationPublisher lp = spy(LocationPublisher.class);
+            lp.onCreate();
+            assertThat(lp.mBroadcast).isNotNull();
+        }
+
+        @Test
+        public void onStartCommand_when_playServicesDisabled_should_triggerEnablingSequence(){
+            LocationPublisher lp = spy(LocationPublisher.class);
+            lp.mBroadcast = mock(LocPubBroadcasters.class);
+            when(lp.playServicesDisabled()).thenReturn(true);
+
+            assertThat(lp.onStartCommand(i, 0, 0)).isEqualTo(Service.START_REDELIVER_INTENT);
+            verify(lp.mBroadcast).playServicesDisabled();
+        }
+
+        @Test
+        public void onStartCommand_when_playEnabled_should_initializeAndRunTheService(){
+            LocationPublisher lp = spy(LocationPublisher.class);
+            doNothing().when(lp).initialize();
+            doNothing().when(lp).run();
+            when(lp.playServicesDisabled()).thenReturn(false);
+
+            assertThat(lp.onStartCommand(i,0,0)).isEqualTo(Service.START_STICKY);
+            verify(lp).initialize();
+            verify(lp).run();
+        }
 
         @Test
         public void initialize_should_initializePrivateFields() {
-            LocationPublisher lp = spy(new FakeLocationPublisher());
+            LocationPublisher lp = spy(LocationPublisher.class);
             when(lp.getRandomId()).thenReturn("123");
 
             lp.initialize();

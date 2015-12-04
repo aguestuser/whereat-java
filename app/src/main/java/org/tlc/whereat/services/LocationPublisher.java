@@ -73,13 +73,14 @@ public class LocationPublisher extends Service
 
     @Override
     public void onCreate(){
+        mBroadcast = LocPubBroadcasters.getInstance(this);
         Log.i(TAG, "Location service created.");
     }
 
     @Override
     public int onStartCommand(Intent i, int flags, int startId){
         if (playServicesDisabled()) {
-            mBroadcast.playServicesDisable();
+            mBroadcast.playServicesDisabled();
             return Service.START_REDELIVER_INTENT;
         }
         else if (!mStarted) {
@@ -110,8 +111,8 @@ public class LocationPublisher extends Service
         mWhereatClient = WhereatApiClient.getInstance();
         mDao = new LocationDao(this);
         mScheduler = Scheduler.getInstance(this);
-        mBroadcast = LocPubBroadcasters.getInstance(this);
         mLocProvider = FusedLocationApi;
+        if (mBroadcast == null) mBroadcast = LocPubBroadcasters.getInstance(this);
 
         mLocSub = mBroadcast::map;
 
@@ -263,10 +264,10 @@ public class LocationPublisher extends Service
             .subscribe(mLocSub);
     }
 
-    private boolean playServicesDisabled() {
+    protected boolean playServicesDisabled() {
         return (GooglePlayServicesUtil.isGooglePlayServicesAvailable(this) != ConnectionResult.SUCCESS);
     }
-    private boolean locationServicesDisabled(){
+    protected boolean locationServicesDisabled(){
         return Build.VERSION.SDK_INT > 19 ? newLsOff() : oldLsOff();
     }
 
