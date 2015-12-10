@@ -24,6 +24,7 @@ import com.google.android.gms.location.LocationListener;
 import static com.google.android.gms.location.LocationServices.FusedLocationApi;
 
 import org.tlc.whereat.R;
+import org.tlc.whereat.model.ApiMessage;
 import org.tlc.whereat.modules.api.WhereatApiClient;
 import org.tlc.whereat.modules.schedule.Scheduler;
 import org.tlc.whereat.modules.pubsub.broadcasters.LocPubBroadcasters;
@@ -59,6 +60,7 @@ public class LocationPublisher extends Service
     protected Scheduler mScheduler;
     protected LocPubBroadcasters mBroadcast;
     protected Action1<UserLocation> mLocSub;
+    protected Action1<ApiMessage> mClearSub;
     protected SharedPreferences mPrefs;
     protected OnSharedPreferenceChangeListener mPrefListener;
 
@@ -112,13 +114,16 @@ public class LocationPublisher extends Service
         mDao = new LocationDao(this);
         mScheduler = Scheduler.getInstance(this);
         mLocProvider = FusedLocationApi;
-        if (mBroadcast == null) mBroadcast = LocPubBroadcasters.getInstance(this);
+        //if (mBroadcast == null) mBroadcast = LocPubBroadcasters.getInstance(this);
 
-        mLocSub = mBroadcast::map;
+        mLocSub = this::record;
+        mClearSub = mBroadcast::clear;
 
         mUserId = getRandomId();
         mPolling = false;
     }
+
+
 
     protected void run(){
         if (!mGoogClient.isConnected()) mGoogClient.connect();
@@ -203,8 +208,30 @@ public class LocationPublisher extends Service
 
     public void clear(){
         UserLocation ul = mDao.get(mUserId);
-        mWhereatClient.remove(ul).subscribe(mBroadcast::clear);
+        mWhereatClient.remove(ul).subscribe(mClearSub);
         mDao.clear();
+    }
+
+    // LOCATION HANDLERS
+
+    protected void relay(Location l){
+        UserLocation ul = UserLocation.valueOf(mUserId, l);
+
+        mBroadcast.pub();
+        update(ul);
+        mDao.save(ul);
+        mLastPing = ul.getTime();
+    }
+
+    protected void update(UserLocation ul){
+        mWhereatClient.update(ul.withTimestamp(mLastPing))
+            .flatMap(Observable::from)
+            .subscribe(mLocSub);
+    }
+
+    protected void record(UserLocation ul){
+        mBroadcast.map(ul);
+        mDao.save(ul);
     }
 
     // HELPERS
@@ -253,20 +280,6 @@ public class LocationPublisher extends Service
         return UUID.randomUUID().toString();
     }
 
-    protected void relay(Location l){
-        UserLocation ul = UserLocation.valueOf(mUserId, l);
-
-        mBroadcast.pub();
-        update(ul);
-        mDao.save(ul);
-        mLastPing = ul.getTime();
-    }
-
-    protected void update(UserLocation ul){
-        mWhereatClient.update(ul.withTimestamp(mLastPing))
-            .flatMap(Observable::from)
-            .subscribe(mLocSub);
-    }
 
     protected boolean playServicesDisabled() {
         return (GooglePlayServicesUtil.isGooglePlayServicesAvailable(this) != ConnectionResult.SUCCESS);

@@ -15,6 +15,8 @@ import org.tlc.whereat.modules.pubsub.receivers.MapActivityReceivers;
 import org.tlc.whereat.modules.db.LocationDao;
 import org.tlc.whereat.model.UserLocation;
 
+import java.util.List;
+
 
 public class MapActivity extends AppCompatActivity {
 
@@ -50,7 +52,10 @@ public class MapActivity extends AppCompatActivity {
         mReceivers.register();
 
         if(!mRunning) run();
-        else mMapper.refresh(mLocDao.getAllSince(mMapper.lastPing()));
+        else {
+            List<UserLocation> locs = mLocDao.getAllSince(mMapper.lastPing());
+            mMapper.refresh(locs);
+        }
     }
 
     @Override
