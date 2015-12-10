@@ -58,12 +58,6 @@ public class OnOffActivity extends AppCompatActivity {
         mReceivers.unregister();
     }
 
-//    @Override
-//    protected void onDestroy(){
-//        super.onDestroy();
-//        mLocPubMgr.stop();
-//    }
-
     // GO BUTTON HELPERS
 
     protected void togglePolling(View v){
