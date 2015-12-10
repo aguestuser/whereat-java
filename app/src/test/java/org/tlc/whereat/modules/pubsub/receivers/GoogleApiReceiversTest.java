@@ -18,7 +18,7 @@ import org.robolectric.annotation.Config;
 
 import org.tlc.whereat.BuildConfig;
 import org.tlc.whereat.R;
-import org.tlc.whereat.activities.MainActivity;
+import org.tlc.whereat.activities.OnOffActivity;
 import org.tlc.whereat.modules.pubsub.broadcasters.LocPubBroadcasters;
 import org.tlc.whereat.fragments.LocServicesAlertFragment;
 import org.tlc.whereat.fragments.PlayServicesAlertFragment;
@@ -37,7 +37,7 @@ public class GoogleApiReceiversTest extends ReceiversTest {
 
     @Before
     public void setup(){
-        ctx = createActivity(MainActivity.class);
+        ctx = createActivity(OnOffActivity.class);
         lbm = spy(LocalBroadcastManager.getInstance(RuntimeEnvironment.application));
         rcv = new GoogleApiReceivers(ctx, lbm);
         ifArg = ArgumentCaptor.forClass(IntentFilter.class);

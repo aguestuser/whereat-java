@@ -20,7 +20,7 @@ import org.tlc.whereat.modules.ui.MenuHandler;
 import org.tlc.whereat.services.LocPubManager;
 import org.tlc.whereat.modules.pubsub.receivers.MainActivityReceivers;
 import org.tlc.whereat.support.ActivityWithMenuHandlersTest;
-import org.tlc.whereat.support.FakeMainActivity;
+import org.tlc.whereat.support.FakeOnOffActivity;
 
 import rx.functions.Func1;
 
@@ -30,7 +30,7 @@ import static org.tlc.whereat.support.ActivityHelpers.*;
 
 @RunWith(Enclosed.class)
 
-public class MainActivityTest {
+public class OnOffActivityTest {
 
     @RunWith(Enclosed.class)
 
@@ -41,11 +41,11 @@ public class MainActivityTest {
 
         public static class OnCreate {
 
-            MainActivity a;
+            OnOffActivity a;
 
             @Before
             public void setup(){
-                a = createActivity(MainActivity.class);
+                a = createActivity(OnOffActivity.class);
             }
 
             @Test
@@ -72,11 +72,11 @@ public class MainActivityTest {
 
     public static class PostCreate {
 
-        MainActivity a;
+        OnOffActivity a;
 
         @Before
         public void setup(){
-            a = createActivity(MainActivity.class);
+            a = createActivity(OnOffActivity.class);
             a.mLocPubMgr = mock(LocPubManager.class);
             a.mReceivers = mock(MainActivityReceivers.class);
         }
@@ -113,7 +113,7 @@ public class MainActivityTest {
 
         @Test
         public void selectingMapFromMenu_should_switchToMapView(){
-            MainActivity a = createActivity(MainActivity.class);
+            OnOffActivity a = createActivity(OnOffActivity.class);
             a.onOptionsItemSelected(new RoboMenuItem(R.id.action_map));
 
             assertThat(nextActivity(a))
@@ -123,7 +123,7 @@ public class MainActivityTest {
         @Test
         public void clickingGoButton_shouldToggleLocationPolling(){
             LocPubManager mockLocPub = mock(LocPubManager.class);
-            FakeMainActivity a = createActivity(FakeMainActivity.class).setLocPub(mockLocPub);
+            FakeOnOffActivity a = createActivity(FakeOnOffActivity.class).setLocPub(mockLocPub);
             Button go = (Button) a.findViewById(R.id.go_button);
 
             go.performClick();
@@ -143,11 +143,11 @@ public class MainActivityTest {
 
     public static class MenuHandlers extends ActivityWithMenuHandlersTest {
 
-        MainActivity a;
+        OnOffActivity a;
 
         @Before
         public void setup() {
-            a = createActivity(MainActivity.class);
+            a = createActivity(OnOffActivity.class);
             a.mMenu = mock(MenuHandler.class);
             menu = new RoboMenu(a);
         }

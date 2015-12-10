@@ -11,7 +11,7 @@ public class ActivityWithMenuHandlersTest {
     //FIELDS
 
     protected Menu menu;
-    protected MenuItem main = new RoboMenuItem(R.id.action_main);
+    protected MenuItem main = new RoboMenuItem(R.id.action_on_off);
     protected MenuItem map = new RoboMenuItem(R.id.action_map);
     protected MenuItem prefs = new RoboMenuItem(R.id.action_prefs);
 

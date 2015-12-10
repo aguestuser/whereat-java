@@ -16,9 +16,9 @@ import org.tlc.whereat.modules.pubsub.receivers.MainActivityReceivers;
 
 import static org.tlc.whereat.modules.ui.Toaster.shortToast;
 
-public class MainActivity extends AppCompatActivity {
+public class OnOffActivity extends AppCompatActivity {
 
-    public static final String TAG = MainActivity.class.getSimpleName();
+    public static final String TAG = OnOffActivity.class.getSimpleName();
 
     protected LocPubManager mLocPubMgr;
     protected MainActivityReceivers mReceivers;
@@ -58,11 +58,11 @@ public class MainActivity extends AppCompatActivity {
         mReceivers.unregister();
     }
 
-    @Override
-    protected void onDestroy(){
-        super.onDestroy();
-        mLocPubMgr.stop();
-    }
+//    @Override
+//    protected void onDestroy(){
+//        super.onDestroy();
+//        mLocPubMgr.stop();
+//    }
 
     // GO BUTTON HELPERS
 
