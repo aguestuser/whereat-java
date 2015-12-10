@@ -32,7 +32,6 @@ import static org.tlc.whereat.support.ActivityHelpers.*;
 
 public class MainActivityTest {
 
-
     @RunWith(Enclosed.class)
 
     public static class LifeCycleMethods{
