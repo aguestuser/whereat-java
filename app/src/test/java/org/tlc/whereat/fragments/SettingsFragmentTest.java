@@ -77,11 +77,11 @@ public class SettingsFragmentTest {
         assertThat(lp.isPersistent()).isTrue();
 
         assertThat(lp.getTitle()).isEqualTo(frag.getString(R.string.pref_loc_share_interval_title));
-        assertThat(lp.getSummary()).isEqualTo(frag.getString(R.string.pref_loc_share_interval_label_2));
+        assertThat(lp.getSummary()).isEqualTo(frag.getString(R.string.pref_loc_share_interval_label_0));
 
         assertThat(lp.getEntries()).isEqualTo(locShareLabels);
         assertThat(lp.getEntryValues()).isEqualTo(locShareVals);
-        assertThat(lp.getValue()).isEqualTo(frag.getString(R.string.pref_loc_share_interval_value_2));
+        assertThat(lp.getValue()).isEqualTo(frag.getString(R.string.pref_loc_share_interval_value_0));
     }
 
     @Test
