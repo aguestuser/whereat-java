@@ -4,9 +4,11 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.content.Intent;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderApi;
 
@@ -258,6 +260,44 @@ public class LocationPublisherTest {
 
     }
 
+    @RunWith(RobolectricGradleTestRunner.class)
+    @Config(constants = BuildConfig.class, sdk = 21)
+
+    public static class LocationApiCallbacks {
+        LocationPublisher lp;
+
+        @Before
+        public void setup(){
+            lp = Helpers.setupMockLocationService();
+        }
+
+        @Test
+        public void onConnected_should_startPolling(){
+            doNothing().when(lp).poll();
+            lp.onConnected(mock(Bundle.class));
+
+            verify(lp).poll();
+        }
+
+        @Test
+        public void onConnectionFailed_should_broadcastGoogApiDisconnected(){
+            ConnectionResult cr = mock(ConnectionResult.class);
+            lp.mBroadcast = mock(LocPubBroadcasters.class);
+            lp.onConnectionFailed(cr);
+
+            verify(lp.mBroadcast).googApiDisconnected(cr);
+        }
+
+        @Test
+        public void onLocationChanged_should_callRelay(){
+            Location l = mock(Location.class);
+            doNothing().when(lp).relay(l);
+            lp.onLocationChanged(l);
+
+            verify(lp).relay(l);
+        }
+
+    }
 
     @RunWith(RobolectricGradleTestRunner.class)
     @Config(constants = BuildConfig.class, sdk = 21)
@@ -268,18 +308,7 @@ public class LocationPublisherTest {
 
         @Before
         public void setup() {
-            lp = spy(LocationPublisher.class);
-            lp.mGoogClient = mock(GoogleApiClient.class);
-            lp.mLocProvider = mock(FusedLocationProviderApi.class);
-            shadowOf(RuntimeEnvironment.application)
-                .setComponentNameAndServiceForBindService(
-                    new ComponentName("org.tlc.whereat.modules.pubsub", "LocationPublisher"),
-                    mock(IBinder.class));
-        }
-
-        @After
-        public void teardown() {
-
+            lp = Helpers.setupMockLocationService();
         }
 
         @Test
@@ -354,6 +383,25 @@ public class LocationPublisherTest {
             // requires mock DAO, API (dao has to mock getting (mUserId)
             // calls clien.remove()
             // calls dao.clear()
+        }
+
+    }
+
+    static class Helpers {
+
+        static LocationPublisher setupMockLocationService(){
+            LocationPublisher lp = spy(LocationPublisher.class);
+            lp.mGoogClient = mock(GoogleApiClient.class);
+            lp.mLocProvider = mock(FusedLocationProviderApi.class);
+            bindService();
+            return lp;
+        }
+
+        static void bindService(){
+            shadowOf(RuntimeEnvironment.application)
+                .setComponentNameAndServiceForBindService(
+                    new ComponentName("org.tlc.whereat.modules.pubsub", "LocationPublisher"),
+                    mock(IBinder.class));
         }
     }
 

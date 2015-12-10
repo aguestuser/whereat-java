@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         mSecAlert = new SecurityAlertFragment();
         mMenu = new MenuHandler(this);
 
-        mPolling = false;
+        mPolling = true;
         mSecAlerted = false;
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
