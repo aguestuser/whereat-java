@@ -6,7 +6,7 @@
         android:title="@string/map_activity_title" />
 
     <item
-        android:id="@id/action_main"
+        android:id="@id/action_on_off"
         android:title="@string/main_activity_title" />
 
     <item
