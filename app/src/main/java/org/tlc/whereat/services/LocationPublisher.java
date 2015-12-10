@@ -125,6 +125,7 @@ public class LocationPublisher extends Service
         mDao.connect();
         mPrefs.registerOnSharedPreferenceChangeListener(mPrefListener);
         mScheduler.forget(sForgetInterval, mTtl);
+
     }
 
     @Override
@@ -157,16 +158,19 @@ public class LocationPublisher extends Service
     }
 
     @Override
-    public void onLocationChanged(Location l) { relay(l); }
-
-    @Override
-    public void onConnected(Bundle bundle) { Log.i(TAG, "Location services connected."); }
+    public void onConnected(Bundle bundle) {
+        Log.i(TAG, "Location services connected.");
+        poll();
+    }
 
     @Override
     public void onConnectionSuspended(int i) {}
 
     @Override
     public void onConnectionFailed(ConnectionResult cr) { mBroadcast.googApiDisconnected(cr); }
+
+    @Override
+    public void onLocationChanged(Location l) { relay(l); }
 
 
     // PUBLIC METHODS

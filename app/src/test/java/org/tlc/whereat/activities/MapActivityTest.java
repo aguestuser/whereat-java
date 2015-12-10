@@ -54,6 +54,11 @@ public class MapActivityTest {
                 assertThat(a.mMapper).isNotNull();
                 assertThat(a.mMenu).isNotNull();
 
+                assertThat(a.mRunning).isFalse();
+                assertThat(a.mLocPubMgr.isRunning()).isFalse();
+                assertThat(a.mLocDao.isConnected()).isFalse();
+                assertThat(a.mMapper.hasInitialized()).isFalse();
+
                 assertThat(shadowOf(a).getContentView().getId()).isEqualTo(R.id.map_activity);
                 assertThat(a.findViewById(R.id.refresh_map_button)).isNotNull();
             }
@@ -75,6 +80,7 @@ public class MapActivityTest {
                 a.mMapper = mock(Mapper.class);
 
                 doReturn(a.mMapper).when(a.mMapper).initialize(anyListOf(UserLocation.class));
+                doNothing().when(a.mMapper).refresh(anyListOf(UserLocation.class));
             }
 
             @Test
@@ -86,38 +92,28 @@ public class MapActivityTest {
             }
 
             @Test
-            public void onResume_should_connectToDatabaseOnceAndOnlyOnce(){
-                doReturn(false).when(a.mLocDao).isConnected();
+            public void onResume_should_runDatabaseMapperandLocPubMgr_OnFirstView(){
+                assertThat(a.mRunning).isFalse();
                 a.onResume();
-                verify(a.mLocDao, times(1)).connect();
 
-                doReturn(true).when(a.mLocDao).isConnected();
-                a.onResume();
+                verify(a.mLocPubMgr, times(1)).start();
                 verify(a.mLocDao, times(1)).connect();
+                verify(a.mMapper, times(1)).initialize(anyListOf(UserLocation.class));
 
+                assertThat(a.mRunning).isTrue();
             }
 
             @Test
-            public void onResume_should_initializeMapperOnceAndOnlyOnce(){
-                doReturn(false).when(a.mMapper).hasInitialized();
+            public void onResume_should_refreshDatabaseAndNothingElse_OnSubsequentViews(){
+                a.mRunning = true;
                 a.onResume();
-                verify(a.mMapper, times(1)).initialize(anyListOf(UserLocation.class));
 
-                doReturn(true).when(a.mMapper).hasInitialized();
-                a.onResume();
-                verify(a.mMapper, times(1)).initialize(anyListOf(UserLocation.class));
-            }
+                verify(a.mLocPubMgr, times(0)).start();
+                verify(a.mLocPubMgr, times(0)).poll();
+                verify(a.mLocDao, times(0)).connect();
+                verify(a.mMapper, times(0)).initialize(anyListOf(UserLocation.class));
 
-            @Test
-            public void onResume_should_refreshMapIfNecessary(){
-                doReturn(false).when(a.mMapper).hasPinged();
-                a.onResume();
-                verify(a.mMapper, never()).refresh(anyListOf(UserLocation.class));
-
-                doReturn(true).when(a.mMapper).hasPinged();
-                a.onResume();
                 verify(a.mMapper, times(1)).refresh(anyListOf(UserLocation.class));
-
             }
 
             @Test

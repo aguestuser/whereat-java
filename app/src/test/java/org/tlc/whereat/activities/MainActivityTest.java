@@ -59,7 +59,7 @@ public class MainActivityTest {
                 assertThat(a.mSecAlert).isNotNull();
                 assertThat(a.mMenu).isNotNull();
 
-                assertThat(a.mPolling).isFalse();
+                assertThat(a.mPolling).isTrue();
                 assertThat(a.mSecAlerted).isFalse();
 
                 assertThat(
@@ -136,12 +136,13 @@ public class MainActivityTest {
             Button go = (Button) a.findViewById(R.id.go_button);
 
             go.performClick();
+            verify(mockLocPub).stopPolling();
+            assertThat(lastToast()).isEqualTo("Location sharing off.");
+
+            go.performClick();
             verify(mockLocPub).poll();
             assertThat(lastToast()).isEqualTo("Location sharing on.");
 
-            go.performClick();
-            verify(mockLocPub).stopPolling();
-            assertThat(lastToast()).isEqualTo("Location sharing off.");
         }
 
     }
