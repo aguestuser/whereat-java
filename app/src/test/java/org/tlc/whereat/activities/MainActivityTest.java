@@ -160,7 +160,6 @@ public class MainActivityTest {
 
         @Test
         public void selectingActivityFromMenu_should_delegateToMenuHandler() {
-
             a.onOptionsItemSelected(main);
             verify(a.mMenu).select(eq(main), any(Func1.class));
 
@@ -171,5 +170,4 @@ public class MainActivityTest {
             verify(a.mMenu).select(eq(prefs), any(Func1.class));
         }
     }
-
 }
