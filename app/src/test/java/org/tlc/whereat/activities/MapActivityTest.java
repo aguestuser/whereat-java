@@ -109,7 +109,6 @@ public class MapActivityTest {
                 a.onResume();
 
                 verify(a.mLocPubMgr, times(0)).start();
-                verify(a.mLocPubMgr, times(0)).poll();
                 verify(a.mLocDao, times(0)).connect();
                 verify(a.mMapper, times(0)).initialize(anyListOf(UserLocation.class));
 

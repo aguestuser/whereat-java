@@ -16,11 +16,9 @@ import org.robolectric.fakes.RoboMenuItem;
 import org.robolectric.shadows.ShadowPreferenceManager;
 import org.tlc.whereat.BuildConfig;
 import org.tlc.whereat.R;
-import org.tlc.whereat.fragments.SecurityAlertFragment;
 import org.tlc.whereat.modules.ui.MenuHandler;
 import org.tlc.whereat.services.LocPubManager;
 import org.tlc.whereat.modules.pubsub.receivers.MainActivityReceivers;
-import org.tlc.whereat.services.LocationPublisher;
 import org.tlc.whereat.support.ActivityWithMenuHandlersTest;
 import org.tlc.whereat.support.FakeMainActivity;
 
@@ -56,22 +54,16 @@ public class MainActivityTest {
 
                 assertThat(a.mLocPubMgr).isNotNull();
                 assertThat(a.mReceivers).isNotNull();
-                assertThat(a.mSecAlert).isNotNull();
                 assertThat(a.mMenu).isNotNull();
 
                 assertThat(a.mPolling).isTrue();
                 assertThat(a.mSecAlerted).isFalse();
 
                 assertThat(
-                    ShadowPreferenceManager.getDefaultSharedPreferences(RuntimeEnvironment.application)).
-                    isNotNull();
+                    ShadowPreferenceManager.getDefaultSharedPreferences(RuntimeEnvironment.application)
+                ).isNotNull();
 
                 assertThat(a.findViewById(R.id.go_button)).isNotNull();
-            }
-
-            @Test
-            public void onCreate_should_startLocationPublisher(){
-                assertThat(nextService(a)).isEqualTo(LocationPublisher.class.getName());
             }
         }
     }
@@ -145,26 +137,6 @@ public class MainActivityTest {
 
         }
 
-    }
-
-    @RunWith(RobolectricGradleTestRunner.class)
-    @Config(constants = BuildConfig.class, sdk = 21)
-
-    public static class SecurityAlert {
-
-        @Test
-        public void securityAlert_should_beShownOnceAndOnlyOnce(){
-            SecurityAlertFragment mockSecAlert = mock(SecurityAlertFragment.class);
-            FakeMainActivity a = createActivity(FakeMainActivity.class)
-                .setLocPub(mock(LocPubManager.class))
-                .setSecAlert(mockSecAlert);
-
-            a.onResume();
-            a.onPause();
-            a.onResume();
-
-            verify(mockSecAlert, times(1)).show(a.getFragmentManager(), a.getString(R.string.sec_alert_fragment_tag));
-        }
     }
 
     @RunWith(RobolectricGradleTestRunner.class)
