@@ -14,9 +14,10 @@ public class LocPubManager {
 
     public static final String TAG = LocPubManager.class.getSimpleName();
 
-    private Context mContext;
-    private LocationPublisher mLocationPublisher;
-    private ServiceConnection mLocationServiceConnection = getLocationServiceConnection();
+    protected Context mContext;
+    protected LocationPublisher mLocationPublisher;
+    protected ServiceConnection mLocationServiceConnection = getLocationServiceConnection();
+    protected boolean mRunning;
 
     public LocPubManager(Context ctx){
         mContext = ctx;
@@ -28,12 +29,14 @@ public class LocPubManager {
     public LocPubManager start(){
         Intent i = new Intent(mContext, LocationPublisher.class);
         mContext.startService(i);
+        mRunning = true;
         return this;
     }
 
     public void stop(){
         Intent i = new Intent(mContext, LocationPublisher.class);
         mContext.stopService(i);
+        mRunning = false;
     }
 
 
@@ -61,11 +64,13 @@ public class LocPubManager {
         };
     }
 
-    // LOCATION SERVICE ACCESSORS
+    // PUBLIC METHODS
 
     public void ping(){
         mLocationPublisher.ping();
     }
+
+    public boolean isRunning() { return mRunning; }
 
     public boolean isPolling(){
         return mLocationPublisher.isPolling();

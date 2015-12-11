@@ -10,21 +10,19 @@ import android.view.MenuItem;
 import android.view.View;
 
 import org.tlc.whereat.R;
-import org.tlc.whereat.fragments.SecurityAlertFragment;
 import org.tlc.whereat.modules.ui.MenuHandler;
 import org.tlc.whereat.services.LocPubManager;
 import org.tlc.whereat.modules.pubsub.receivers.MainActivityReceivers;
 
 import static org.tlc.whereat.modules.ui.Toaster.shortToast;
 
-public class MainActivity extends AppCompatActivity {
+public class OnOffActivity extends AppCompatActivity {
 
-    public static final String TAG = MainActivity.class.getSimpleName();
+    public static final String TAG = OnOffActivity.class.getSimpleName();
 
     protected LocPubManager mLocPubMgr;
     protected MainActivityReceivers mReceivers;
     protected boolean mPolling;
-    protected SecurityAlertFragment mSecAlert;
     protected MenuHandler mMenu;
 
     protected boolean mSecAlerted;
@@ -37,23 +35,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mLocPubMgr = new LocPubManager(this).start();
+        mLocPubMgr = new LocPubManager(this);
         mReceivers = new MainActivityReceivers(this);
-        mSecAlert = new SecurityAlertFragment();
         mMenu = new MenuHandler(this);
-
-        mPolling = false;
-        mSecAlerted = false;
+        mPolling = true;
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-
         findViewById(R.id.go_button).setOnClickListener(this::togglePolling);
     }
 
     @Override
     protected void onResume(){
         super.onResume();
-        if(!mSecAlerted) { showSecurityAlert(); }
         mLocPubMgr.bind();
         mReceivers.register();
     }
@@ -63,12 +56,6 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         mLocPubMgr.unbind();
         mReceivers.unregister();
-    }
-
-    @Override
-    protected void onDestroy(){
-        super.onDestroy();
-        mLocPubMgr.stop();
     }
 
     // GO BUTTON HELPERS
@@ -108,12 +95,4 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         return mMenu.select(item, super::onOptionsItemSelected);
     }
-
-    // SECURITY ALERT ROUTINE
-
-    protected void showSecurityAlert(){
-        mSecAlert.show(getFragmentManager(),getString(R.string.sec_alert_fragment_tag));
-        mSecAlerted = true;
-    }
-
 }

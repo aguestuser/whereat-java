@@ -4,13 +4,14 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.content.Intent;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderApi;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
@@ -21,14 +22,15 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowPreferenceManager;
 import org.tlc.whereat.BuildConfig;
 import org.tlc.whereat.R;
+import org.tlc.whereat.model.ApiMessage;
 import org.tlc.whereat.model.UserLocation;
 import org.tlc.whereat.model.UserLocationTimestamped;
 import org.tlc.whereat.modules.api.WhereatApiClient;
 import org.tlc.whereat.modules.db.LocationDao;
 import org.tlc.whereat.modules.pubsub.broadcasters.LocPubBroadcasters;
 import org.tlc.whereat.modules.schedule.Scheduler;
-import org.tlc.whereat.support.FakeLocationPublisher;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -93,6 +95,7 @@ public class LocationPublisherTest {
             LocationPublisher lp = spy(LocationPublisher.class);
             when(lp.getRandomId()).thenReturn("123");
 
+            lp.onCreate();
             lp.initialize();
 
             assertThat(lp.mGoogClient).isNotNull();
@@ -110,7 +113,8 @@ public class LocationPublisherTest {
             assertThat(lp.mBroadcast).isNotNull();
             assertThat(lp.mLocProvider).isNotNull();
 
-            assertThat(lp.mLocSub).isEqualToComparingFieldByField(lp.mBroadcast::map);
+            assertThat(lp.mLocSub).isEqualToComparingFieldByField(lp::record);
+            assertThat(lp.mClearSub).isEqualToComparingFieldByField(lp.mBroadcast::clear);
 
             assertThat(lp.mUserId).isEqualTo("123");
             assertThat(lp.mPolling).isFalse();
@@ -258,6 +262,44 @@ public class LocationPublisherTest {
 
     }
 
+    @RunWith(RobolectricGradleTestRunner.class)
+    @Config(constants = BuildConfig.class, sdk = 21)
+
+    public static class LocationApiCallbacks {
+        LocationPublisher lp;
+
+        @Before
+        public void setup(){
+            lp = TestHelpers.setupMockLocationService();
+        }
+
+        @Test
+        public void onConnected_should_startPolling(){
+            doNothing().when(lp).poll();
+            lp.onConnected(mock(Bundle.class));
+
+            verify(lp).poll();
+        }
+
+        @Test
+        public void onConnectionFailed_should_broadcastGoogApiDisconnected(){
+            ConnectionResult cr = mock(ConnectionResult.class);
+            lp.mBroadcast = mock(LocPubBroadcasters.class);
+            lp.onConnectionFailed(cr);
+
+            verify(lp.mBroadcast).googApiDisconnected(cr);
+        }
+
+        @Test
+        public void onLocationChanged_should_callRelay(){
+            Location l = mock(Location.class);
+            doNothing().when(lp).relay(l);
+            lp.onLocationChanged(l);
+
+            verify(lp).relay(l);
+        }
+
+    }
 
     @RunWith(RobolectricGradleTestRunner.class)
     @Config(constants = BuildConfig.class, sdk = 21)
@@ -268,36 +310,78 @@ public class LocationPublisherTest {
 
         @Before
         public void setup() {
-            lp = spy(LocationPublisher.class);
-            lp.mGoogClient = mock(GoogleApiClient.class);
-            lp.mLocProvider = mock(FusedLocationProviderApi.class);
-            shadowOf(RuntimeEnvironment.application)
-                .setComponentNameAndServiceForBindService(
-                    new ComponentName("org.tlc.whereat.modules.pubsub", "LocationPublisher"),
-                    mock(IBinder.class));
-        }
-
-        @After
-        public void teardown() {
-
+            lp = TestHelpers.setupMockLocationService();
         }
 
         @Test
         public void ping_whenLocationNull_broadcastsFailedLocationRequest() {
+            doReturn(null).when(lp.mLocProvider).getLastLocation(lp.mGoogClient);
+            doReturn(true).when(lp).locationServicesDisabled();
+            lp.mBroadcast = mock(LocPubBroadcasters.class);
+            lp.ping();
 
+            verify(lp.mBroadcast).fail();
+            verify(lp.mBroadcast).locServicesDisabled();
         }
 
         @Test
         public void ping_whenLocationExists_relaysLocation() {
             doReturn(s17raw).when(lp.mLocProvider).getLastLocation(lp.mGoogClient);
             doNothing().when(lp).relay(s17raw);
-
             lp.ping();
 
             verify(lp).relay(s17raw);
         }
 
-        //#ping helpers
+        @Test
+        public void poll_turnsOnPolling() {
+            lp.mLocProvider = mock(FusedLocationProviderApi.class);
+            lp.poll();
+
+            verify(lp.mLocProvider).requestLocationUpdates(lp.mGoogClient, lp.mLocReq, lp);
+            assertThat(lp.mPolling).isTrue();
+        }
+
+        @Test
+        public void stopPolling_stopsPolling() {
+            lp.mLocProvider = mock(FusedLocationProviderApi.class);
+            lp.stopPolling();
+
+            verify(lp.mLocProvider).removeLocationUpdates(lp.mGoogClient, lp);
+            assertThat(lp.mPolling).isFalse();
+        }
+
+        @Test
+        public void clear_clearsUserFromServerAndAllLocsFromDB() {
+            ApiMessage msg = ApiMessage.of("Database erased. 4 record(s) deleted.");
+            lp.mWhereatClient = mock(WhereatApiClient.class);
+            doReturn(Observable.just(msg)).when(lp.mWhereatClient).remove(any(UserLocation.class));
+            TestSubscriber<ApiMessage> sub = new TestSubscriber<>();
+            lp.mClearSub = sub::onNext;
+            lp.mBroadcast = mock(LocPubBroadcasters.class);
+            lp.mDao = mock(LocationDao.class);
+            doReturn(s17).when(lp.mDao).get(lp.mUserId);
+
+            lp.clear();
+
+            verify(lp.mWhereatClient).remove(s17);
+            verify(lp.mDao).clear();
+            sub.assertNoErrors();
+            sub.assertReceivedOnNext(Arrays.asList(msg));
+        }
+    }
+
+    @RunWith(RobolectricGradleTestRunner.class)
+    @Config(constants = BuildConfig.class, sdk = 21)
+
+    public static class LocationHandlers {
+
+        LocationPublisher lp;
+
+        @Before
+        public void setup() {
+            lp = TestHelpers.setupMockLocationService();
+        }
 
         @Test
         public void relay_broadcastsPostsAndSavesLocThenSetsLastPing() throws IllegalAccessException {
@@ -329,31 +413,32 @@ public class LocationPublisherTest {
             sub.assertReceivedOnNext(locs);
         }
 
-
         @Test
-        public void broadcastLocationPublished_broadcastsIntentContainingLocation() {
+        public void record_broadcastsAndSavesLocation(){
+            lp.mDao = mock(LocationDao.class);
+            lp.mBroadcast = mock(LocPubBroadcasters.class);
+            lp.record(s17);
 
+            verify(lp.mBroadcast).map(s17);
+            verify(lp.mDao).save(s17);
+        }
+    }
+
+    static class TestHelpers {
+
+        static LocationPublisher setupMockLocationService(){
+            LocationPublisher lp = spy(LocationPublisher.class);
+            lp.mGoogClient = mock(GoogleApiClient.class);
+            lp.mLocProvider = mock(FusedLocationProviderApi.class);
+            bindService();
+            return lp;
         }
 
-        //#poll
-
-        @Test
-        public void poll_turnsOnPolling() {
-            // calls LocationServices.FusedLocationApi.requestLocationUpdates
-            // sets mPolling true
-        }
-
-        //#stopPolling
-        public void stopPolling_stopsPolling() {
-            // calls LocationServices.FusedLocationApi.removeLocationUpdates
-            // sets mPolling false
-        }
-
-        //#clear
-        public void clear_clearsUserFromServerAllLocsFromPhone() {
-            // requires mock DAO, API (dao has to mock getting (mUserId)
-            // calls clien.remove()
-            // calls dao.clear()
+        static void bindService(){
+            shadowOf(RuntimeEnvironment.application)
+                .setComponentNameAndServiceForBindService(
+                    new ComponentName("org.tlc.whereat.modules.pubsub", "LocationPublisher"),
+                    mock(IBinder.class));
         }
     }
 

@@ -1,5 +1,6 @@
 package org.tlc.whereat.activities;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -14,6 +15,8 @@ import org.tlc.whereat.modules.pubsub.receivers.MapActivityReceivers;
 import org.tlc.whereat.modules.db.LocationDao;
 import org.tlc.whereat.model.UserLocation;
 
+import java.util.List;
+
 
 public class MapActivity extends AppCompatActivity {
 
@@ -22,7 +25,7 @@ public class MapActivity extends AppCompatActivity {
     protected LocationDao mLocDao;
     protected Mapper mMapper;
     protected MenuHandler mMenu;
-
+    protected boolean mRunning;
 
     // LIFE CYCLE METHODS
 
@@ -36,6 +39,7 @@ public class MapActivity extends AppCompatActivity {
         mLocDao = new LocationDao(this);
         mMapper = new Mapper(this);
         mMenu = new MenuHandler(this);
+        mRunning = false;
 
         findViewById(R.id.refresh_map_button).setOnClickListener((View v) -> refresh());
     }
@@ -47,9 +51,11 @@ public class MapActivity extends AppCompatActivity {
         mLocPubMgr.bind();
         mReceivers.register();
 
-        if(!mLocDao.isConnected()) mLocDao.connect();
-        if(!mMapper.hasInitialized()) mMapper.initialize(mLocDao.getAll());
-        if(mMapper.hasPinged()) mMapper.refresh(mLocDao.getAllSince(mMapper.lastPing()));
+        if(!mRunning) run();
+        else {
+            List<UserLocation> locs = mLocDao.getAllSince(mMapper.lastPing());
+            mMapper.refresh(locs);
+        }
     }
 
     @Override
@@ -64,6 +70,7 @@ public class MapActivity extends AppCompatActivity {
         super.onDestroy();
         mMapper.clear();
         mLocDao.disconnect();
+        mLocPubMgr.stop();
     }
 
     // EVENT HANDLERS
@@ -91,10 +98,16 @@ public class MapActivity extends AppCompatActivity {
 
     // HELPER METHODS
 
+    protected void run(){
+        mLocPubMgr.start();
+        mLocDao.connect();
+        mMapper.initialize(mLocDao.getAll());
+        mRunning = true;
+    }
+
     protected void refresh(){
         mLocDao.clear();
         mMapper.clear();
         mLocPubMgr.ping();
     }
-
 }

@@ -12,7 +12,7 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import org.tlc.whereat.BuildConfig;
-import org.tlc.whereat.activities.MainActivity;
+import org.tlc.whereat.activities.OnOffActivity;
 import org.tlc.whereat.support.ActivityHelpers;
 
 import static org.mockito.Mockito.*;
@@ -22,13 +22,13 @@ import static org.assertj.core.api.Assertions.*;
 @Config(constants = BuildConfig.class, sdk = 21)
 
 
-public class MainActivityReceiversTest extends ReceiversTest {
+public class OnOffActivityReceiversTest extends ReceiversTest {
 
     MainActivityReceivers rcv;
 
     @Before
     public void setup(){
-        ctx = ActivityHelpers.createActivity(MainActivity.class);
+        ctx = ActivityHelpers.createActivity(OnOffActivity.class);
         lbm = spy(LocalBroadcastManager.getInstance(RuntimeEnvironment.application));
         ifArg = ArgumentCaptor.forClass(IntentFilter.class);
         rcv = new MainActivityReceivers(ctx);

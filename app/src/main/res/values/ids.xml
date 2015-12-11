@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="action_main" type="id" />
+    <item name="action_on_off" type="id" />
     <item name="action_map" type="id" />
     <item name="action_prefs" type="id" />
     <item name="go_button" type="id" />
