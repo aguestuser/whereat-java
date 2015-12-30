@@ -3,11 +3,6 @@ package org.tlc.whereat.modules.map;
 import android.app.Activity;
 import android.util.Pair;
 
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
@@ -24,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.tlc.whereat.util.CollectionUtils.last;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.tlc.whereat.support.LocationHelpers.*;
@@ -35,13 +31,12 @@ public class MapperTest {
 
     protected static final UserLocation s17 = s17UserLocationStub();
     protected static final UserLocation s17_ = s17UserLocationStubMoved();
-    protected static final Marker s17mrk = mock(Marker.class);
-
     protected static final UserLocation n17 = n17UserLocationStub();
+
     protected static final UserLocation n17_ = n17UserLocationStubMoved();
-    protected static final Marker n17mrk = mock(Marker.class);
 
     protected static final List<UserLocation> noLocs = new ArrayList<>();
+    protected static final List<UserLocation> oneLoc = Arrays.asList(s17);
     protected static final List<UserLocation> locs = Arrays.asList(s17, n17);
     protected static final List<UserLocation> movedLocs = Arrays.asList(s17_, n17_);
 
@@ -57,68 +52,20 @@ public class MapperTest {
             Mapper m = new Mapper(ctx);
 
             assertThat(m.mCtx).isEqualTo(ctx);
+            assertThat(m.mMapFactory).isInstanceOf(GoogleMapContainerFactory.class);
             assertThat(m.mMarkers).isEqualTo(new ConcurrentHashMap<>());
             assertThat(m.mLastPing).isEqualTo(-1L);
-            assertThat(m.mInitialized).isFalse();
-        }
-
-    }
-
-    @RunWith(RobolectricGradleTestRunner.class)
-    @Config(constants = BuildConfig.class, sdk = 21)
-
-    public static class Initialization {
-        MapActivity ctx;
-        GoogleMap map;
-        Mapper m;
-
-        @Before
-        public void setup(){
-            ctx = Robolectric.buildActivity(MapActivity.class).get();
-            map = mock(GoogleMap.class);
-            m = spy(new Mapper(ctx));
-            doReturn(map).when(m).getMap();
-            doNothing().when(m).initCenter(any(LatLng.class));
-        }
-
-
-        @Test
-        public void initialize_should_callInitMapAndRecordLastPingAndSetInitializedToTrue(){
-            doNothing().when(m).initMap(locs);
-            doNothing().when(m).recordLastPing(locs);
-
-            m.initialize(locs);
-
-            verify(m).initMap(locs);
-            verify(m).recordLastPing(locs);
-            assertThat(m.mInitialized).isTrue();
-        }
-
-        @Test
-        public void initMap_should_initializeMapWithMarkers(){
-            m.initMap(locs);
-
-            assertThat(m.mMap).isEqualTo(map);
-            verify(map).setMyLocationEnabled(true);
-            verify(m).initCenter(n17);
-        }
-
-        @Test
-        public void initMap_should_initializeMapWithNoMarkers(){
-            m.initMap(new ArrayList<>());
-
-            assertThat(m.mMap).isEqualTo(map);
-            verify(map).setMyLocationEnabled(true);
-            verify(m).initCenter(Mapper.LIBERTY);
+            assertThat(m.mRendered).isFalse();
         }
     }
 
     @RunWith(RobolectricGradleTestRunner.class)
     @Config(constants = BuildConfig.class, sdk = 21)
 
-    public static class Getters {
+    public static class Accessors {
         MapActivity ctx;
         Mapper m;
+        MapContainer mc;
 
         @Before
         public void setup() {
@@ -136,254 +83,345 @@ public class MapperTest {
         }
 
         @Test
-        public void hasPinged_should_returnTrueIfLastPingGreaterThanSentinelValue(){
-            m.mLastPing = -1L;
-            assertThat(m.hasPinged()).isFalse();
+        public void hasRendered_should_returnValueOfRenderedBooleanFlag(){
+            m.mRendered = false;
+            assertThat(m.hasRendered()).isFalse();
 
-            m.mLastPing = 0L;
-            assertThat(m.hasPinged()).isTrue();
-        }
-
-        @Test
-        public void hasInitialized_should_returnTrueIfMapperHasInitialized(){
-            doNothing().when(m).initMap(anyListOf(UserLocation.class));
-            doNothing().when(m).recordLastPing(anyListOf(UserLocation.class));
-
-            assertThat(m.hasInitialized()).isFalse();
-            m.initialize(noLocs);
-            assertThat(m.hasInitialized()).isTrue();
+            m.mRendered = true;
+            assertThat(m.hasRendered()).isTrue();
         }
     }
 
     @RunWith(RobolectricGradleTestRunner.class)
     @Config(constants = BuildConfig.class, sdk = 21)
 
-    public static class PublicMethods {
+    public static class Initialization {
         MapActivity ctx;
-        GoogleMap map;
         Mapper m;
-        ConcurrentHashMap<String, Pair<Long, Marker>> mMarkers;
-
+        MapContainer mc;
+        MarkerContainer s17mrk;
+        MarkerContainer s17_mrk;
+        MarkerContainer n17mrk;
+        MarkerContainer n17_mrk;
 
         @Before
-        public void setup() {
+        public void setup(){
+
             ctx = Robolectric.buildActivity(MapActivity.class).get();
-            map = mock(GoogleMap.class);
             m = spy(new Mapper(ctx));
+            mc = mock(MapContainer.class);
+            m.mMapFactory = spy(m.mMapFactory);
 
-            doNothing().when(m).initCenter(any(LatLng.class));
-            doReturn(map).when(m).getMap();
+            doReturn(mc).when(m.mMapFactory).getInstance();
+            doReturn(mc).when(mc).getMap();
+            doReturn(mc).when(mc).showUserLocation();
+            doReturn(mc).when(mc).center(any(LatLon.class));
 
-            doReturn(s17mrk).when(m).addMarker(s17);
-            doReturn(n17mrk).when(m).addMarker(n17);
+            s17mrk = mock(MarkerContainer.class);
+            s17_mrk = mock(MarkerContainer.class);
+            n17mrk = mock(MarkerContainer.class);
+            n17_mrk = mock(MarkerContainer.class);
+
+            doReturn(s17mrk).when(mc).addMarker(s17.asLatLon(), s17.asDateTime());
+            doReturn(s17_mrk).when(s17mrk).move(s17_.asLatLon());
+            doReturn(n17mrk).when(mc).addMarker(n17.asLatLon(), n17.asDateTime());
+            doReturn(n17_mrk).when(n17mrk).move(n17_.asLatLon());
         }
 
-        @After
-        public void teardown(){
-            reset(s17mrk);
-            reset(n17mrk);
-        }
-
-        //#refresh()
+        //#render
 
         @Test
-        public void refresh_should_callPlotManyAndRecordLastPing(){
-            doNothing().when(m).plotMany(anyListOf(UserLocation.class));
-            doNothing().when(m).recordLastPing(anyListOf(UserLocation.class));
-
-            m.initialize(noLocs);
-            m.refresh(locs);
-
-            verify(m).plotMany(locs);
-            verify(m).recordLastPing(locs);
+        public void render_should_returnThis(){
+            assertThat(m.render(noLocs)).isEqualTo(m);
         }
 
         @Test
-        public void plotMany_should_doNothingIfPassedEmptyList(){
-            m.initialize(noLocs);
-            m.plotMany(noLocs);
+        public void render_whenPassedNoLocs_should_recordNoPingAndRenderMapWithNoMarkers(){
 
-            verify(m, never()).plot(any(UserLocation.class));
+            assertThat(m.mLastPing).isEqualTo(-1L);
+            assertThat(m.mMarkers).isEmpty();
+
+            m.render(noLocs);
+
+            assertThat(m.mLastPing).isEqualTo(-1L);
+            assertThat(m.mMarkers).isEmpty();
+            assertThat(m.mMap).isEqualTo(mc);
+
+            verify(mc).showUserLocation();
+            verify(mc).center(Mapper.LIBERTY);
+            verify(m, never()).plotMany(anyListOf(UserLocation.class));
         }
 
         @Test
-        public void plotMany_should_addManyMarkersToEmptyMap(){
-            m.initialize(noLocs);
-            m.plotMany(locs);
+        public void render_whenPassedOneLoc_should_renderMapWithOneMarker(){
 
+            assertThat(m.mLastPing).isEqualTo(-1L);
+            assertThat(m.mMarkers).isEmpty();
+
+            m.render(oneLoc);
+
+            assertThat(m.mMap).isEqualTo(mc);
+            assertThat(m.mLastPing).isEqualTo(s17.getTime());
+            assertThat(m.mMarkers).hasSize(1);
+
+            verify(mc).showUserLocation();
+            verify(mc).center(s17.asLatLon());
+            verify(m).plotMany(oneLoc);
             verify(m).plot(s17);
-            verify(m).plot(n17);
-
             verify(m).addPlot(s17);
-            verify(m).addPlot(n17);
+            verify(mc).addMarker(s17.asLatLon(), s17.asDateTime());
 
-            assertThat(m.mMarkers.size()).isEqualTo(2);
+            assertThat(m.mMarkers).containsKey(s17.getId());
+            assertThat(m.mMarkers.get(s17.getId())).isEqualTo(Pair.create(s17.getTime(), s17mrk));
+        }
+
+        @Test
+        public void render_whenPassedManyLocs_should_renderMapWithNoMarkers(){
+
+            assertThat(m.mLastPing).isEqualTo(-1L);
+            assertThat(m.mMarkers).isEmpty();
+
+            m.render(locs);
+
+            assertThat(m.mMap).isEqualTo(mc);
+            assertThat(m.mLastPing).isEqualTo(n17.getTime());
+            assertThat(m.mMarkers).hasSize(2);
+
+            verify(mc).showUserLocation();
+            verify(mc).center(last(locs).asLatLon());
+            verify(m).plotMany(locs);
+            for (UserLocation l : locs){
+                verify(m).plot(l);
+                verify(m).addPlot(l);
+                verify(mc).addMarker(l.asLatLon(), l.asDateTime());
+            }
+
+            assertThat(m.mMarkers).containsKey(s17.getId());
+            assertThat(m.mMarkers.get(s17.getId())).isEqualTo(Pair.create(s17.getTime(), s17mrk));
+            assertThat(m.mMarkers).containsKey(n17.getId());
+            assertThat(m.mMarkers.get(n17.getId())).isEqualTo(Pair.create(n17.getTime(), n17mrk));
+        }
+
+        // #refresh
+
+        @Test
+        public void refresh_whenPassedNoLocs_should_addNoMarkersToMap(){
+
+            m.render(noLocs);
+
+            assertThat(m.mLastPing).isEqualTo(-1L);
+            assertThat(m.mMarkers).isEmpty();
+
+            m.refresh(noLocs);
+
+            assertThat(m.mLastPing).isEqualTo(-1L);
+            assertThat(m.mMarkers).isEmpty();
+        }
+
+        @Test
+        public void refresh_whenEmptyAndPassedOneLoc_should_addOneMarkerToMap(){
+
+            m.render(noLocs);
+
+            assertThat(m.mLastPing).isEqualTo(-1L);
+            assertThat(m.mMarkers).isEmpty();
+
+            m.refresh(oneLoc);
+
+            assertThat(m.mLastPing).isEqualTo(s17.getTime());
+            assertThat(m.mMarkers).hasSize(1);
+
+            assertThat(m.mMarkers).containsKey(s17.getId());
+            assertThat(m.mMarkers.get(s17.getId())).isEqualTo(Pair.create(s17.getTime(), s17mrk));
+        }
+
+        @Test
+        public void refresh_whenNotEmptyAndPassedOneLoc_should_addOneMarkerToMap(){
+
+            m.render(oneLoc);
+
+            assertThat(m.mLastPing).isEqualTo(s17.getTime());
+            assertThat(m.mMarkers).hasSize(1);
+            assertThat(m.mMarkers).containsKey(s17.getId());
+            assertThat(m.mMarkers).doesNotContainKey(n17.getId());
+
+            m.refresh(Arrays.asList(n17));
+
+            assertThat(m.mLastPing).isEqualTo(n17.getTime());
+            assertThat(m.mMarkers).hasSize(2);
+            assertThat(m.mMarkers).containsKey(n17.getId());
+            assertThat(m.mMarkers.get(n17.getId())).isEqualTo(Pair.create(n17.getTime(), n17mrk));
+        }
+
+        @Test
+        public void refresh_whenNotEmptyAndPassedManyLocs_should_moveMarkers(){
+
+            m.render(locs);
+
+            assertThat(m.mLastPing).isEqualTo(n17.getTime());
+            assertThat(m.mMarkers).hasSize(2);
             assertThat(m.mMarkers).containsKey(s17.getId());
             assertThat(m.mMarkers).containsKey(n17.getId());
 
-            Pair<Long, Marker> s17entry = m.mMarkers.get(s17.getId());
-            assertThat(s17entry.first).isEqualTo(s17.getTime());
-            assertThat(s17entry.second).isEqualTo(s17mrk);
-            
-            Pair<Long, Marker> n17entry = m.mMarkers.get(n17.getId());
-            assertThat(n17entry.first).isEqualTo(n17.getTime());
-            assertThat(n17entry.second).isEqualTo(n17mrk);
-        }
+            m.refresh(movedLocs);
 
-        @Test
-        public void plotMany_should_replotManyMarkersOnExistingMap(){
-            m.initialize(noLocs);
-            m.plotMany(locs);
-            assertThat(m.mMarkers).hasSize(2);
-            m.plotMany(movedLocs);
-            
-            verify(m).plot(s17_);
-            verify(m).plot(n17_);
-
-            verify(m).rePlot(s17_);
-            verify(m).rePlot(n17_);
-
-            assertThat(m.mMarkers).hasSize(2);
-
-            assertThat(m.mMarkers.get(s17.getId()).first).isEqualTo(s17_.getTime());
-            assertThat(m.mMarkers.get(s17.getId()).second).isEqualTo(s17mrk);
-            verify(s17mrk).setPosition(s17_.asLatLng());
-
-            assertThat(m.mMarkers.get(n17.getId()).first).isEqualTo(n17_.getTime());
-            assertThat(m.mMarkers.get(n17.getId()).second).isEqualTo(n17mrk);
-            verify(n17mrk).setPosition(n17_.asLatLng());
-        }
-
-        @Test
-        public void recordLastPing_should_doNothingIfPassedEmptyList(){
-            m.initialize(noLocs);
-            m.recordLastPing(noLocs);
-
-            verify(m, never()).recordPing(any(UserLocation.class));
-        }
-
-        @Test
-        public void recordLastPing_should_setLastPingToValueOfLastLocInList(){
-            m.initialize(noLocs);
-            m.recordLastPing(locs);
-
-            verify(m).recordPing(n17);
-            assertThat(m.mLastPing).isEqualTo(n17.getTime());
-        }
-
-        @Test
-        public void recordLastPing_should_updateLastPingOnRefresh(){
-            m.initialize(locs);
-            m.recordLastPing(movedLocs);
-
-            verify(m).recordPing(n17_);
             assertThat(m.mLastPing).isEqualTo(n17_.getTime());
+            assertThat(m.mMarkers).hasSize(2);
+
+            verify(m, never()).addPlot(s17_);
+            verify(m).rePlot(s17_);
+            verify(s17mrk).move(s17_.asLatLon());
+
+            verify(m, never()).addPlot(n17_);
+            verify(m).rePlot(n17_);
+            verify(n17mrk).move(n17_.asLatLon());
+
+            assertThat(m.mMarkers.get(s17.getId())).isEqualTo(Pair.create(s17_.getTime(), s17_mrk));
+            /*assertThat(m.mMarkers.get(n17.getId())).isEqualTo(Pair.create(n17_.getTime(), n17_mrk));*/
         }
 
-        //#map()
+        // #record
 
         @Test
-        public void map_should_callPlotAndRecordPing(){
-            doReturn(true).when(m).plot(any(UserLocation.class));
-            doNothing().when(m).recordPing(any(UserLocation.class));
+        public void record_whenEmpty_shouldAddOneMarker(){
 
-            m.initialize(noLocs);
-            m.map(s17);
+            m.render(noLocs);
 
-            verify(m).plot(s17);
-            verify(m).recordPing(s17);
+            assertThat(m.mLastPing).isEqualTo(-1L);
+            assertThat(m.mMarkers).isEmpty();
+
+            m.record(s17);
+
+            assertThat(m.mLastPing).isEqualTo(s17.getTime());
+            assertThat(m.mMarkers).hasSize(1);
+            assertThat(m.mMarkers).containsKey(s17.getId());
+            assertThat(m.mMarkers.get(s17.getId())).isEqualTo(Pair.create(s17.getTime(), s17mrk));
         }
 
         @Test
-        public void plot_should_addMarkerToEmptyMap(){
-            m.initialize(noLocs);
-            m.plot(s17);
+        public void record_whenNotEmptyAndPassedNewLoc_shouldAddOneMarker(){
 
-            verify(m).addPlot(s17);
+            m.render(oneLoc);
+
+            assertThat(m.mLastPing).isEqualTo(s17.getTime());
+            assertThat(m.mMarkers).hasSize(1);
+            assertThat(m.mMarkers).doesNotContainKey(n17.getId());
+
+            m.record(n17);
+
+            assertThat(m.mLastPing).isEqualTo(n17.getTime());
+            assertThat(m.mMarkers).hasSize(2);
+            assertThat(m.mMarkers).containsKey(n17.getId());
+            assertThat(m.mMarkers.get(n17.getId())).isEqualTo(Pair.create(n17.getTime(), n17mrk));
+        }
+
+        @Test
+        public void record_whenNotEmptyAndPassedOldLoc_shouldMoveMarker(){
+
+            m.render(oneLoc);
+
+            assertThat(m.mLastPing).isEqualTo(s17.getTime());
+            assertThat(m.mMarkers).hasSize(1);
+            assertThat(m.mMarkers).containsKey(s17.getId());
+
+            m.record(s17_);
+
+            verify(s17mrk).move(s17_.asLatLon());
+
+            assertThat(m.mLastPing).isEqualTo(s17_.getTime());
+            assertThat(m.mMarkers).hasSize(1);
+            assertThat(m.mMarkers.get(s17.getId())).isEqualToComparingFieldByField(Pair.create(s17_.getTime(), s17_mrk));
+        }
+
+        // # forgetSince
+
+        @Test
+
+        public void forgetSince_whenEmpty_should_doNothing(){
+
+            m.render(noLocs);
+            assertThat(m.mMarkers).isEmpty();
+
+            m.forgetSince(s17.getTime());
+            assertThat(m.mMarkers).isEmpty();
+        }
+
+
+
+        @Test
+        public void forgetSince_whenOneExpiredLoc_should_removeOneMarker(){
+
+            m.render(oneLoc);
 
             assertThat(m.mMarkers).hasSize(1);
             assertThat(m.mMarkers).containsKey(s17.getId());
-            assertThat(m.mMarkers.get(s17.getId()).first).isEqualTo(s17.getTime());
-            assertThat(m.mMarkers.get(s17.getId()).second).isEqualTo(s17mrk);
+
+            m.forgetSince(n17.getTime());
+
+            assertThat(m.mMarkers).isEmpty();
+            assertThat(m.mMarkers).doesNotContainKey(s17.getId());
         }
 
         @Test
-        public void plot_should_addMarkerToMapWithOtherMarker(){
-            m.initialize(Arrays.asList(s17));
-            m.plot(n17);
+        public void forgetSince_whenTwoExpiredLocs_should_removeTwoMarkers(){
 
-            verify(m).addPlot(n17);
+            m.render(locs);
 
             assertThat(m.mMarkers).hasSize(2);
             assertThat(m.mMarkers).containsKey(s17.getId());
-
             assertThat(m.mMarkers).containsKey(n17.getId());
-            assertThat(m.mMarkers.get(n17.getId()).first).isEqualTo(n17.getTime());
-            assertThat(m.mMarkers.get(n17.getId()).second).isEqualTo(n17mrk);
+
+            m.forgetSince(n17.getTime() + 1L);
+
+            assertThat(m.mMarkers).isEmpty();
+            assertThat(m.mMarkers).doesNotContainKey(s17.getId());
+            assertThat(m.mMarkers).doesNotContainKey(n17.getId());
         }
 
         @Test
-        public void plot_should_replotExistingMarker(){
-            m.initialize(locs);
-            m.plot(n17_);
+        public void forgetSince_whenOneExpiredOneUnexpiredLoc_should_removeOneMarker(){
 
-            verify(m).rePlot(n17_);
+            m.render(locs);
 
             assertThat(m.mMarkers).hasSize(2);
-            assertThat(m.mMarkers.get(n17.getId()).first).isEqualTo(n17_.getTime());
-            assertThat(m.mMarkers.get(n17.getId()).second).isEqualTo(n17mrk);
-            verify(n17mrk).setPosition(n17_.asLatLng());
+            assertThat(m.mMarkers).containsKey(s17.getId());
+            assertThat(m.mMarkers).containsKey(n17.getId());
+
+            m.forgetSince(n17.getTime());
+
+            assertThat(m.mMarkers).hasSize(1);
+            assertThat(m.mMarkers).doesNotContainKey(s17.getId());
+            assertThat(m.mMarkers).containsKey(n17.getId());
         }
 
-        @Test
-        public void recordPing_should_setLastPingToTimeUserLocationWasPublished(){
-            m.initialize(noLocs);
-
-            m.recordPing(s17);
-            assertThat(m.mLastPing).isEqualTo(s17.getTime());
-
-            m.recordPing(s17_);
-            assertThat(m.mLastPing).isEqualTo(s17_.getTime());
-        }
-
-        //#clear
+        // #clear
 
         @Test
-        public void clear_should_clearMapAndSetLastPingToSentinalValue(){
-            m.initialize(locs);
+        public void clear_whenEmpty_should_doNothing(){
+
+            m.render(noLocs);
+
+            assertThat(m.mLastPing).isEqualTo(-1L);
+            assertThat(m.mMarkers).isEmpty();
 
             m.clear();
 
-            verify(map).clear();
-            assertThat(m.mMarkers).isEmpty();
             assertThat(m.mLastPing).isEqualTo(-1L);
-        }
-
-        //#forgetSince()
-
-        @Test
-        public void forgetSince_should_doNothingIfNoLocsOlderThanExpiration(){
-            m.initialize(locs);
-            assertThat(m.mMarkers).hasSize(2);
-
-            m.forgetSince(s17.getTime());
-            assertThat(m.mMarkers).hasSize(2);
-            verify(s17mrk, never()).remove();
-            verify(n17mrk, never()).remove();
-        }
-
-        @Test
-        public void forgetSince_should_deleteLocsOlderThanExpiration(){
-            m.initialize(locs);
-            assertThat(m.mMarkers).hasSize(2);
-
-            m.forgetSince(n17.getTime());
-            assertThat(m.mMarkers).hasSize(1);
-            verify(s17mrk).remove();
-
-            m.forgetSince(n17_.getTime());
             assertThat(m.mMarkers).isEmpty();
-            verify(n17mrk).remove();
+        }
+
+        @Test
+        public void clear_whenNotEmpty_should_removeMarkersAndResetLastPing(){
+
+            m.render(locs);
+
+            assertThat(m.mLastPing).isEqualTo(n17.getTime());
+            assertThat(m.mMarkers).hasSize(2);
+
+            m.clear();
+
+            assertThat(m.mLastPing).isEqualTo(-1L);
+            assertThat(m.mMarkers).isEmpty();
         }
     }
 }

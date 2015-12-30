@@ -14,6 +14,7 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import org.tlc.whereat.modules.map.LatLon;
 import org.tlc.whereat.util.TimeUtils;
 import org.whispersystems.curve25519.JCESecureRandomProvider;
 
@@ -102,21 +103,13 @@ public class UserLocation implements Parcelable {
 
     // CONVERTERS
 
-    public MarkerOptions asMarkerOptions(){
-        return new MarkerOptions()
-            .position(asLatLng())
-            .title(asDateTime());
+    public LatLon asLatLon(){
+        return new LatLon(getLatitude(), getLongitude());
     }
 
-    public LatLng asLatLng(){
-        return new LatLng(getLatitude(), getLongitude());
-    }
-
-    private String asDateTime(){
+    public String asDateTime(){
         return TimeUtils.fullDate(getTime());
     }
-
-
 
     // PARCELABLE IMPLEMENTATION
 

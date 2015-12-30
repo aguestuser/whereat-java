@@ -57,7 +57,7 @@ public class MapActivityTest {
                 assertThat(a.mRunning).isFalse();
                 assertThat(a.mLocPubMgr.isRunning()).isFalse();
                 assertThat(a.mLocDao.isConnected()).isFalse();
-                assertThat(a.mMapper.hasInitialized()).isFalse();
+                assertThat(a.mMapper.hasRendered()).isFalse();
 
                 assertThat(shadowOf(a).getContentView().getId()).isEqualTo(R.id.map_activity);
                 assertThat(a.findViewById(R.id.refresh_map_button)).isNotNull();
@@ -79,7 +79,7 @@ public class MapActivityTest {
                 a.mLocDao = mock(LocationDao.class);
                 a.mMapper = mock(Mapper.class);
 
-                doReturn(a.mMapper).when(a.mMapper).initialize(anyListOf(UserLocation.class));
+                doReturn(a.mMapper).when(a.mMapper).render(anyListOf(UserLocation.class));
                 doNothing().when(a.mMapper).refresh(anyListOf(UserLocation.class));
             }
 
@@ -98,7 +98,7 @@ public class MapActivityTest {
 
                 verify(a.mLocPubMgr, times(1)).start();
                 verify(a.mLocDao, times(1)).connect();
-                verify(a.mMapper, times(1)).initialize(anyListOf(UserLocation.class));
+                verify(a.mMapper, times(1)).render(anyListOf(UserLocation.class));
 
                 assertThat(a.mRunning).isTrue();
             }
@@ -110,7 +110,7 @@ public class MapActivityTest {
 
                 verify(a.mLocPubMgr, times(0)).start();
                 verify(a.mLocDao, times(0)).connect();
-                verify(a.mMapper, times(0)).initialize(anyListOf(UserLocation.class));
+                verify(a.mMapper, times(0)).render(anyListOf(UserLocation.class));
 
                 verify(a.mMapper, times(1)).refresh(anyListOf(UserLocation.class));
             }
@@ -148,13 +148,13 @@ public class MapActivityTest {
             a.mLocDao = mock(LocationDao.class);
             a.mMapper = mock(Mapper.class);
 
-            doReturn(a.mMapper).when(a.mMapper).initialize(anyListOf(UserLocation.class));
+            doReturn(a.mMapper).when(a.mMapper).render(anyListOf(UserLocation.class));
         }
 
         @Test
         public void map_should_delegateToChildren(){
             a.map(s17);
-            verify(a.mMapper).map(s17);
+            verify(a.mMapper).record(s17);
         }
 
         @Test
@@ -182,7 +182,7 @@ public class MapActivityTest {
             a.mLocDao = mock(LocationDao.class);
             a.mMapper = mock(Mapper.class);
 
-            doReturn(a.mMapper).when(a.mMapper).initialize(anyListOf(UserLocation.class));
+            doReturn(a.mMapper).when(a.mMapper).render(anyListOf(UserLocation.class));
         }
 
         @Test

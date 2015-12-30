@@ -3,13 +3,6 @@ package org.tlc.whereat.modules.map;
 import android.app.Activity;
 import android.util.Pair;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-
-import org.tlc.whereat.R;
 import org.tlc.whereat.model.UserLocation;
 
 import java.util.List;
@@ -23,50 +16,62 @@ public class Mapper {
     // FIELDS
 
     public static final String TAG = Mapper.class.getSimpleName();
-    protected static final LatLng LIBERTY = new LatLng(40.7092529,-74.0112551);
+    protected static final LatLon LIBERTY = new LatLon(40.7092529,-74.0112551);
 
     protected Activity mCtx;
-    protected GoogleMap mMap;
-    protected ConcurrentHashMap<String, Pair<Long, Marker>> mMarkers;
+    protected MapContainerFactory mMapFactory;
+    protected MapContainer mMap;
+    protected ConcurrentHashMap<String, Pair<Long, MarkerContainer>> mMarkers;
     protected Long mLastPing;
-    protected boolean mInitialized;
+    protected boolean mRendered;
 
     // CONSTRUCTORS
 
-    public static Mapper getInstance(Activity ctx, List<UserLocation> uls){
-        return new Mapper(ctx).initialize(uls);
-    }
-
     public Mapper(Activity ctx){
         mCtx = ctx;
+        mMapFactory = new GoogleMapContainerFactory(ctx);
         mMarkers = new ConcurrentHashMap<>();
         mLastPing = -1L;
-        mInitialized = false;
+        mRendered = false;
     }
 
-    public Mapper initialize(List<UserLocation> uls){
-        initMap(uls);
-        recordLastPing(uls);
-        mInitialized = true;
-        return this;
-    }
+    // ACCESSORS
 
-    // GETTERS
-
-    public boolean hasInitialized(){ return mInitialized; }
+    public boolean hasRendered(){ return mRendered; }
     public long lastPing(){ return mLastPing; }
-    public boolean hasPinged() { return mLastPing > -1L; }
 
     // PUBLIC METHODS
 
-    public void refresh(List<UserLocation> uls){
-        plotMany(uls);
+    public Mapper render(List<UserLocation> uls){
         recordLastPing(uls);
+        mMap = mMapFactory
+            .getInstance()
+            .getMap()
+            .showUserLocation()
+            .center(uls.isEmpty() ? LIBERTY : last(uls).asLatLon());
+        if(!uls.isEmpty()) plotMany(uls);
+        mRendered = true;
+        return this;
     }
 
-    public void map(UserLocation ul){
-        plot(ul);
+    public void refresh(List<UserLocation> uls){
+        recordLastPing(uls);
+        plotMany(uls);
+    }
+
+    public void record(UserLocation ul){
         recordPing(ul);
+        plot(ul);
+    }
+
+    public void forgetSince(long expiration){
+        for (Map.Entry<String, Pair<Long,MarkerContainer>> entry : mMarkers.entrySet()){
+            Pair<Long, MarkerContainer> pair = entry.getValue();
+            if(pair.first < expiration){
+                pair.second.remove();
+                mMarkers.remove(entry.getKey());
+            }
+        }
     }
 
     public void clear(){
@@ -75,79 +80,37 @@ public class Mapper {
         mLastPing = -1L;
     }
 
-    public void forgetSince(long expiration){
-        for (Map.Entry<String, Pair<Long,Marker>> entry : mMarkers.entrySet()){
-            Pair<Long, Marker> pair = entry.getValue();
-            if(pair.first < expiration){
-                pair.second.remove();
-                mMarkers.remove(entry.getKey());
-            }
-        }
-    }
-
-
-    // CONSTRUCTION HELPERS
-
-    protected void initMap(List<UserLocation> ls) {
-        mMap = getMap();
-        mMap.setMyLocationEnabled(true);
-        if(!ls.isEmpty()){
-            initMarkers(ls);
-            initCenter(last(ls));
-        }
-        else initCenter(LIBERTY);
-    }
-
-    protected GoogleMap getMap(){ // helper function for testing seem. see: https://github.com/robolectric/robolectric/issues/1145
-        return ((MapFragment) mCtx.getFragmentManager().findFragmentById(R.id.map_fragment)).getMap();
-    }
-
-    void initMarkers(List<UserLocation> ls){
-        if(!ls.isEmpty()) plotMany(ls);
-    }
-
-    protected void initCenter(UserLocation l){
-        initCenter(l.asLatLng());
-    }
-
-    protected void initCenter(LatLng ctr){
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ctr, 15));
-    }
-
     // HELPERS
 
-    protected void plotMany(List<UserLocation> ls){
-        if (!ls.isEmpty()) for (UserLocation l : ls) plot(l);
+    protected void plotMany(List<UserLocation> uls){
+        for (UserLocation ul : uls) plot(ul);
     }
 
-    protected boolean plot(UserLocation l){
-        return mMarkers.containsKey(l.getId()) ? rePlot(l) : addPlot(l);
+    protected boolean plot(UserLocation ul){
+        return mMarkers.containsKey(ul.getId()) ? rePlot(ul) : addPlot(ul);
     }
 
-    protected boolean rePlot(UserLocation l){
-        String id = l.getId();
-
-        mMarkers.get(id).second.setPosition(l.asLatLng());
-        mMarkers.put(id, Pair.create(l.getTime(), mMarkers.get(id).second));
+    protected boolean rePlot(UserLocation ul){
+        String id = ul.getId();
+        mMarkers.put(id, Pair.create(
+                ul.getTime(),
+                mMarkers.get(id).second.move(ul.asLatLon())));
         return true;
     }
 
-    protected boolean addPlot(UserLocation l){
-        mMarkers.put(l.getId(), Pair.create(l.getTime(), addMarker(l)));
+    protected boolean addPlot(UserLocation ul){
+        mMarkers.put(
+            ul.getId(),
+            Pair.create(ul.getTime(), mMap.addMarker(ul.asLatLon(), ul.asDateTime())));
         return true;
     }
 
-    protected Marker addMarker(UserLocation l){ // extracted as testing workaround. grr..
-        return mMap.addMarker(l.asMarkerOptions());
+    protected void recordLastPing(List<UserLocation> uls){
+        if (!uls.isEmpty()) recordPing(last(uls));
     }
 
-    protected void recordLastPing(List<UserLocation> ls){
-        if (!ls.isEmpty()) recordPing(last(ls));
+    protected void recordPing(UserLocation ul){
+        mLastPing =  ul.getTime();
     }
-
-    protected void recordPing(UserLocation l){
-        mLastPing =  l.getTime();
-    }
-
 
 }

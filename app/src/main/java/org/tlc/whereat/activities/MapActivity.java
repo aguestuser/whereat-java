@@ -1,6 +1,5 @@
 package org.tlc.whereat.activities;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -14,8 +13,6 @@ import org.tlc.whereat.services.LocPubManager;
 import org.tlc.whereat.modules.pubsub.receivers.MapActivityReceivers;
 import org.tlc.whereat.modules.db.LocationDao;
 import org.tlc.whereat.model.UserLocation;
-
-import java.util.List;
 
 
 public class MapActivity extends AppCompatActivity {
@@ -52,10 +49,7 @@ public class MapActivity extends AppCompatActivity {
         mReceivers.register();
 
         if(!mRunning) run();
-        else {
-            List<UserLocation> locs = mLocDao.getAllSince(mMapper.lastPing());
-            mMapper.refresh(locs);
-        }
+        else mMapper.refresh(mLocDao.getAllSince(mMapper.lastPing()));
     }
 
     @Override
@@ -88,7 +82,7 @@ public class MapActivity extends AppCompatActivity {
     // PUBLIC METHODS
 
     public void map(UserLocation ul){
-        mMapper.map(ul);
+        mMapper.record(ul);
     }
 
     public void forgetSince(long time) {
@@ -101,7 +95,7 @@ public class MapActivity extends AppCompatActivity {
     protected void run(){
         mLocPubMgr.start();
         mLocDao.connect();
-        mMapper.initialize(mLocDao.getAll());
+        mMapper.render(mLocDao.getAll());
         mRunning = true;
     }
 
