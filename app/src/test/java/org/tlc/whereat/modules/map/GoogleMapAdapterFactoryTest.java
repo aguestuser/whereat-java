@@ -11,14 +11,14 @@ import static org.mockito.Mockito.*;
  * coded with <3 for where@
  */
 
-public class GoogleMapContainerFactoryTest {
+public class GoogleMapAdapterFactoryTest {
 
     @Test
     public void getInstance_should_delegateToGoogleMapContainerAndReturnAMapContainer() throws Exception {
         Activity ctx = mock(Activity.class);
-        GoogleMapContainerFactory mcf = new GoogleMapContainerFactory(ctx);
+        GoogleMapAdapterFactory mcf = new GoogleMapAdapterFactory(ctx);
 
         assertThat(mcf.mCtx).isEqualTo(ctx);
-        assertThat(mcf.getInstance()).isInstanceOf(MapContainer.class);
+        assertThat(mcf.createMapAdapter()).isInstanceOf(MapAdapter.class);
     }
 }

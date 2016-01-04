@@ -27,11 +27,11 @@ import static org.tlc.whereat.support.LocationHelpers.*;
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)
 
-public class GoogleMapContainerTest {
+public class GoogleMapAdapterTest {
 
     UserLocation s17 = s17UserLocationStub();
     Activity ctx;
-    GoogleMapContainer mc;
+    GoogleMapAdapter mc;
 
     GoogleMap gm = mock(GoogleMap.class);
     CameraUpdate cu = mock(CameraUpdate.class);
@@ -40,7 +40,7 @@ public class GoogleMapContainerTest {
     @Before
     public void setup(){
         ctx = Robolectric.buildActivity(MapActivity.class).get();
-        mc = spy((GoogleMapContainer) GoogleMapContainer.getInstance(ctx));
+        mc = spy((GoogleMapAdapter) GoogleMapAdapter.getInstance(ctx));
 
         doReturn(gm).when(mc).getGoogleMap();
         doReturn(cu).when(mc).getCameraUpdate(s17.asLatLon());
@@ -84,7 +84,7 @@ public class GoogleMapContainerTest {
     @Test
     public void addMarker_should_delegateToGoogleMapAndReturnMarkerContainer(){
         mc.getMap();
-        assertThat(mc.addMarker(s17.asLatLon(), s17.asDateTime())).isInstanceOf(MarkerContainer.class);
+        assertThat(mc.addMarker(s17.asLatLon(), s17.asDateTime())).isInstanceOf(MarkerAdapter.class);
         verify(gm).addMarker(mo);
     }
 

@@ -10,7 +10,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.tlc.whereat.R;
 
-public class GoogleMapContainer implements MapContainer {
+public class GoogleMapAdapter implements MapAdapter {
 
     // FIELDS
     protected Activity mCtx;
@@ -19,38 +19,38 @@ public class GoogleMapContainer implements MapContainer {
 
     // CONSTRUCTORS
 
-    public static MapContainer getInstance(Activity ctx){
-        return new GoogleMapContainer(ctx);
+    public static MapAdapter getInstance(Activity ctx){
+        return new GoogleMapAdapter(ctx);
     }
 
-    protected GoogleMapContainer(Activity ctx){
+    protected GoogleMapAdapter(Activity ctx){
         mCtx = ctx;
     }
 
     // PUBLIC METHODS
 
-    public MapContainer getMap(){ // helper function for testing seem. see: https://github.com/robolectric/robolectric/issues/1145
+    public MapAdapter getMap(){ // helper function for testing seem. see: https://github.com/robolectric/robolectric/issues/1145
         mMap = getGoogleMap();
         return this;
     }
 
-    public MapContainer clear(){
+    public MapAdapter clear(){
         mMap.clear();
         return this;
     }
 
-    public MapContainer showUserLocation(){
+    public MapAdapter showUserLocation(){
         mMap.setMyLocationEnabled(true);
         return this;
     }
 
-    public MapContainer center(LatLon latLon){
+    public MapAdapter center(LatLon latLon){
         mMap.moveCamera(getCameraUpdate(latLon));
         return this;
     }
 
-    public MarkerContainer addMarker(LatLon latLon, String msg){
-        return GoogleMarkerContainer.getInstance(mMap.addMarker(getMarkerOptions(latLon, msg)));
+    public MarkerAdapter addMarker(LatLon latLon, String msg){
+        return GoogleMarkerAdapter.getInstance(mMap.addMarker(getMarkerOptions(latLon, msg)));
     }
 
     // HELPERS

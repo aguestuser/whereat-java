@@ -21,16 +21,16 @@ import static org.tlc.whereat.support.LocationHelpers.*;
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)
 
-public class GoogleMarkerContainerTest {
+public class GoogleMarkerAdapterTest {
 
     UserLocation s17 = s17UserLocationStub();
-    GoogleMarkerContainer mc;
+    GoogleMarkerAdapter mc;
     Marker gm;
 
     @Before
     public void setup(){
         gm = mock(Marker.class);
-        mc = (GoogleMarkerContainer) GoogleMarkerContainer.getInstance(gm);
+        mc = (GoogleMarkerAdapter) GoogleMarkerAdapter.getInstance(gm);
 
         doNothing().when(gm).setPosition(s17.asLatLon().asGoogleLatLon());
         doNothing().when(gm).remove();
@@ -38,7 +38,7 @@ public class GoogleMarkerContainerTest {
 
     @Test
     public void getInstance_should_instantiateMarkerContainerWrappingGoogleMarker () throws Exception {
-        assertThat(mc).isInstanceOf(MarkerContainer.class);
+        assertThat(mc).isInstanceOf(MarkerAdapter.class);
         assertThat(mc.mMarker).isEqualTo(gm);
     }
 

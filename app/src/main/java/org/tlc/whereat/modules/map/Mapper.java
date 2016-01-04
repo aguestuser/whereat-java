@@ -19,9 +19,9 @@ public class Mapper {
     protected static final LatLon LIBERTY = new LatLon(40.7092529,-74.0112551);
 
     protected Activity mCtx;
-    protected MapContainerFactory mMapFactory;
-    protected MapContainer mMap;
-    protected ConcurrentHashMap<String, Pair<Long, MarkerContainer>> mMarkers;
+    protected MapAdapterFactory mMapFactory;
+    protected MapAdapter mMap;
+    protected ConcurrentHashMap<String, Pair<Long, MarkerAdapter>> mMarkers;
     protected Long mLastPing;
     protected boolean mRendered;
 
@@ -29,7 +29,7 @@ public class Mapper {
 
     public Mapper(Activity ctx){
         mCtx = ctx;
-        mMapFactory = new GoogleMapContainerFactory(ctx);
+        mMapFactory = new GoogleMapAdapterFactory(ctx);
         mMarkers = new ConcurrentHashMap<>();
         mLastPing = -1L;
         mRendered = false;
@@ -45,7 +45,7 @@ public class Mapper {
     public Mapper render(List<UserLocation> uls){
         recordLastPing(uls);
         mMap = mMapFactory
-            .getInstance()
+            .createMapAdapter()
             .getMap()
             .showUserLocation()
             .center(uls.isEmpty() ? LIBERTY : last(uls).asLatLon());
@@ -65,8 +65,8 @@ public class Mapper {
     }
 
     public void forgetSince(long expiration){
-        for (Map.Entry<String, Pair<Long,MarkerContainer>> entry : mMarkers.entrySet()){
-            Pair<Long, MarkerContainer> pair = entry.getValue();
+        for (Map.Entry<String, Pair<Long,MarkerAdapter>> entry : mMarkers.entrySet()){
+            Pair<Long, MarkerAdapter> pair = entry.getValue();
             if(pair.first < expiration){
                 pair.second.remove();
                 mMarkers.remove(entry.getKey());

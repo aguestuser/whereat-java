@@ -52,7 +52,7 @@ public class MapperTest {
             Mapper m = new Mapper(ctx);
 
             assertThat(m.mCtx).isEqualTo(ctx);
-            assertThat(m.mMapFactory).isInstanceOf(GoogleMapContainerFactory.class);
+            assertThat(m.mMapFactory).isInstanceOf(GoogleMapAdapterFactory.class);
             assertThat(m.mMarkers).isEqualTo(new ConcurrentHashMap<>());
             assertThat(m.mLastPing).isEqualTo(-1L);
             assertThat(m.mRendered).isFalse();
@@ -65,7 +65,7 @@ public class MapperTest {
     public static class Accessors {
         MapActivity ctx;
         Mapper m;
-        MapContainer mc;
+        MapAdapter mc;
 
         @Before
         public void setup() {
@@ -98,29 +98,29 @@ public class MapperTest {
     public static class Initialization {
         MapActivity ctx;
         Mapper m;
-        MapContainer mc;
-        MarkerContainer s17mrk;
-        MarkerContainer s17_mrk;
-        MarkerContainer n17mrk;
-        MarkerContainer n17_mrk;
+        MapAdapter mc;
+        MarkerAdapter s17mrk;
+        MarkerAdapter s17_mrk;
+        MarkerAdapter n17mrk;
+        MarkerAdapter n17_mrk;
 
         @Before
         public void setup(){
 
             ctx = Robolectric.buildActivity(MapActivity.class).get();
             m = spy(new Mapper(ctx));
-            mc = mock(MapContainer.class);
+            mc = mock(MapAdapter.class);
             m.mMapFactory = spy(m.mMapFactory);
 
-            doReturn(mc).when(m.mMapFactory).getInstance();
+            doReturn(mc).when(m.mMapFactory).createMapAdapter();
             doReturn(mc).when(mc).getMap();
             doReturn(mc).when(mc).showUserLocation();
             doReturn(mc).when(mc).center(any(LatLon.class));
 
-            s17mrk = mock(MarkerContainer.class);
-            s17_mrk = mock(MarkerContainer.class);
-            n17mrk = mock(MarkerContainer.class);
-            n17_mrk = mock(MarkerContainer.class);
+            s17mrk = mock(MarkerAdapter.class);
+            s17_mrk = mock(MarkerAdapter.class);
+            n17mrk = mock(MarkerAdapter.class);
+            n17_mrk = mock(MarkerAdapter.class);
 
             doReturn(s17mrk).when(mc).addMarker(s17.asLatLon(), s17.asDateTime());
             doReturn(s17_mrk).when(s17mrk).move(s17_.asLatLon());
