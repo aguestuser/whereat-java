@@ -39,7 +39,7 @@ public class OnOffActivity extends AppCompatActivity {
         mLocPubMgr = new LocPubManager(this);
         mReceivers = new MainActivityReceivers(this);
         mMenu = new MenuHandler(this);
-        mPolling = state == null || state.getBoolean(POLLING); //TODO test this!
+        mPolling = state == null || state.getBoolean(POLLING);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         initGoButton(findViewById(R.id.go_button));
