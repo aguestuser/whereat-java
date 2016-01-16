@@ -19,6 +19,7 @@ import static org.tlc.whereat.modules.ui.Toaster.shortToast;
 public class OnOffActivity extends AppCompatActivity {
 
     public static final String TAG = OnOffActivity.class.getSimpleName();
+    public static final String POLLING = "polling";
 
     protected LocPubManager mLocPubMgr;
     protected MainActivityReceivers mReceivers;
@@ -30,18 +31,18 @@ public class OnOffActivity extends AppCompatActivity {
     // LIFE CYCLE METHODS
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle state) {
 
-        super.onCreate(savedInstanceState);
+        super.onCreate(state);
         setContentView(R.layout.activity_main);
 
         mLocPubMgr = new LocPubManager(this);
         mReceivers = new MainActivityReceivers(this);
         mMenu = new MenuHandler(this);
-        mPolling = true;
+        mPolling = state == null || state.getBoolean(POLLING); //TODO test this!
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-        findViewById(R.id.go_button).setOnClickListener(this::togglePolling);
+        initGoButton(findViewById(R.id.go_button));
     }
 
     @Override
@@ -58,7 +59,24 @@ public class OnOffActivity extends AppCompatActivity {
         mReceivers.unregister();
     }
 
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle state){
+        state.putBoolean(POLLING, mPolling);
+        super.onSaveInstanceState(state);
+    }
+
     // GO BUTTON HELPERS
+
+    protected void initGoButton(View v){
+        if (mPolling) v.setBackground(getDrawn(R.drawable.go_button_on));
+        else v.setBackground(getDrawn(R.drawable.go_button_off));
+        v.setOnClickListener(this::togglePolling);
+    }
 
     protected void togglePolling(View v){
         if (mPolling) stopPolling(v);

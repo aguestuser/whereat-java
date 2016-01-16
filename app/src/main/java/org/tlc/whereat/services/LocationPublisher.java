@@ -69,7 +69,7 @@ public class LocationPublisher extends Service
     protected long mTtl;
     protected boolean mPolling = false;
     protected long mLastPing = -1L;
-    protected boolean mStarted = false;
+    protected boolean mRunning = false;
 
     // LIFE CYCLE METHODS
 
@@ -85,10 +85,10 @@ public class LocationPublisher extends Service
             mBroadcast.playServicesDisabled();
             return Service.START_REDELIVER_INTENT;
         }
-        else if (!mStarted) {
+        else if (!mRunning) {
             initialize();
             run();
-            mStarted = true;
+            mRunning = true;
             return Service.START_STICKY;
         }
         else {
@@ -114,7 +114,6 @@ public class LocationPublisher extends Service
         mDao = new LocationDao(this);
         mScheduler = Scheduler.getInstance(this);
         mLocProvider = FusedLocationApi;
-        //if (mBroadcast == null) mBroadcast = LocPubBroadcasters.getInstance(this);
 
         mLocSub = this::record;
         mClearSub = mBroadcast::clear;
